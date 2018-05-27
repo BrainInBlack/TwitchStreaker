@@ -1,0 +1,33 @@
+{
+ 	"output_file": "TSSettings.json",
+	"StreamerName": {
+		"type": "textbox",
+		"value": "StreamerName",
+		"label": "Streamer Name",
+		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)",
+		"group": "Primary"
+	},
+	"SubsPerStreak": {
+		"type": "numberbox",
+		"value": 7,
+		"label": "Subs Per Streak",
+		"tooltip": "Amount of new/gifted subs needed to advance to the next streak.",
+		"group": "Primary"
+	},
+	"AddSub": {
+		"type": "button",
+		"label": "Add Sub",
+		"tooltip": "Increments the Sub counter by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_ADD_SUB",
+		"group": "Overwrites"
+	},
+	"AddStreak": {
+		"type": "button",
+		"label": "Add Streak",
+		"tooltip": "Increments the Streak counter by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_ADD_STREAK",
+		"group": "Overwrites"
+	}
+}

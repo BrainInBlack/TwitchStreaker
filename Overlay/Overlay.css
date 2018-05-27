@@ -1,0 +1,15 @@
+@import url("https://fonts.googleapis.com/css?family=Shadows+Into+Light");
+body {
+  margin: 0;
+}
+
+div {
+  margin: 0;
+  font-size: 72pt;
+  font-family: "Shadows Into Light", cursive;
+  text-align: center;
+  text-shadow: 0 0 10px #6441a4, 0 0 20px #6441a4, 0 0 30px #6441a4;
+  -webkit-text-fill-color: white;
+  -webkit-text-stroke: 0.02em #6441a4;
+}
+/*# sourceMappingURL=Overlay.css.map */
