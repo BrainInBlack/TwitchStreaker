@@ -3,3 +3,4 @@ TSSettings.js export-ignore
 TSSettings.json export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
+*\.scss export-ignore
