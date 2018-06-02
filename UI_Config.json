@@ -22,12 +22,28 @@
 		"wsevent": "EVENT_ADD_SUB",
 		"group": "Overwrites"
 	},
+	"SubtractSub": {
+		"type": "button",
+		"label": "Subtract Sub",
+		"tooltip": "Decrements the Sub counter by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_SUBTRACT_SUB",
+		"group": "Overwrites"
+	},
 	"AddStreak": {
 		"type": "button",
 		"label": "Add Streak",
 		"tooltip": "Increments the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_STREAK",
+		"group": "Overwrites"
+	},
+	"SubtractStreak": {
+		"type": "button",
+		"label": "Substract Streak",
+		"tooltip": "Decrements the Streak counter by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_SUBTRACT_STREAK",
 		"group": "Overwrites"
 	}
 }

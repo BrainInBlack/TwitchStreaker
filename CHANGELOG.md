@@ -1,3 +1,14 @@
 # Changelog
 
+## 1.0.9 - Fixing Stuff
+
+* Added substract buttons for subs/streaks
+* Reduced default glow
+
+## 1.0.8 - Primary Release
+
+* First public release attempt
+
 ## 1.0.7 - Repo Init
+
+* Initialized the Repo and added the existing files

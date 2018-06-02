@@ -8,13 +8,10 @@ body { margin: 0;}
 
 div {
 	margin : 0;
-	font-size: 72pt;
 	font-family: $font;
+	font-size: 72pt;
 	text-align: center;
-	text-shadow:
-		0 0 10px $glow,
-		0 0 20px $glow,
-		0 0 30px $glow;
+	text-shadow: 0 0 10px $glow;
 	-webkit-text-fill-color: $color;
 	-webkit-text-stroke: 0.02em $glow;
 }

@@ -2,9 +2,9 @@
 #	Script Information
 #---------------------------------------
 ScriptName = "Twitch Streaker"
-Website = "http://www.twitch.tv/BrainInBlack"
+Website = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator = "BrainInBlack"
-Version = "1.0.7"
+Version = "1.0.9"
 Description = "Tracks new/gift subs to a certain amount."
 
 import time
