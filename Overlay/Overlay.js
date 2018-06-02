@@ -24,7 +24,9 @@ function connectWebsocket() {
 				"EVENT_UPDATE_SETTINGS",
 				"EVENT_REFRESH_OVERLAY",
 				"EVENT_ADD_SUB",
-				"EVENT_ADD_STREAK"
+				"EVENT_SUBTRACT_SUB",
+				"EVENT_ADD_STREAK",
+				"EVENT_SUBTRACT_STREAK"
 			]
 		};
 		socket.send(JSON.stringify(auth));
@@ -49,8 +51,20 @@ function connectWebsocket() {
 			Overlay.addSub();
 			Overlay.refesh();
 		}
+		if(socketMessage.event == "EVENT_SUBTRACT_SUB") {
+			if(settings.CurrentSubs != 0) {
+				settings.CurrentSubs--;
+			}
+			Overlay.refesh();
+		}
 		if(socketMessage.event == "EVENT_ADD_STREAK") {
 			settings.CurrentStreak++;
+			Overlay.refesh();
+		}
+		if(socketMessage.event == "EVENT_SUBTRACT_STREAK") {
+			if(settings.CurrentStreak >= 2) {
+				settings.CurrentStreak--;
+			}
 			Overlay.refesh();
 		}
 		if (socketMessage.event == "EVENT_UPDATE_SETTINGS") {
@@ -82,5 +96,7 @@ var Overlay = {
 			settings.CurrentSubs = 0;
 			settings.CurrentStreak++;
 		}
+	},
+	'subtractSub': function() {
 	}
 }
