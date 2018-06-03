@@ -96,7 +96,5 @@ var Overlay = {
 			settings.CurrentSubs = 0;
 			settings.CurrentStreak++;
 		}
-	},
-	'subtractSub': function() {
 	}
 }
