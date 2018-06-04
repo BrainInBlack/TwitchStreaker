@@ -1,6 +1,3 @@
-#---------------------------------------
-#	Script Information
-#---------------------------------------
 ScriptName = "Twitch Streaker"
 Website = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator = "BrainInBlack"
