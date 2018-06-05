@@ -10,6 +10,7 @@ $(document).ready(function () {
 		return;
 	}
 	connectWebsocket();
+	Overlay.refesh();
 });
 
 function connectWebsocket() {
@@ -41,31 +42,40 @@ function connectWebsocket() {
 		if (socketMessage.event == "EVENT_SUB") {
 			var data = JSON.parse(socketMessage.data);
 			if (data.is_gift || !data.is_resub) {
-				if (data.display_name.toLowerCase() != settings.StreamerName.toLowerCase()) {
-					Overlay.addSub();
-					Overlay.refesh();
+				if (data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) {
+					return;
 				}
+				if(data.is_gift && (data.display_name.toLowerCase() == data.gift_target.toLowerCase())) {
+					return;
+				}
+				Overlay.addSub();
+				Overlay.refesh();
 			}
+			return;
 		}
 		if(socketMessage.event == "EVENT_ADD_SUB") {
 			Overlay.addSub();
 			Overlay.refesh();
+			return;
 		}
 		if(socketMessage.event == "EVENT_SUBTRACT_SUB") {
 			if(settings.CurrentSubs != 0) {
 				settings.CurrentSubs--;
 			}
 			Overlay.refesh();
+			return;
 		}
 		if(socketMessage.event == "EVENT_ADD_STREAK") {
 			settings.CurrentStreak++;
 			Overlay.refesh();
+			return;
 		}
 		if(socketMessage.event == "EVENT_SUBTRACT_STREAK") {
 			if(settings.CurrentStreak >= 2) {
 				settings.CurrentStreak--;
 			}
 			Overlay.refesh();
+			return;
 		}
 		if (socketMessage.event == "EVENT_UPDATE_SETTINGS") {
 			var data = JSON.parse(socketMessage.data);
@@ -74,9 +84,11 @@ function connectWebsocket() {
 			settings.SubsPerStreak = data.SubsPerStreak;
 			settings.StreamerName = data.StreamerName;
 			Overlay.refesh();
+			return;
 		}
 		if (socketMessage.event == "EVENT_REFRESH_OVERLAY") {
 			Overlay.refesh();
+			return;
 		}
 	}
 };
