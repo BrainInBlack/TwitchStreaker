@@ -82,6 +82,7 @@ function connectWebsocket() {
 };
 
 var Overlay = {
+	'Container': $("#Container"),
 	'CurrentStreak': $("#CurrentStreak"),
 	'CurrentSubs': $("#CurrentSubs"),
 	'SubsPerStreak': $("#SubsPerStreak"),
@@ -89,6 +90,7 @@ var Overlay = {
 		Overlay.CurrentStreak.html(settings.CurrentStreak);
 		Overlay.CurrentSubs.html(settings.CurrentSubs);
 		Overlay.SubsPerStreak.html(settings.SubsPerStreak);
+		Overlay.Container.prop('title', Overlay.Container.text());
 	},
 	'addSub': function() {
 		settings.CurrentSubs++;
