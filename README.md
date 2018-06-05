@@ -1,4 +1,3 @@
-
 # TwitchStreaker for Streamlabs Chatbot
 
 This plugin was initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel, counting towards a goal (Streak). After completing a Streak a new one gets started right away, again counting towards the same goal.

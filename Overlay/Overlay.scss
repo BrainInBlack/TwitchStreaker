@@ -4,14 +4,19 @@ $font: 'Shadows Into Light', cursive;
 $color: rgba(255, 255, 255, 1);
 $glow: rgba(100, 65, 164, 1);
 
-body { margin: 0;}
-
-div {
-	margin : 0;
+#Container {
+	width: 100%;
+	text-align: center;
+	position: absolute;
+	background: transparent;
+	z-index: 0;
 	font-family: $font;
 	font-size: 72pt;
-	text-align: center;
-	text-shadow: 0 0 10px $glow;
-	-webkit-text-fill-color: $color;
-	-webkit-text-stroke: 0.02em $glow;
+	color: $color;
+}
+#Container:before {
+	content: attr(title);
+	position: absolute;
+	-webkit-text-stroke: 0.09em $glow;
+	z-index: -1;
 }
