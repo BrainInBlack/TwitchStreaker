@@ -4,6 +4,15 @@ $font: 'Shadows Into Light', cursive;
 $color: rgba(255, 255, 255, 1);
 $glow: rgba(100, 65, 164, 1);
 
+html, body {
+	margin: 0;
+	padding: 0;
+	height: 100%;
+	width: 100%;
+	overflow: hidden;
+	background-color: transparent;
+}
+
 #Container {
 	width: 100%;
 	text-align: center;
@@ -11,7 +20,8 @@ $glow: rgba(100, 65, 164, 1);
 	background: transparent;
 	z-index: 0;
 	font-family: $font;
-	font-size: 72pt;
+	font-size: 12vw;
+	letter-spacing: 0.06em;
 	color: $color;
 }
 #Container:before {

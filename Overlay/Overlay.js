@@ -6,7 +6,6 @@ $(document).ready(function () {
 		$("body").css({ "font-size": "20px", "color": "#ff8080", "text-align": "center" });
 		return;
 	}
-
 	// Settings File Check
 	if (typeof settings === "undefined") {
 		$("body").html("No Settings found<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"");
@@ -93,10 +92,10 @@ function connectWebsocket() {
 		}
 
 		// ForceRedraw
-		if (socketMessage.event == "EVENT_REFRESH_OVERLAY") {
+		/*if (socketMessage.event == "EVENT_REFRESH_OVERLAY") {<
 			Overlay.refesh();
 			return;
-		}
+		}*/
 
 		// Update Settings
 		if (socketMessage.event == "EVENT_UPDATE_SETTINGS") {
