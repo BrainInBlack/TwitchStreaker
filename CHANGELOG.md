@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.10 - Minor Improvements
+
+* Removed timed redraw
+* Improved styling
+* Minor fixes
+
 ## 1.0.9 - Fixing Stuff
 
 * Added substract buttons for subs/streaks

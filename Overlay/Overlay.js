@@ -32,7 +32,6 @@ function connectWebsocket() {
 			events: [
 				"EVENT_SUB",
 				"EVENT_UPDATE_SETTINGS",
-				"EVENT_REFRESH_OVERLAY",
 				"EVENT_ADD_SUB",
 				"EVENT_SUBTRACT_SUB",
 				"EVENT_ADD_STREAK",
@@ -90,12 +89,6 @@ function connectWebsocket() {
 			Overlay.refesh();
 			return;
 		}
-
-		// ForceRedraw
-		/*if (socketMessage.event == "EVENT_REFRESH_OVERLAY") {<
-			Overlay.refesh();
-			return;
-		}*/
 
 		// Update Settings
 		if (socketMessage.event == "EVENT_UPDATE_SETTINGS") {
