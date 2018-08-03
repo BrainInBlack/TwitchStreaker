@@ -17,10 +17,6 @@ def Execute(data):
 	return
 
 def Tick():
-	global TimeStamp
-	if time.time() - TimeStamp >= 5:
-		TimeStamp = time.time()
-		Parent.BroadcastWsEvent("EVENT_REFRESH_OVERLAY", None)
 	return
 
 def ReloadSettings(jsonData):
