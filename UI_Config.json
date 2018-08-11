@@ -45,5 +45,13 @@
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
 		"group": "Overwrites"
+	},
+	"ResetTracker": {
+		"type": "button",
+		"label": "Reset Tracker",
+		"tooltip": "Resets the Tracker to zero.",
+		"function": "Tick",
+		"wsevent": "EVENT_RESET",
+		"group": "Overwrites"
 	}
 }

@@ -35,7 +35,8 @@ function connectWebsocket() {
 				"EVENT_ADD_SUB",
 				"EVENT_SUBTRACT_SUB",
 				"EVENT_ADD_STREAK",
-				"EVENT_SUBTRACT_STREAK"
+				"EVENT_SUBTRACT_STREAK",
+				"EVENT_RESET"
 			]
 		};
 		socket.send(JSON.stringify(auth));
@@ -90,6 +91,12 @@ function connectWebsocket() {
 			if(settings.CurrentStreak >= 2) {
 				settings.CurrentStreak--;
 			}
+			Overlay.refesh();
+			return;
+		}
+		if(socketMessage.event == "EVENT_RESET") {
+			settings.CurrentStreak = 0;
+			settings.CurrentSubs = 0;
 			Overlay.refesh();
 			return;
 		}

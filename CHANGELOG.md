@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.1.0 - Error Handling
+## 1.1.0 - Errors and Resets
 
 * Added error loging (direct dump to console)
+* Added reset button
 * Removed resedue of the "ForceRedraw" workaround
 
 ## 1.0.10 - Minor Improvements
