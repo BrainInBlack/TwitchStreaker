@@ -23,7 +23,7 @@ $(document).ready(function () {
 function connectWebsocket() {
 	var socket = new WebSocket("ws://127.0.0.1:3337/streamlabs");
 
-	// Connect/Reconnect
+	// DefaultEvents
 	socket.onopen = function () {
 		var auth = {
 			author: "BrainInBlack",
@@ -44,6 +44,9 @@ function connectWebsocket() {
 		socket = null;
 		setTimeout(connectWebsocket, 5000);
 	}
+	socket.onerror = function(error) {
+		console.log("Error: " + error)
+	}
 
 	// EventBus
 	socket.onmessage = function (message) {
@@ -53,6 +56,7 @@ function connectWebsocket() {
 		if (socketMessage.event == "EVENT_SUB") {
 			var data = JSON.parse(socketMessage.data);
 			// Ignore GiftSubs made by the streamer
+			// TODO: Find a way to get the channel name w/o manual adding it to the settings
 			if (data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) {
 				return;
 			}
@@ -64,7 +68,7 @@ function connectWebsocket() {
 			return;
 		}
 
-		// Custom Overwrite Events
+		// CustomEvents
 		if(socketMessage.event == "EVENT_ADD_SUB") {
 			Overlay.addSub();
 			Overlay.refesh();

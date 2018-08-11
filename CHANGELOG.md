@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0 - Error Handling
+
+* Added error loging (direct dump to console)
+* Removed resedue of the "ForceRedraw" workaround
+
 ## 1.0.10 - Minor Improvements
 
 * Removed timed redraw
