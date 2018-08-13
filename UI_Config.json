@@ -1,5 +1,5 @@
 {
- 	"output_file": "TSSettings.json",
+	"output_file": "TSSettings.json",
 	"StreamerName": {
 		"type": "textbox",
 		"value": "StreamerName",

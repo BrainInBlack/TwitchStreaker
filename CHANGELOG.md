@@ -2,9 +2,10 @@
 
 ## 1.1.0 - Errors and Resets
 
-* Added error loging (direct dump to console)
+* Added log messages for easier troubleshooting
 * Added reset button
 * Removed resedue of the "ForceRedraw" workaround
+* Minor changes and improvements
 
 ## 1.0.10 - Minor Improvements
 

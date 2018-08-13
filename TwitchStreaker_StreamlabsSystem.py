@@ -2,7 +2,7 @@ ScriptName = "Twitch Streaker"
 Website = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator = "BrainInBlack"
 Version = "1.1.0"
-Description = "Tracks new/gift subs to a user defined amount."
+Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 def Init():
 	return
