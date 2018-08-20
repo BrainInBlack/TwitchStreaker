@@ -1,6 +1,8 @@
 API_Key.js export-ignore
-TSSettings.js export-ignore
-TSSettings.json export-ignore
+Settings.js export-ignore
+Settings.json export-ignore
+overlay/main.min.css export-ignore
+overlay/main.min.css.map export-ignore
 .gitignore export-ignore
 .gitattributes export-ignore
 *\.scss export-ignore

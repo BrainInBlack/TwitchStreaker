@@ -3,13 +3,13 @@ $(document).ready(function () {
 	// API Key Check
 	if (typeof API_Key === "undefined") {
 		$("body").html("No API Key found<br>Rightclick on the script in Streamlabs Chatbot and select \"Insert API Key\"");
-		$("body").css({ "font-size": "20px", "color": "#ff8080", "text-align": "center" });
+		$("body").css({"font-family": "sans-serif", "font-size": "20pt", "font-weight": "bold", "color": "rgb(255, 22, 23)", "text-align": "center"});
 		return;
 	}
 	// Settings File Check
 	if (typeof settings === "undefined") {
 		$("body").html("No Settings found<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"");
-		$("body").css({ "font-size": "20px", "color": "#ff8080", "text-align": "center" });
+		$("body").css({"font-family": "sans-serif", "font-size": "20pt", "font-weight": "bold", "color": "rgb(255, 22, 23)", "text-align": "center"});
 		return;
 	}
 
@@ -17,8 +17,8 @@ $(document).ready(function () {
 	connectWebsocket();
 	settings.CurrentSubs = 0;
 	settings.CurrentStreak = 1;
-	Overlay.refesh(); // Force redraw to prevent a strange issue with some browser plugins
-	console.log("TwitchStreaker: Loaded");
+	Overlay.refesh();
+	console.log("TwitchStreaker: Loaded (Init)");
 });
 
 function connectWebsocket() {
@@ -37,19 +37,20 @@ function connectWebsocket() {
 				"EVENT_SUBTRACT_SUB",
 				"EVENT_ADD_STREAK",
 				"EVENT_SUBTRACT_STREAK",
+				"EVENT_FORCE_REDRAW",
 				"EVENT_RESET"
 			]
 		};
 		socket.send(JSON.stringify(auth));
-		console.log("TwitchStreaker: Connected");
+		console.log("TwitchStreaker: Connected (Socket)");
 	};
 	socket.onclose = function () {
 		socket = null;
 		setTimeout(connectWebsocket, 5000);
-		console.log("TwitchStreaker: Reconnecting");
+		console.log("TwitchStreaker: Reconnecting (Socket)");
 	}
 	socket.onerror = function(error) {
-		console.log("Error: " + error)
+		console.log("Error: " + error + " (System)")
 	}
 
 	// EventBus
@@ -59,17 +60,12 @@ function connectWebsocket() {
 		// Subscription Event
 		if (socketMessage.event == "EVENT_SUB") {
 			var data = JSON.parse(socketMessage.data);
-			// Ignore GiftSubs made by the streamer
-			// TODO: Find a way to get the channel name w/o manual adding it to the settings
-			if (data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) {
-				console.log("TwitchStreaker: SubEvent ignored, sub done by the streamer.");
-				return;
-			}
 			// Check if GiftSub or NewSub (ignores Self-GiftSubs)
-			if ((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) {
+			if (((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) &&
+				(data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
 				Overlay.addSub();
 				Overlay.refesh();
-				console.log("TwitchStreaker: New/Gift sub added (SubEvent)");
+				console.log("TwitchStreaker: New/Gift sub added (Sub)");
 			}
 			return;
 		}
@@ -78,36 +74,41 @@ function connectWebsocket() {
 		if(socketMessage.event == "EVENT_ADD_SUB") {
 			Overlay.addSub();
 			Overlay.refesh();
-			console.log("TwitchStreaker: Added Sub (OverwriteEvent)");
+			console.log("TwitchStreaker: Added Sub (Overwrite)");
 			return;
 		}
 		if(socketMessage.event == "EVENT_SUBTRACT_SUB") {
 			if(settings.CurrentSubs != 0) {
 				settings.CurrentSubs--;
-				console.log("TwitchStreaker: Removed Sub (OverwriteEvent)");
+				Overlay.refesh();
+				console.log("TwitchStreaker: Removed Sub (Overwrite)");
 			}
-			Overlay.refesh();
 			return;
 		}
 		if(socketMessage.event == "EVENT_ADD_STREAK") {
 			settings.CurrentStreak++;
 			Overlay.refesh();
-			console.log("TwitchStreaker: Added Streak (OverwriteEvent)");
+			console.log("TwitchStreaker: Added Streak (Overwrite)");
 			return;
 		}
 		if(socketMessage.event == "EVENT_SUBTRACT_STREAK") {
 			if(settings.CurrentStreak >= 2) {
 				settings.CurrentStreak--;
-				console.log("TwitchStreaker: Removed Streak (OverwriteEvent)");
+				Overlay.refesh();
+				console.log("TwitchStreaker: Removed Streak (Overwrite)");
 			}
+			return;
+		}
+		if(socketMessage.event == "EVENT_FORCE_REDRAW") {
 			Overlay.refesh();
+			console.log("TwitchStreaker: Force Redraw (Overwrite)");
 			return;
 		}
 		if(socketMessage.event == "EVENT_RESET") {
 			settings.CurrentStreak = 0;
 			settings.CurrentSubs = 0;
 			Overlay.refesh();
-			console.log("TwitchStreaker: Reset Tracker (OverwriteEvent)");
+			console.log("TwitchStreaker: Reset Tracker (Overwrite)");
 			return;
 		}
 
@@ -120,6 +121,13 @@ function connectWebsocket() {
 			console.log("TwitchStreaker: Settings updated");
 			return;
 		}
+
+		// System Events (ignored events)
+		var sysEvents = ['EVENT_CONNECTED'];
+		if(socketMessage.event, sysEvents) { return; }
+
+		// Unknown Event
+		console.log("Unknown Event \"" + socketMessage.event + "\" (System)");
 	}
 };
 

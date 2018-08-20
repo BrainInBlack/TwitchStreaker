@@ -1,10 +1,20 @@
 # Changelog
 
+## 1.2.0 - Structure Rework (IMPORTANT CHANGES)
+
+**This version breaks a lot of things!** The Overlay was moved to the main folder, and the settings file got renamed. Meaning you have to redo your settings and change your Overlay in your streaming software of choice. Just point the browser plugin to the "Overlay.html" file in the **main folder**.
+
+* Reorganized and renamed files
+* Added "Refresh" overwrite to resolve eventual render issues
+* Moved redraws where they are actually needed
+* Modified log messages to be a little clearer
+* Fixed system events are handled now, unknown events will be logged to the console
+
 ## 1.1.0 - Errors and Resets
 
 * Added log messages for easier troubleshooting
 * Added reset button
-* Removed resedue of the "ForceRedraw" workaround
+* Removed residue of the "ForceRedraw" workaround
 * Minor changes and improvements
 
 ## 1.0.10 - Minor Improvements
@@ -15,7 +25,7 @@
 
 ## 1.0.9 - Fixing Stuff
 
-* Added substract buttons for subs/streaks
+* Added subtract buttons for subs/streaks
 * Reduced default glow
 
 ## 1.0.8 - Primary Release

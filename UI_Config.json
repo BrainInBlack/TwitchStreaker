@@ -1,5 +1,5 @@
 {
-	"output_file": "TSSettings.json",
+	"output_file": "Settings.json",
 	"StreamerName": {
 		"type": "textbox",
 		"value": "StreamerName",
@@ -40,10 +40,18 @@
 	},
 	"SubtractStreak": {
 		"type": "button",
-		"label": "Substract Streak",
+		"label": "Subtract Streak",
 		"tooltip": "Decrements the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
+		"group": "Overwrites"
+	},
+	"ForceRedraw": {
+		"type": "button",
+		"label": "Refresh Overlay",
+		"tooltip": "Refreshes the Overlay in case of rendering issues.",
+		"function": "Tick",
+		"wsevent": "EVENT_FORCE_REDRAW",
 		"group": "Overwrites"
 	},
 	"ResetTracker": {
