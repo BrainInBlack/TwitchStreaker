@@ -9,15 +9,11 @@ This plugin was initially created for the Twitch-Streamer [AnEternalEnigma](http
 3. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
 4. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
 5. Enter your ```Twitch Account Name``` and the amount of subs required per streak.
-6. Add the [Overlay.html](Overlay/Overlay.html) as Browser Source to your scene in your preferred streaming software.
+6. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming
 
 ## Customization
 
-The sky is pretty much the limit, as long there are the following element-id's present in the [Overlay.html](Overlay/Overlay.html). Also, it is not recommended changing anything between the head tags, unless you know what you're doing.
-
-* CurrentStreak
-* CurrentSubs
-* SubsPerStreak
+Currently restructuring the whole project, meaning we can't guarantee a reliable way to customize the Overlay yet, but it will come back soon.
 
 ## Support
 
@@ -43,4 +39,4 @@ The sky is pretty much the limit, as long there are the following element-id's p
 
 [GNU GPL-3.0 License](LICENSE.md)
 
-[Running Changelog](CHANGELOG.md)
+[Changelog](CHANGELOG.md)
