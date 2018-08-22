@@ -4,15 +4,13 @@
 		"type": "textbox",
 		"value": "StreamerName",
 		"label": "Streamer Name",
-		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)",
-		"group": "Primary"
+		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)"
 	},
 	"SubsPerStreak": {
 		"type": "numberbox",
 		"value": 7,
 		"label": "Subs Per Streak",
-		"tooltip": "Amount of new/gifted subs needed to advance to the next streak.",
-		"group": "Primary"
+		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
 	"AddSub": {
 		"type": "button",

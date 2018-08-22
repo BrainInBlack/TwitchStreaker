@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.2.1 - Structure Rework Phase II
+
+**Elements got renamed!** If you're using custom styling, you'll have to redo those customizations. In the future there will be a different way to customize the Overlay.
+
+* Renamed Container into Tracker (HTML/CSS/JS)
+* Moved StreamerName and SubsPerStreak option out of groups (chatbot)
+
 ## 1.2.0 - Structure Rework (IMPORTANT CHANGES)
 
 **This version breaks a lot of things!** The Overlay was moved to the main folder, and the settings file got renamed. Meaning you have to redo your settings and change your Overlay in your streaming software of choice. Just point the browser plugin to the "Overlay.html" file in the **main folder**.
