@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css?family=Shadows+Into+Light");
 html, body {
   margin: 0;
   padding: 0;
@@ -13,7 +14,7 @@ html, body {
   position: absolute;
   background: transparent;
   z-index: 0;
-  font-family: sans-serif;
+  font-family: "Shadows Into Light", cursive;
   font-size: 12vw;
   letter-spacing: 0.06em;
   color: white;
