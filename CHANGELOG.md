@@ -2,7 +2,6 @@
 
 ## 1.2.2 - Structure Rework Phase III
 
-* Added variables.scss (build-system)
 * Removed minimized CSS (HTML/CSS/JS)
 
 ## 1.2.1 - Structure Rework Phase II
