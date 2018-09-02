@@ -1,26 +1,3 @@
-$(document).ready(function () {
-
-	// API Key Check
-	if (typeof API_Key === "undefined") {
-		$("body").html("No API Key found<br>Rightclick on the script in Streamlabs Chatbot and select \"Insert API Key\"");
-		$("body").css({"font-family": "sans-serif", "font-size": "20pt", "font-weight": "bold", "color": "rgb(255, 22, 23)", "text-align": "center"});
-		return;
-	}
-	// Settings File Check
-	if (typeof settings === "undefined") {
-		$("body").html("No Settings found<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"");
-		$("body").css({"font-family": "sans-serif", "font-size": "20pt", "font-weight": "bold", "color": "rgb(255, 22, 23)", "text-align": "center"});
-		return;
-	}
-
-	// Init
-	connectWebsocket();
-	settings.CurrentSubs = 0;
-	settings.CurrentStreak = 1;
-	Overlay.refesh();
-	console.log("TwitchStreaker: Loaded (Init)");
-});
-
 function connectWebsocket() {
 	var socket = new WebSocket("ws://127.0.0.1:3337/streamlabs");
 
@@ -132,18 +109,18 @@ function connectWebsocket() {
 };
 
 var Overlay = {
-	'Container': $("#Tracker"),
-	'CurrentStreak': $("#CurrentStreak"),
-	'CurrentSubs': $("#CurrentSubs"),
-	'SubsPerStreak': $("#SubsPerStreak"),
+	'Container': document.getElementById('Tracker'),
+	'CurrentStreak': document.getElementById('CurrentStreak'),
+	'CurrentSubs': document.getElementById('CurrentSubs'),
+	'SubsPerStreak': document.getElementById('SubsPerStreak'),
 
 	// Redraw
 	'refesh': function() {
-		Overlay.CurrentStreak.html(settings.CurrentStreak);
-		Overlay.CurrentSubs.html(settings.CurrentSubs);
-		Overlay.SubsPerStreak.html(settings.SubsPerStreak);
+		this.CurrentStreak.innerText = settings.CurrentStreak;
+		this.CurrentSubs.innerText = settings.CurrentSubs;
+		this.SubsPerStreak.innerText = settings.SubsPerStreak;
 		// Outline Hack
-		Overlay.Container.prop('title', Overlay.Container.text());
+		this.Container.title = this.Container.innerText;
 	},
 
 	// Increment Sub
@@ -155,3 +132,23 @@ var Overlay = {
 		}
 	}
 }
+
+// API Key Check
+if (typeof API_Key === "undefined") {
+	document.body.innerHTML = "No API Key found<br>Rightclick on the script in Streamlabs Chatbot and select \"Insert API Key\"";
+	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
+	throw new Error("API Key not loaded or missing.");
+}
+// Settings File Check
+if (typeof settings === "undefined") {
+	document.body.innerHTML = "No Settings found<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"";
+	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
+	throw new Error("Settings file not loaded or missing.");
+}
+
+// Init
+connectWebsocket();
+settings.CurrentSubs = 0;
+settings.CurrentStreak = 1;
+setTimeout(function() { Overlay.refesh(); }, 500);
+console.log("TwitchStreaker: Loaded (Init)");
