@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.1 - Fixes
+
+* Fixed Save Settings was not applying the Tier Multipliers
+
 ## 1.4.0 - Tier Multipliers
 
 **Click "Save Settings" at least once!** Otherwise the script wont work as intended.
