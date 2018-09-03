@@ -104,6 +104,9 @@ function connectWebsocket() {
 			var data = JSON.parse(socketMessage.data);
 			settings.SubsPerStreak = data.SubsPerStreak;
 			settings.StreamerName = data.StreamerName;
+			settings.Tier1 = data.Tier1;
+			settings.Tier2 = data.Tier2;
+			settings.Tier3 = data.Tier3;
 			Overlay.refesh();
 			console.log("TwitchStreaker: Settings updated");
 			return;
