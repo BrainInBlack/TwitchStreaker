@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 - Goodbye jQuery
+
+* Removed jQuery
+* Locked down font sizes
+* Added delay for initial redraw
+
 ## 1.2.2 - Structure Rework Phase III
 
 * Removed minimized CSS (HTML/CSS/JS)
