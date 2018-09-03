@@ -12,6 +12,27 @@
 		"label": "Subs Per Streak",
 		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
+	"Tier1": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 1",
+		"tooltip": "Point multiplier for Tier 1 subs.",
+		"group": "Tier Multiplier"
+	},
+	"Tier2": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 2",
+		"tooltip": "Point multiplier for Tier 2 subs.",
+		"group": "Tier Multiplier"
+	},
+	"Tier3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 3",
+		"tooltip": "Point multiplier for Tier 3 subs.",
+		"group": "Tier Multiplier"
+	},
 	"AddSub": {
 		"type": "button",
 		"label": "Add Sub",

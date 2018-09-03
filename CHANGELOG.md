@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 - Tier Multipliers
+
+**Click "Save Settings" at least once!** Otherwise the script wont work as intended.
+
+* Added multiplier for tiered subs (default: 1), thanks to [KatLink](http://twitch.tv/KatLink) for the idea
+* Streak calculation moved to refresh(), less overhead
+* Fixed reset setting the current streak to 0 instead of 1
+* Changed streak calculation, now able to calculate multiple streaks at once
+
 ## 1.3.0 - Goodbye jQuery
 
 * Removed jQuery

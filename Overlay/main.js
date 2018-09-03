@@ -40,7 +40,17 @@ function connectWebsocket() {
 			// Check if GiftSub or NewSub (ignores Self-GiftSubs)
 			if (((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) &&
 				(data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
-				Overlay.addSub();
+				// Tier Multiplier
+				switch(data.tier) {
+					case "3":
+						settings.CurrentSubs = settings.CurrentSubs + settings.Tier3;
+						break;
+					case "2":
+						settings.CurrentSubs = settings.CurrentSubs + settings.Tier2;
+						break;
+					default:
+						settings.CurrentSubs = settings.CurrentSubs + settings.Tier1;
+				}
 				Overlay.refesh();
 				console.log("TwitchStreaker: New/Gift sub added (Sub)");
 			}
@@ -49,7 +59,7 @@ function connectWebsocket() {
 
 		// CustomEvents
 		if(socketMessage.event == "EVENT_ADD_SUB") {
-			Overlay.addSub();
+			settings.CurrentSubs++;
 			Overlay.refesh();
 			console.log("TwitchStreaker: Added Sub (Overwrite)");
 			return;
@@ -82,7 +92,7 @@ function connectWebsocket() {
 			return;
 		}
 		if(socketMessage.event == "EVENT_RESET") {
-			settings.CurrentStreak = 0;
+			settings.CurrentStreak = 1;
 			settings.CurrentSubs = 0;
 			Overlay.refesh();
 			console.log("TwitchStreaker: Reset Tracker (Overwrite)");
@@ -116,39 +126,45 @@ var Overlay = {
 
 	// Redraw
 	'refesh': function() {
+		while (settings.CurrentSubs >= settings.SubsPerStreak) {
+			settings.CurrentSubs = (settings.CurrentSubs - settings.SubsPerStreak);
+			settings.CurrentStreak++;
+		}
 		this.CurrentStreak.innerText = settings.CurrentStreak;
 		this.CurrentSubs.innerText = settings.CurrentSubs;
 		this.SubsPerStreak.innerText = settings.SubsPerStreak;
-		// Outline Hack
-		this.Container.title = this.Container.innerText;
-	},
 
-	// Increment Sub
-	'addSub': function() {
-		settings.CurrentSubs++;
-		if (settings.CurrentSubs >= settings.SubsPerStreak) {
-			settings.CurrentSubs = 0;
-			settings.CurrentStreak++;
-		}
+		// Outline Hack, remove when there are better methods for outlined text!
+		this.Container.title = this.Container.innerText;
 	}
 }
 
 // API Key Check
 if (typeof API_Key === "undefined") {
-	document.body.innerHTML = "No API Key found<br>Rightclick on the script in Streamlabs Chatbot and select \"Insert API Key\"";
+	document.body.innerHTML = "No API Key found!<br>Rightclick on the script in Streamlabs Chatbot and select \"Insert API Key\"";
 	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
 	throw new Error("API Key not loaded or missing.");
 }
 // Settings File Check
 if (typeof settings === "undefined") {
-	document.body.innerHTML = "No Settings found<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"";
+	document.body.innerHTML = "No Settings found!<br>Click on the script in Streamlabs Chatbot and click \"Save Settings\"";
 	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
 	throw new Error("Settings file not loaded or missing.");
+}
+// Tier Multiplier Check
+if (typeof settings.Tier1 === "undefined" || typeof settings.Tier2 === "undefined" || typeof settings.Tier3 === "undefined") {
+	document.body.innerHTML = "New Sub Tier Multiplier!<br>Please check the script settings and and click \"Save Settings\"";
+	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
+	throw new Error("Sub Tier Settings not set.");
 }
 
 // Init
 connectWebsocket();
 settings.CurrentSubs = 0;
 settings.CurrentStreak = 1;
-setTimeout(function() { Overlay.refesh(); }, 500);
-console.log("TwitchStreaker: Loaded (Init)");
+
+// defer seems to be ignored by OBS and probably other browser plugins
+setTimeout(function() {
+	Overlay.refesh();
+	console.log("TwitchStreaker: Loaded (Init)"
+);}, 500);
