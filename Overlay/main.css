@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Shadows+Into+Light");
+@import url("https://fonts.googleapis.com/css?family=Roboto");
 html, body {
   margin: 0;
   padding: 0;
@@ -14,7 +14,7 @@ html, body {
   position: absolute;
   background: transparent;
   z-index: 0;
-  font-family: "Shadows Into Light", cursive;
+  font-family: "Roboto", sans-serif;
   font-size: 94px;
   letter-spacing: 0.06em;
   color: white;
@@ -26,4 +26,3 @@ html, body {
   -webkit-text-stroke: 0.09em #6441a4;
   z-index: -1;
 }
-/*# sourceMappingURL=main.css.map */
