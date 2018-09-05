@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.2 - New Buildsystem
+
+* Changed default styling to be more generic
+* Changed default phrase to be more generic
+* Changed default font to Roboto
+* Removed CSS mapfiles
+* Minor changes to account for the new buildsystem
+
 ## 1.4.1 - Fixes
 
 * Fixed Save Settings was not applying the Tier Multipliers
