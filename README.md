@@ -1,19 +1,64 @@
 # TwitchStreaker for Streamlabs Chatbot
 
-This plugin was initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel, counting towards a goal (Streak). After completing a Streak a new one gets started right away, again counting towards the same goal.
+Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it more generic.
 
 ## Installation
 
-1. Create a folder called "TwitchStreaker" in the ```Chatbot > Services > Scripts``` directory.
-2. Clone this Repo in the newly created folder.
-3. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
-4. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
-5. Enter your ```Twitch Account Name``` and the amount of subs required per streak.
-6. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming
+1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+2. Create a folder called "TwitchStreaker" in the ```Chatbot > Services > Scripts``` directory.
+3. Extract the downloaded archive into the newly created folder.
+4. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
+5. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
+6. Enter your ```Twitch Name``` and the amount of subs required per streak.
+7. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming software.
+
+## Updates
+
+**Remember to Backup your customized files!**
+
+1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+2. Extract the downloaded archive and overwrite existing files.
+3. Check the [Changelog](CHANGELOG.md) for additional instructions
+4. Reapply your customization's.
+5. Reload the script and overlay.
 
 ## Customization
 
-Currently restructuring the whole project, meaning we can't guarantee a reliable way to customize the Overlay yet, but it will come back soon.
+Before you attempt to make any customization's, you need to be aware that we're using a workaround to get the text-outline working in the overlay. Meaning if you don't want/need a text-outline you should remove the following:
+
+[main.css](Overlay/main.css)
+```CSS
+#Tracker:before {
+  content: attr(title);
+  position: absolute;
+  -webkit-text-stroke: 0.09em #6441a4;
+  z-index: -1;
+}
+```
+
+[main.js](Overlay/main.js)
+```Javascript
+// Outline Hack!
+'Container': document.getElementById('Tracker'),
+...
+// Outline Hack!
+this.Container.title = this.Container.innerText;
+```
+
+With that out of the way, you're free to pretty much do what ever you want. Just make sure that there are elements with IDs around that correspond to the respective values (see [Overlay.html](Overlay.html)), otherwise the script will not work without messing around with the JavaScript, and at that point you probably know what you're doing.
+
+## Manual Overwrites
+
+If something can go wrong, it will most like go wrong at some point. That's why the script has some overwrite functions built in to account for missed subs, streaks, and outright crashes.
+
+Button | Functionality
+-------|--------------
+Add Sub | Adds a Sub, Streaks will increment if conditions are met.
+Subtract Sub | Removes a Sub, until 0 (zero) is reached.
+Add Streak | Adds a Streak.
+Subtract Streak | Removes a Streak, until 0 (zero) is reached.
+Refresh Overlay | Refreshes the Overlay without loosing the current values.
+Reset Tracker | Resets everything to their initial values.
 
 ## Support
 
@@ -29,11 +74,13 @@ Currently restructuring the whole project, meaning we can't guarantee a reliable
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
 
-## Credits
+## Contributor's
 
-[**Daniel Lieberwirth** (BrainInBlack)](https://github.com/BrainInBlack)
+[**BrainInBlack**](https://github.com/BrainInBlack)
 
 [**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma)
+
+[**KatLink**](http://twitch.tv/KatLink)
 
 ## Project Info
 

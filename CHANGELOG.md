@@ -1,12 +1,14 @@
 # Changelog
 
-## 1.4.2 - New Buildsystem
+## 1.4.2 - New Build System
 
+* Updated README.md
 * Changed default styling to be more generic
 * Changed default phrase to be more generic
 * Changed default font to Roboto
-* Removed CSS mapfiles
-* Minor changes to account for the new buildsystem
+* Removed CSS map files
+* Fixed several typos
+* Minor changes to account for the new build system
 
 ## 1.4.1 - Fixes
 
@@ -33,7 +35,7 @@
 
 ## 1.2.1 - Structure Rework Phase II
 
-**Elements got renamed!** If you're using custom styling, you'll have to redo those customizations. In the future there will be a different way to customize the Overlay.
+**Elements got renamed!** If you're using custom styling, you'll have to redo those customization's. In the future there will be a different way to customize the Overlay.
 
 * Renamed Container into Tracker (HTML/CSS/JS)
 * Moved StreamerName and SubsPerStreak option out of groups (chatbot)
