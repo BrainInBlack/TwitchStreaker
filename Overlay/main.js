@@ -38,8 +38,10 @@ function connectWebsocket() {
 			website: "https://github.com/BrainInBlack/TwitchStreaker",
 			api_key: API_Key,
 			events: [
+				// Streamlabs Events
 				"EVENT_SUB",
 				"EVENT_UPDATE_SETTINGS",
+				// Custom Events
 				"EVENT_ADD_SUB",
 				"EVENT_SUBTRACT_SUB",
 				"EVENT_ADD_STREAK",
@@ -74,14 +76,9 @@ function connectWebsocket() {
 				(data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
 				// Tier Multiplier
 				switch(data.tier) {
-					case "3":
-						settings.CurrentSubs = settings.CurrentSubs + settings.Tier3;
-						break;
-					case "2":
-						settings.CurrentSubs = settings.CurrentSubs + settings.Tier2;
-						break;
-					default:
-						settings.CurrentSubs = settings.CurrentSubs + settings.Tier1;
+					case "3": settings.CurrentSubs = settings.CurrentSubs + settings.Tier3; break;
+					case "2": settings.CurrentSubs = settings.CurrentSubs + settings.Tier2; break;
+					default:  settings.CurrentSubs = settings.CurrentSubs + settings.Tier1;
 				}
 				Overlay.refresh();
 				console.log("TwitchStreaker: New/Gift sub added (Sub)");
@@ -171,9 +168,9 @@ if (typeof settings === "undefined") {
 	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
 	throw new Error("Settings file not loaded or missing.");
 }
-// Tier Multiplier Check
+// New Settings Check
 if (typeof settings.Tier1 === "undefined" || typeof settings.Tier2 === "undefined" || typeof settings.Tier3 === "undefined") {
-	document.body.innerHTML = "New Sub Tier Multiplier!<br>Please check the script settings and and click \"Save Settings\"";
+	document.body.innerHTML = "New set of Settings!<br>Please check the script settings and Changelog, then click \"Save Settings\"";
 	document.body.style.cssText = "font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;";
 	throw new Error("Sub Tier Settings not set.");
 }
@@ -186,5 +183,5 @@ settings.CurrentStreak = 1;
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
 	Overlay.refresh();
-	console.log("TwitchStreaker: Loaded (Init)"
-);}, 500);
+	console.log("TwitchStreaker: Loaded (Init)");
+}, 500);

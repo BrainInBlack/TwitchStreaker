@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.3 - ????
+
+* Added/Changed check for new/changed settings
+* Minor fixes and formatting
+
 ## 1.4.2 - New Build System
 
 * Updated README.md
