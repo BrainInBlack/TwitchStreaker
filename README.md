@@ -1,16 +1,20 @@
 # TwitchStreaker for Streamlabs Chatbot
 
-Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it more generic.
+Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
 ## Installation
 
 1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
-2. Create a folder called "TwitchStreaker" in the ```Chatbot > Services > Scripts``` directory.
-3. Extract the downloaded archive into the newly created folder.
-4. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
-5. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
-6. Enter your ```Twitch Name``` and the amount of subs required per streak.
-7. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming software.
+2. Extract the downloaded archive into the```Chatbot > Services > Scripts``` directory.
+3. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
+4. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
+5. Enter your ```Twitch Name``` and the amount of subs required per streak.
+6. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming software.
+   1. Recommended Browser Source width: ```800px```
+
+**For OBS:** Make sure that ```Shutdown source when not visible``` and ```Refresh browser when scene becomes active``` are unchecked. If you want to use the Overlay in other scenes, use the existing Source.
+
+**For XSplit:** Make sure that ```Keep source in memory``` is checked, ```Reload on scene enter``` and ```Reload on source show``` are unchecked. If you want to use the Overlay in other scenes, copy&paste the source as a linked source to another scene.
 
 ## Updates
 

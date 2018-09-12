@@ -4,12 +4,12 @@ about: Create a report to help us improve
 
 ---
 
-### Before you start
+### Checklist
 
 - [ ] Latest version of the Script and Chatbot installed?
 - [ ] Streamer and Bot Account are connected?
 
-*Replace the space with a ```X``` to mark a point as checked.*
+Replace the space with a X to mark a point as checked. (remove this line when you're done)
 
 ### Short summary of the issue:
 
