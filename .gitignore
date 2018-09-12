@@ -1,6 +1,8 @@
-\.version
+# Exclude user specific files
 API_Key.js
 Settings.js
 Settings.json
+
+# Exclude personal files (BrainInBlack)
 AnEternalEnigma/
 KatLink/

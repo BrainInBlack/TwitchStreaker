@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.4 - Project Maintenance
+
+* Fixed default font-size causing issues with the recommended browser source width of 800px
+* Updated BugReport template
+* Updated README.md
+* Added explanations to .gitignore
+* Added .version to the repo, might be useful for contributors
+* Added GitHub specific files
+* Removed .gitattributes, no longer required
+
 ## 1.4.3 - Minor Update
 
 * Added/Changed check for new/changed settings
