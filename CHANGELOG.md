@@ -1,8 +1,9 @@
 # Changelog
 
-## 1.4.3 - ????
+## 1.4.3 - Minor Update
 
 * Added/Changed check for new/changed settings
+* Changed styling (external change)
 * Improved how archives are generated (external change)
 * Minor fixes and formatting
 
