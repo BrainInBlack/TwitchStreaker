@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.5 - Fixes
+
+* Added Exception prefix
+* Changed now using API_Socket dynamic variable from the API_Key.js
+* Improved initialization error messages
+* Fixed single and double quotes consistency
+
 ## 1.4.4 - Project Maintenance
 
 * Fixed default font-size causing issues with the recommended browser source width of 800px
