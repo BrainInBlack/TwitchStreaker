@@ -1,8 +1,8 @@
-ScriptName = 'Twitch Streaker'
-Website = 'https://github.com/BrainInBlack/TwitchStreaker'
-Creator = 'BrainInBlack'
-Version = '1.4.5'
-Description = 'Tracker for new and gifted subscriptions with a streak mechanic.'
+ScriptName = "Twitch Streaker"
+Website = "https://github.com/BrainInBlack/TwitchStreaker"
+Creator = "BrainInBlack"
+Version = "1.4.2"
+Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 def Init():
 	return
@@ -14,5 +14,5 @@ def Tick():
 	return
 
 def ReloadSettings(jsonData):
-	Parent.BroadcastWsEvent('EVENT_UPDATE_SETTINGS', jsonData)
+	Parent.BroadcastWsEvent("EVENT_UPDATE_SETTINGS", jsonData)
 	return
