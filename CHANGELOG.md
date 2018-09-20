@@ -4,6 +4,7 @@
 
 * Added Exception prefix
 * Changed now using API_Socket dynamic variable from the API_Key.js
+* Improved initialisation error messages
 * Fixed single and double quotes consistency
 
 ## 1.4.4 - Project Maintenance

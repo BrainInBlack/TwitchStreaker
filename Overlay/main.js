@@ -71,10 +71,13 @@ function connectWebsocket() {
 		// Subscription Event
 		if (socketMessage.event == 'EVENT_SUB') {
 			var data = JSON.parse(socketMessage.data);
-			// Check if new or gifted subscription, and ignore subscription by streamer
-			if (((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) &&
-				(data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
-				// Tier Multiplier
+
+			// Check if new or gifted subscription
+			if ((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) {
+				// Ignore subscriptions from the Streamer
+				if(data.display_name.toLowerCase() != settings.StreamerName.toLowerCase()) {
+					console.log('TwitchStreaker: Ignoring GiftSub by Streamer.'); return;
+				}
 				switch(data.tier) {
 					case '3': settings.CurrentSubs = settings.CurrentSubs + settings.Tier3; break;
 					case '2': settings.CurrentSubs = settings.CurrentSubs + settings.Tier2; break;
@@ -157,20 +160,20 @@ function connectWebsocket() {
 };
 
 // API Key Check
-if (typeof API_Key === 'undefined') {
-	document.body.innerHTML = 'No API Key found!<br>Right-click on the script in Streamlabs Chatbot and select "Insert API Key"';
+if (typeof API_Key === 'undefined' || typeof API_Socket === 'undefined') {
+	document.body.innerHTML = 'API Key not found!<br>Right-click on the TwitchStreaker Script in Streamlabs Chatbot and select "Insert API Key".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: API Key not loaded or missing.');
 }
 // Settings File Check
 if (typeof settings === 'undefined') {
-	document.body.innerHTML = 'No Settings found!<br>Click on the script in Streamlabs Chatbot and click "Save Settings"';
+	document.body.innerHTML = 'No Settings found!<br>Click on the TwitchStreaker Script in Streamlabs Chatbot and click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Settings file not loaded or missing.');
 }
 // New Settings Check
 if (typeof settings.Tier1 === 'undefined' || typeof settings.Tier2 === 'undefined' || typeof settings.Tier3 === 'undefined') {
-	document.body.innerHTML = 'New set of Settings!<br>Please check the script settings and Changelog, then click "Save Settings"';
+	document.body.innerHTML = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Missing Settings.');
 }
