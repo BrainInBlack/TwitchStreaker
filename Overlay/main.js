@@ -14,6 +14,7 @@ var Overlay = {
 		// Calculate CurrentStreak and CurrentSubs (DO NOT REMOVE)
 		while (settings.CurrentSubs >= settings.SubsPerStreak) {
 			settings.CurrentSubs = (settings.CurrentSubs - settings.SubsPerStreak);
+			settings.SubsPerStreak = (settings.SubsPerStreak + settings.StreakIncrement);
 			settings.CurrentStreak++;
 		}
 
@@ -46,6 +47,8 @@ function connectWebsocket() {
 				'EVENT_SUBTRACT_SUB',
 				'EVENT_ADD_STREAK',
 				'EVENT_SUBTRACT_STREAK',
+				'EVENT_ADD_TO_GOAL',
+				'EVENT_SUBTRACT_FROM_GOAL',
 				'EVENT_FORCE_REDRAW',
 				'EVENT_RESET'
 			]
@@ -117,6 +120,22 @@ function connectWebsocket() {
 			return;
 		}
 
+		// StreakGoal Overwrite Events
+		if(socketMessage.event == 'EVENT_ADD_TO_GOAL') {
+			settings.SubsPerStreak++;
+			Overlay.refresh();
+			console.log('TwitchStreaker: Added to Goal (Overwrite)');
+			return;
+		}
+		if(socketMessage.event == 'EVENT_SUBTRACT_FROM_GOAL') {
+			if(settings.SubsPerStreak != 1) {
+				settings.SubsPerStreak--;
+				Overlay.refresh();
+				console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
+			}
+			return;
+		}
+
 		// Redraw Overwrite Event
 		if(socketMessage.event == 'EVENT_FORCE_REDRAW') {
 			Overlay.refresh();
@@ -128,6 +147,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_RESET') {
 			settings.CurrentStreak = 1;
 			settings.CurrentSubs = 0;
+			settings.SubsPerStreak = initialGoal;
 			Overlay.refresh();
 			console.log('TwitchStreaker: Reset Tracker (Overwrite)');
 			return;
@@ -138,9 +158,11 @@ function connectWebsocket() {
 			var data = JSON.parse(socketMessage.data);
 			settings.SubsPerStreak = data.SubsPerStreak;
 			settings.StreamerName = data.StreamerName;
+			settings.StreakIncrement = data.StreakIncrement;
 			settings.Tier1 = data.Tier1;
 			settings.Tier2 = data.Tier2;
 			settings.Tier3 = data.Tier3;
+			settings.SubsPerStreak = (((settings.CurrentStreak - 1) * settings.StreakIncrement) + settings.SubsPerStreak);
 			Overlay.refresh();
 			console.log('TwitchStreaker: Settings updated');
 			return;
@@ -168,7 +190,10 @@ if (typeof settings === 'undefined') {
 	throw new Error('TwitchStreaker: Settings file not loaded or missing.');
 }
 // New Settings Check
-if (typeof settings.Tier1 === 'undefined' || typeof settings.Tier2 === 'undefined' || typeof settings.Tier3 === 'undefined') {
+if (typeof settings.Tier1 === 'undefined' ||
+	typeof settings.Tier2 === 'undefined' ||
+	typeof settings.Tier3 === 'undefined' ||
+	typeof settings.StreakIncrement === 'undefined') {
 	document.body.innerHTML = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Missing Settings.');
@@ -178,6 +203,7 @@ if (typeof settings.Tier1 === 'undefined' || typeof settings.Tier2 === 'undefine
 connectWebsocket();
 settings.CurrentSubs = 0;
 settings.CurrentStreak = 1;
+var initialGoal = settings.SubsPerStreak;
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
