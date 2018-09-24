@@ -12,6 +12,12 @@
 		"label": "Subs Per Streak",
 		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
+	"StreakIncrement": {
+		"type": "numberbox",
+		"value": 0,
+		"label": "Increments Streak By",
+		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero for the known behavior.)"
+	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,
@@ -63,6 +69,22 @@
 		"tooltip": "Decrements the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
+		"group": "Overwrites"
+	},
+	"AddToGoal": {
+		"type": "button",
+		"label": "Add To Goal",
+		"tooltip": "Increments the Subs Per Streak goal by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_ADD_TO_GOAL",
+		"group": "Overwrites"
+	},
+	"SubtractFromGoal": {
+		"type": "button",
+		"label": "Subtract From Goal",
+		"tooltip": "Decrements the Subs Per Streak goal by one.",
+		"function": "Tick",
+		"wsevent": "EVENT_SUBTRACT_FROM_GOAL",
 		"group": "Overwrites"
 	},
 	"ForceRedraw": {

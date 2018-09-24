@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.6 - Growing Streaks
+
+* Added new Streak Growth Mechanic
+
 ## 1.4.5 - Fixes
 
 * Added Exception prefix
