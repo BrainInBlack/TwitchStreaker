@@ -15,28 +15,28 @@
 	"StreakIncrement": {
 		"type": "numberbox",
 		"value": 0,
-		"label": "Increments Streak By",
-		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero for the known behavior.)"
+		"label": "Increment Streak By",
+		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
 	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 1",
-		"tooltip": "Point Value for Tier 1 subs.",
+		"tooltip": "Value for Tier 1 subs.",
 		"group": "Tier Values"
 	},
 	"Tier2": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 2",
-		"tooltip": "Point Value for Tier 2 subs.",
+		"tooltip": "Value for Tier 2 subs.",
 		"group": "Tier Values"
 	},
 	"Tier3": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 3",
-		"tooltip": "Point Value for Tier 3 subs.",
+		"tooltip": "Value for Tier 3 subs.",
 		"group": "Tier Values"
 	},
 	"AddSub": {

@@ -3,7 +3,7 @@ var Overlay = {
 
 	// Elements
 	'CurrentStreak': document.getElementById('CurrentStreak'),
-	'CurrentSubs': document.getElementById('CurrentSubs'),
+	'CurrentSubs':   document.getElementById('CurrentSubs'),
 	'SubsPerStreak': document.getElementById('SubsPerStreak'),
 
 	// Outline Hack!
@@ -13,14 +13,14 @@ var Overlay = {
 	'refresh': function() {
 		// Calculate CurrentStreak and CurrentSubs (DO NOT REMOVE)
 		while (settings.CurrentSubs >= settings.SubsPerStreak) {
-			settings.CurrentSubs = (settings.CurrentSubs - settings.SubsPerStreak);
-			settings.SubsPerStreak = (settings.SubsPerStreak + settings.StreakIncrement);
+			settings.CurrentSubs    -= settings.SubsPerStreak;
+			settings.SubsPerStreak  += settings.StreakIncrement;
 			settings.CurrentStreak++;
 		}
 
 		// Update Overlay
 		this.CurrentStreak.innerText = settings.CurrentStreak;
-		this.CurrentSubs.innerText = settings.CurrentSubs;
+		this.CurrentSubs.innerText   = settings.CurrentSubs;
 		this.SubsPerStreak.innerText = settings.SubsPerStreak;
 
 		// Outline Hack!
@@ -35,9 +35,9 @@ function connectWebsocket() {
 	// Connect to Socket and register Events
 	socket.onopen = function () {
 		var auth = {
-			author: 'BrainInBlack',
+			author:  'BrainInBlack',
 			website: 'https://github.com/BrainInBlack/TwitchStreaker',
-			api_key: API_Key,
+			api_key:  API_Key,
 			events: [
 				// Streamlabs Events
 				'EVENT_SUB',
@@ -59,7 +59,7 @@ function connectWebsocket() {
 	// Attempt reconnect after connection loss
 	socket.onclose = function () {
 		socket = null;
-		setTimeout(connectWebsocket, 5000);
+		setTimeout(connectWebsocket, 5000); // 5 Second Delay
 		console.log('TwitchStreaker: Reconnecting (Socket)');
 	}
 	// Output errors to the console (only works in a browser)
@@ -78,9 +78,9 @@ function connectWebsocket() {
 			if (((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) &&
 				 (data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
 				switch(data.tier) {
-					case '3': settings.CurrentSubs = settings.CurrentSubs + settings.Tier3; break;
-					case '2': settings.CurrentSubs = settings.CurrentSubs + settings.Tier2; break;
-					default:  settings.CurrentSubs = settings.CurrentSubs + settings.Tier1;
+					case '3': settings.CurrentSubs += settings.Tier3; break;
+					case '2': settings.CurrentSubs += settings.Tier2; break;
+					default:  settings.CurrentSubs += settings.Tier1;
 				}
 				Overlay.refresh();
 				console.log('TwitchStreaker: New/Gift sub added (Sub)');
@@ -146,8 +146,9 @@ function connectWebsocket() {
 		// Reset Overwrite Event
 		if(socketMessage.event == 'EVENT_RESET') {
 			settings.CurrentStreak = 1;
-			settings.CurrentSubs = 0;
+			settings.CurrentSubs   = 0;
 			settings.SubsPerStreak = initialGoal;
+
 			Overlay.refresh();
 			console.log('TwitchStreaker: Reset Tracker (Overwrite)');
 			return;
@@ -156,15 +157,19 @@ function connectWebsocket() {
 		// Update Settings Event
 		if (socketMessage.event == 'EVENT_UPDATE_SETTINGS') {
 			var data = JSON.parse(socketMessage.data);
-			settings.SubsPerStreak = data.SubsPerStreak;
-			settings.StreamerName = data.StreamerName;
-			settings.StreakIncrement = data.StreakIncrement;
-			settings.Tier1 = data.Tier1;
-			settings.Tier2 = data.Tier2;
-			settings.Tier3 = data.Tier3;
+
+			settings.SubsPerStreak   = Math.abs(data.SubsPerStreak);
+			settings.StreamerName    = Math.abs(data.StreamerName);
+			settings.StreakIncrement = Math.abs(data.StreakIncrement);
+			settings.Tier1           = Math.abs(data.Tier1);
+			settings.Tier2           = Math.abs(data.Tier2);
+			settings.Tier3           = Math.abs(data.Tier3);
+
+			// Adjust SubsPerStreak based on CurrentStreak
 			settings.SubsPerStreak = (((settings.CurrentStreak - 1) * settings.StreakIncrement) + settings.SubsPerStreak);
+
 			Overlay.refresh();
-			console.log('TwitchStreaker: Settings updated');
+			console.log('TwitchStreaker: Settings updated (System)');
 			return;
 		}
 
@@ -179,30 +184,37 @@ function connectWebsocket() {
 
 // API Key Check
 if (typeof API_Key === 'undefined' || typeof API_Socket === 'undefined') {
-	document.body.innerHTML = 'API Key not found!<br>Right-click on the TwitchStreaker Script in Streamlabs Chatbot and select "Insert API Key".';
+	document.body.innerHTML     = 'API Key not found!<br>Right-click on the TwitchStreaker Script in Streamlabs Chatbot and select "Insert API Key".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: API Key not loaded or missing.');
 }
 // Settings File Check
 if (typeof settings === 'undefined') {
-	document.body.innerHTML = 'No Settings found!<br>Click on the TwitchStreaker Script in Streamlabs Chatbot and click "Save Settings".';
+	document.body.innerHTML     = 'No Settings found!<br>Click on the TwitchStreaker Script in Streamlabs Chatbot and click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Settings file not loaded or missing.');
 }
 // New Settings Check
-if (typeof settings.Tier1 === 'undefined' ||
-	typeof settings.Tier2 === 'undefined' ||
-	typeof settings.Tier3 === 'undefined' ||
+if (typeof settings.Tier1           === 'undefined' ||
+	typeof settings.Tier2           === 'undefined' ||
+	typeof settings.Tier3           === 'undefined' ||
 	typeof settings.StreakIncrement === 'undefined') {
-	document.body.innerHTML = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
+	document.body.innerHTML     = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Missing Settings.');
 }
 
 // Initialize
 connectWebsocket();
-settings.CurrentSubs = 0;
-settings.CurrentStreak = 1;
+settings.CurrentSubs     = 0;
+settings.CurrentStreak   = 1;
+settings.SubsPerStreak   = Math.abs(settings.SubsPerStreak);
+settings.Tier1           = Math.abs(settings.Tier1);
+settings.Tier2           = Math.abs(settings.Tier2);
+settings.Tier3           = Math.abs(settings.Tier3);
+settings.StreakIncrement = Math.abs(settings.StreakIncrement);
+
+// Backup for Reset
 var initialGoal = settings.SubsPerStreak;
 
 // Workaround for some browser plugins having issues with the initial draw

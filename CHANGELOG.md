@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.7 - ???
+
+* Streamlined main.js
+* Minor improvements and fixes
+
 ## 1.4.6 - Growing Streaks
 
 * Added new Streak Growth Mechanic
