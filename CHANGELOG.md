@@ -1,7 +1,9 @@
 # Changelog
 
-## 1.4.7 - ???
+## 1.5.0 - Better Naming Scheme
 
+* Renamed variables
+* Updated Readme
 * Streamlined main.js
 * Minor improvements and fixes
 

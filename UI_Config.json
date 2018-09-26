@@ -6,16 +6,16 @@
 		"label": "Streamer Name",
 		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)"
 	},
-	"SubsPerStreak": {
+	"Goal": {
 		"type": "numberbox",
 		"value": 7,
-		"label": "Subs Per Streak",
+		"label": "Goal",
 		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
-	"StreakIncrement": {
+	"GoalIncrement": {
 		"type": "numberbox",
 		"value": 0,
-		"label": "Increment Streak By",
+		"label": "Increment Goal By",
 		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
 	},
 	"Tier1": {
@@ -41,7 +41,7 @@
 	},
 	"AddSub": {
 		"type": "button",
-		"label": "Add Sub",
+		"label": "+ Sub",
 		"tooltip": "Increments the Sub counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_SUB",
@@ -49,7 +49,7 @@
 	},
 	"SubtractSub": {
 		"type": "button",
-		"label": "Subtract Sub",
+		"label": "- Sub",
 		"tooltip": "Decrements the Sub counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_SUB",
@@ -57,7 +57,7 @@
 	},
 	"AddStreak": {
 		"type": "button",
-		"label": "Add Streak",
+		"label": "+ Streak",
 		"tooltip": "Increments the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_STREAK",
@@ -65,7 +65,7 @@
 	},
 	"SubtractStreak": {
 		"type": "button",
-		"label": "Subtract Streak",
+		"label": "- Streak",
 		"tooltip": "Decrements the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
@@ -73,7 +73,7 @@
 	},
 	"AddToGoal": {
 		"type": "button",
-		"label": "Add To Goal",
+		"label": "+ Goal",
 		"tooltip": "Increments the Subs Per Streak goal by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_TO_GOAL",
@@ -81,7 +81,7 @@
 	},
 	"SubtractFromGoal": {
 		"type": "button",
-		"label": "Subtract From Goal",
+		"label": "- Goal",
 		"tooltip": "Decrements the Subs Per Streak goal by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_FROM_GOAL",

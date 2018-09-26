@@ -43,10 +43,10 @@ Before you attempt to make any customization's, you need to be aware that we're 
 [main.js](Overlay/main.js)
 ```Javascript
 // Outline Hack!
-'Container': document.getElementById('Tracker'),
+'Tracker': document.getElementById('Tracker'),
 ...
 // Outline Hack!
-this.Container.title = this.Container.innerText;
+this.Tracker.title = this.Tracker.innerText;
 ```
 
 With that out of the way, you're free to pretty much do what ever you want. Just make sure that there are elements with IDs around that correspond to the respective values (see [Overlay.html](Overlay.html)), otherwise the script will not work without messing around with the JavaScript, and at that point you probably know what you're doing.
@@ -57,10 +57,12 @@ If something can go wrong, it will most like go wrong at some point. That's why 
 
 Button | Functionality
 -------|--------------
-Add Sub | Adds a Sub, Streaks will increment if conditions are met.
-Subtract Sub | Removes a Sub, until 0 (zero) is reached.
-Add Streak | Adds a Streak.
-Subtract Streak | Removes a Streak, until 0 (zero) is reached.
++ Sub | Adds a Sub, Streaks will increment if conditions are met.
+- Sub | Removes a Sub, until 0 (zero) is reached.
++ Streak | Adds a Streak.
+- Streak | Removes a Streak, until 0 (zero) is reached.
++ Goal | Increments the Goal by one.
+- Goal | Decrements the Goal by one, until 1 (one) is reached.
 Refresh Overlay | Refreshes the Overlay without loosing the current values.
 Reset Tracker | Resets everything to their initial values.
 
