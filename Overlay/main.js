@@ -2,29 +2,17 @@
 var Overlay = {
 
 	// Elements
-	'Streak': document.getElementById('Streak'),
-	'Subs':   document.getElementById('Subs'),
-	'Goal':   document.getElementById('Goal'),
+	'Streak':  document.getElementById('Streak'),
+	'Subs':    document.getElementById('Subs'),
+	'Goal':    document.getElementById('Goal'),
+	'Tracker': document.getElementById('Tracker'), // ! Outline Hack!
 
-	// Outline Hack!
-	'Tracker': document.getElementById('Tracker'),
-
-	// Refresh/Redraw
+	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		// Calculate CurrentStreak and CurrentSubs (DO NOT REMOVE)
-		while (settings.Subs >= settings.Goal) {
-			settings.Subs    -= settings.Goal;
-			settings.Goal    += settings.GoalIncrement;
-			settings.Streak++;
-		}
-
-		// Update Overlay
 		this.Streak.innerText = settings.Streak;
 		this.Subs.innerText   = settings.Subs;
 		this.Goal.innerText   = settings.Goal;
-
-		// Outline Hack!
-		this.Tracker.title = this.Tracker.innerText;
+		this.Tracker.title    = this.Tracker.innerText; // ! Outline Hack!
 	}
 }
 
@@ -82,6 +70,7 @@ function connectWebsocket() {
 					case '2': settings.Subs += settings.Tier2; break;
 					default:  settings.Subs += settings.Tier1;
 				}
+				calcStreak();
 				Overlay.refresh();
 				console.log('TwitchStreaker: New/Gift sub added (Sub)');
 			}
@@ -91,6 +80,7 @@ function connectWebsocket() {
 		// SubCounter Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_SUB') {
 			settings.Subs++;
+			calcStreak();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Added Sub (Overwrite)');
 			return;
@@ -98,6 +88,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_SUB') {
 			if(settings.Subs != 0) {
 				settings.Subs--;
+				calcStreak();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Removed Sub (Overwrite)');
 			}
@@ -107,6 +98,7 @@ function connectWebsocket() {
 		// StreakCounter Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_STREAK') {
 			settings.Streak++;
+			calcStreak();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Added Streak (Overwrite)');
 			return;
@@ -114,6 +106,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_STREAK') {
 			if(settings.Streak != 1) {
 				settings.Streak--;
+				calcStreak();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Removed Streak (Overwrite)');
 			}
@@ -123,6 +116,7 @@ function connectWebsocket() {
 		// StreakGoal Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_TO_GOAL') {
 			settings.Goal++;
+			calcStreak();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Added to Goal (Overwrite)');
 			return;
@@ -130,6 +124,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_FROM_GOAL') {
 			if(settings.Goal != 1) {
 				settings.Goal--;
+				calcStreak();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
 			}
@@ -147,8 +142,9 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_RESET') {
 			settings.Streak = 1;
 			settings.Subs   = 0;
-			settings.Goal   = initialGoal;
+			settings.Goal   = settings.InitialGoal;
 
+			calcStreak();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Reset Tracker (Overwrite)');
 			return;
@@ -168,6 +164,7 @@ function connectWebsocket() {
 			// Adjust SubsPerStreak based on CurrentStreak
 			settings.Goal = (((settings.Streak - 1) * settings.GoalIncrement) + settings.Goal);
 
+			calcStreak();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Settings updated (System)');
 			return;
@@ -181,6 +178,15 @@ function connectWebsocket() {
 		console.log('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
 	}
 };
+
+// Calculate Streak
+function calcStreak() {
+	while (settings.Subs >= settings.Goal) {
+		settings.Subs    -= settings.Goal;
+		settings.Goal    += settings.GoalIncrement;
+		settings.Streak++;
+	}
+}
 
 // API Key Check
 if (typeof API_Key === 'undefined' || typeof API_Socket === 'undefined') {
@@ -214,9 +220,7 @@ settings.Tier1         = Math.abs(settings.Tier1);
 settings.Tier2         = Math.abs(settings.Tier2);
 settings.Tier3         = Math.abs(settings.Tier3);
 settings.GoalIncrement = Math.abs(settings.GoalIncrement);
-
-// Backup for Reset
-var initialGoal = settings.Goal;
+settings.InitialGoal   = settings.Goal;
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
