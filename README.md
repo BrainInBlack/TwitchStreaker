@@ -2,6 +2,20 @@
 
 Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
+## Table of Contents
+
+- [TwitchStreaker for Streamlabs Chatbot](#twitchstreaker-for-streamlabs-chatbot)
+  - [Table of Contents](#table-of-contents)
+  - [Installation](#installation)
+  - [Updates](#updates)
+  - [Customization](#customization)
+  - [JavaScript Variables](#javascript-variables)
+  - [Manual Overwrites](#manual-overwrites)
+  - [Support](#support)
+  - [Contributing](#contributing)
+  - [Contributor's](#contributors)
+  - [Project Info](#project-info)
+
 ## Installation
 
 1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
@@ -42,14 +56,25 @@ Before you attempt to make any customization's, you need to be aware that we're 
 
 [main.js](Overlay/main.js)
 ```Javascript
-// Outline Hack!
-'Container': document.getElementById('Tracker'),
+'Tracker': document.getElementById('Tracker'), // ! Outline Hack!
 ...
-// Outline Hack!
-this.Container.title = this.Container.innerText;
+this.Tracker.title = this.Tracker.innerText; // ! Outline Hack!
 ```
 
-With that out of the way, you're free to pretty much do what ever you want. Just make sure that there are elements with IDs around that correspond to the respective values (see [Overlay.html](Overlay.html)), otherwise the script will not work without messing around with the JavaScript, and at that point you probably know what you're doing.
+With that out of the way, you're free to pretty much do what ever you want. Just make sure that there are elements with IDs around that correspond to the respective values (see [Overlay.html](Overlay.html)), otherwise the script will not work without messing around with the JavaScript, and at that point you probably know what you're doing anyway.
+
+## JavaScript Variables
+
+Variable | Description
+---------|------------
+settings.Subs | Current amount of Subs in the Streak (min: 0)
+settings.Streak | Current amount Streaks (min: 1)
+settings.Goal | Amount of Subs needed to complete a Streak (min: 1)
+settings.GoalIncrement | Amount of which the Goal gets incremented each time a Streak is completed (min: 0)
+settings.GoalCap | Cap for the incremental goals. (min: initial goal)
+settings.InitialGoal | Original Goal value upon init (needed for the reset)
+settings.StreamerName | Name of the Streamer (required to be able to ignore gifted Subs made by the streamer)
+settings.Tier1..3 | Worth of subs for each SubTier (min: 1)
 
 ## Manual Overwrites
 
@@ -57,10 +82,12 @@ If something can go wrong, it will most like go wrong at some point. That's why 
 
 Button | Functionality
 -------|--------------
-Add Sub | Adds a Sub, Streaks will increment if conditions are met.
-Subtract Sub | Removes a Sub, until 0 (zero) is reached.
-Add Streak | Adds a Streak.
-Subtract Streak | Removes a Streak, until 0 (zero) is reached.
++ Sub | Adds a Sub, Streaks will increment if conditions are met.
+- Sub | Removes a Sub, until 0 (zero) is reached.
++ Streak | Adds a Streak.
+- Streak | Removes a Streak, until 0 (zero) is reached.
++ Goal | Increments the Goal by one.
+- Goal | Decrements the Goal by one, until 1 (one) is reached.
 Refresh Overlay | Refreshes the Overlay without loosing the current values.
 Reset Tracker | Resets everything to their initial values.
 

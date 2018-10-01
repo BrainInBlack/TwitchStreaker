@@ -6,42 +6,48 @@
 		"label": "Streamer Name",
 		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)"
 	},
-	"SubsPerStreak": {
+	"Goal": {
 		"type": "numberbox",
 		"value": 7,
-		"label": "Subs Per Streak",
+		"label": "Goal",
 		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
-	"StreakIncrement": {
+	"GoalIncrement": {
 		"type": "numberbox",
 		"value": 0,
-		"label": "Increments Streak By",
-		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero for the known behavior.)"
+		"label": "Increment Goal By",
+		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
+	},
+	"GoalCap": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Goal Cap",
+		"tooltip": "Cap for the incremental Goals.\n\n(Won't go below the initial Goal.)"
 	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 1",
-		"tooltip": "Point Value for Tier 1 subs.",
+		"tooltip": "Value for Tier 1 subs.",
 		"group": "Tier Values"
 	},
 	"Tier2": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 2",
-		"tooltip": "Point Value for Tier 2 subs.",
+		"tooltip": "Value for Tier 2 subs.",
 		"group": "Tier Values"
 	},
 	"Tier3": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 3",
-		"tooltip": "Point Value for Tier 3 subs.",
+		"tooltip": "Value for Tier 3 subs.",
 		"group": "Tier Values"
 	},
 	"AddSub": {
 		"type": "button",
-		"label": "Add Sub",
+		"label": "+ Sub",
 		"tooltip": "Increments the Sub counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_SUB",
@@ -49,7 +55,7 @@
 	},
 	"SubtractSub": {
 		"type": "button",
-		"label": "Subtract Sub",
+		"label": "- Sub",
 		"tooltip": "Decrements the Sub counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_SUB",
@@ -57,7 +63,7 @@
 	},
 	"AddStreak": {
 		"type": "button",
-		"label": "Add Streak",
+		"label": "+ Streak",
 		"tooltip": "Increments the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_STREAK",
@@ -65,7 +71,7 @@
 	},
 	"SubtractStreak": {
 		"type": "button",
-		"label": "Subtract Streak",
+		"label": "- Streak",
 		"tooltip": "Decrements the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
@@ -73,7 +79,7 @@
 	},
 	"AddToGoal": {
 		"type": "button",
-		"label": "Add To Goal",
+		"label": "+ Goal",
 		"tooltip": "Increments the Subs Per Streak goal by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_ADD_TO_GOAL",
@@ -81,7 +87,7 @@
 	},
 	"SubtractFromGoal": {
 		"type": "button",
-		"label": "Subtract From Goal",
+		"label": "- Goal",
 		"tooltip": "Decrements the Subs Per Streak goal by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_FROM_GOAL",

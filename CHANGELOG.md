@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.5.0 - Better Naming Scheme
+
+**Settings and Variables have changed!**
+
+In an effort to make things a little more clear for everybody, we changed the names of pretty much all the variables. Those changes are reflected across the whole script, meaning that you have to re-apply your settings and customization's. This will hopefully the last time we make changes on this scale.
+
+* Added cap to the incremental goals
+* Renamed variables
+* Updated README.md
+* Streamlined main.js
+* Minor improvements and fixes
+
 ## 1.4.6 - Growing Streaks
 
 * Added new Streak Growth Mechanic

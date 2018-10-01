@@ -1,8 +1,12 @@
-# Exclude user specific files
+# Exclude Common Files and Folders
+.vscode/
+.notes/
+
+# Exclude user specific Files
 API_Key.js
 Settings.js
 Settings.json
 
-# Exclude personal files (BrainInBlack)
+# Exclude personal Files (BrainInBlack)
 AnEternalEnigma/
 KatLink/
