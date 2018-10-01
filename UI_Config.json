@@ -18,6 +18,12 @@
 		"label": "Increment Goal By",
 		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
 	},
+	"GoalCap": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Goal Cap",
+		"tooltip": "Cap for the incremental Goals.\n\n(Won't go below the initial Goal.)"
+	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,

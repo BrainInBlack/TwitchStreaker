@@ -157,12 +157,21 @@ function connectWebsocket() {
 			settings.Goal            = Math.abs(data.Goal);
 			settings.StreamerName    = Math.abs(data.StreamerName);
 			settings.GoalIncrement   = Math.abs(data.GoalIncrement);
+			settings.GoalCap         = Math.abs(data.GoalCap);
 			settings.Tier1           = Math.abs(data.Tier1);
 			settings.Tier2           = Math.abs(data.Tier2);
 			settings.Tier3           = Math.abs(data.Tier3);
+			settings.InitialGoal     = settings.Goal;
+
+			// Clamp Goal to InitialGoal
+			if(settings.GoalCap > settings.InitialGoal) {
+				settings.GoalCap = settings.InitialGoal;
+			}
 
 			// Adjust SubsPerStreak based on CurrentStreak
-			settings.Goal = (((settings.Streak - 1) * settings.GoalIncrement) + settings.Goal);
+			if(settings.Goal < settings.GoalCap) {
+				settings.Goal = (((settings.Streak - 1) * settings.GoalIncrement) + settings.Goal); // ! Remake calculation
+			}
 
 			calcStreak();
 			Overlay.refresh();
@@ -183,7 +192,10 @@ function connectWebsocket() {
 function calcStreak() {
 	while (settings.Subs >= settings.Goal) {
 		settings.Subs    -= settings.Goal;
-		settings.Goal    += settings.GoalIncrement;
+		console.log(settings.Goal, settings.GoalCap);
+		if(settings.Goal  < settings.GoalCap) {
+			settings.Goal += settings.GoalIncrement;
+		}
 		settings.Streak++;
 	}
 }
@@ -205,7 +217,8 @@ if (typeof settings.Tier1         === 'undefined' ||
 	typeof settings.Tier2         === 'undefined' ||
 	typeof settings.Tier3         === 'undefined' ||
 	typeof settings.GoalIncrement === 'undefined' ||
-	typeof settings.Goal          === "undefined") {
+	typeof settings.Goal          === "undefined" ||
+	typeof settings.GoalCap       === "undefined") {
 	document.body.innerHTML     = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Missing Settings.');
@@ -220,7 +233,12 @@ settings.Tier1         = Math.abs(settings.Tier1);
 settings.Tier2         = Math.abs(settings.Tier2);
 settings.Tier3         = Math.abs(settings.Tier3);
 settings.GoalIncrement = Math.abs(settings.GoalIncrement);
+settings.GoalCap       = Math.abs(settings.GoalCap);
 settings.InitialGoal   = settings.Goal;
+
+if(settings.GoalCap < settings.InitialGoal) {
+	settings.GoalCap = settings.InitialGoal;
+}
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
