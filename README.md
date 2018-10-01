@@ -82,12 +82,12 @@ If something can go wrong, it will most like go wrong at some point. That's why 
 
 Button | Functionality
 -------|--------------
-+ Sub | Adds a Sub, Streaks will increment if conditions are met.
-- Sub | Removes a Sub, until 0 (zero) is reached.
-+ Streak | Adds a Streak.
-- Streak | Removes a Streak, until 0 (zero) is reached.
-+ Goal | Increments the Goal by one.
-- Goal | Decrements the Goal by one, until 1 (one) is reached.
+\+ Sub | Adds a Sub, Streaks will increment if conditions are met.
+\- Sub | Removes a Sub, until 0 (zero) is reached.
+\+ Streak | Adds a Streak.
+\- Streak | Removes a Streak, until 0 (zero) is reached.
+\+ Goal | Increments the Goal by one.
+\- Goal | Decrements the Goal by one, until 1 (one) is reached.
 Refresh Overlay | Refreshes the Overlay without loosing the current values.
 Reset Tracker | Resets everything to their initial values.
 
