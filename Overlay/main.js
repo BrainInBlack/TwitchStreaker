@@ -86,7 +86,7 @@ function connectWebsocket() {
 			return;
 		}
 		if(socketMessage.event == 'EVENT_SUBTRACT_SUB') {
-			if(settings.Subs != 0) {
+			if(settings.Subs > 0) {
 				settings.Subs--;
 				calcStreak();
 				Overlay.refresh();
@@ -104,7 +104,7 @@ function connectWebsocket() {
 			return;
 		}
 		if(socketMessage.event == 'EVENT_SUBTRACT_STREAK') {
-			if(settings.Streak != 1) {
+			if(settings.Streak > 1) {
 				settings.Streak--;
 				calcStreak();
 				Overlay.refresh();
@@ -115,14 +115,16 @@ function connectWebsocket() {
 
 		// StreakGoal Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_TO_GOAL') {
-			settings.Goal++;
-			calcStreak();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Added to Goal (Overwrite)');
+			if(settings.Goal < settings.GoalCap) {
+				settings.Goal++;
+				calcStreak();
+				Overlay.refresh();
+				console.log('TwitchStreaker: Added to Goal (Overwrite)');
+			}
 			return;
 		}
 		if(socketMessage.event == 'EVENT_SUBTRACT_FROM_GOAL') {
-			if(settings.Goal != 1) {
+			if(settings.Goal > settings.InitialGoal) {
 				settings.Goal--;
 				calcStreak();
 				Overlay.refresh();
@@ -154,6 +156,7 @@ function connectWebsocket() {
 		if (socketMessage.event == 'EVENT_UPDATE_SETTINGS') {
 			var data = JSON.parse(socketMessage.data);
 
+			// Assign new values and ensure positive numbers
 			settings.Goal            = Math.abs(data.Goal);
 			settings.StreamerName    = Math.abs(data.StreamerName);
 			settings.GoalIncrement   = Math.abs(data.GoalIncrement);
@@ -163,15 +166,15 @@ function connectWebsocket() {
 			settings.Tier3           = Math.abs(data.Tier3);
 			settings.InitialGoal     = settings.Goal;
 
-			// Clamp Goal to InitialGoal
-			if(settings.GoalCap > settings.InitialGoal) {
-				settings.GoalCap = settings.InitialGoal;
-			}
+			// Calculate current Goal
+			settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
 
-			// Adjust SubsPerStreak based on CurrentStreak
-			if(settings.Goal < settings.GoalCap) {
-				settings.Goal = (((settings.Streak - 1) * settings.GoalIncrement) + settings.Goal); // ! Remake calculation
-			}
+			// Sanity checks
+			if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
+			if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
+			if(settings.Tier1 < 1)                      { settings.Tier1   = 1; }
+			if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
+			if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
 
 			calcStreak();
 			Overlay.refresh();
@@ -192,7 +195,6 @@ function connectWebsocket() {
 function calcStreak() {
 	while (settings.Subs >= settings.Goal) {
 		settings.Subs    -= settings.Goal;
-		console.log(settings.Goal, settings.GoalCap);
 		if(settings.Goal  < settings.GoalCap) {
 			settings.Goal += settings.GoalIncrement;
 		}
@@ -224,8 +226,7 @@ if (typeof settings.Tier1         === 'undefined' ||
 	throw new Error('TwitchStreaker: Missing Settings.');
 }
 
-// Initialize
-connectWebsocket();
+// Initialize Values
 settings.Subs          = 0;
 settings.Streak        = 1;
 settings.Goal          = Math.abs(settings.Goal);
@@ -236,9 +237,15 @@ settings.GoalIncrement = Math.abs(settings.GoalIncrement);
 settings.GoalCap       = Math.abs(settings.GoalCap);
 settings.InitialGoal   = settings.Goal;
 
-if(settings.GoalCap < settings.InitialGoal) {
-	settings.GoalCap = settings.InitialGoal;
-}
+// Sanity checks
+if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
+if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
+if(settings.Tier1   < 1)                    { settings.Tier1   = 1; }
+if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
+if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
+
+// Connect Socket
+connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {

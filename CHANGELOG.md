@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.1 - Cleanup and Improvements
+
+* Better sanity checks
+* Minor fixes
+
 ## 1.5.0 - Better Naming Scheme
 
 **Settings and Variables have changed!**
