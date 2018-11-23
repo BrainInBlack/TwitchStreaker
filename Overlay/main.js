@@ -2,17 +2,19 @@
 var Overlay = {
 
 	// Elements
-	'Streak':  document.getElementById('Streak'),
-	'Subs':    document.getElementById('Subs'),
-	'Goal':    document.getElementById('Goal'),
-	'Tracker': document.getElementById('Tracker'), // ! Outline Hack!
+	'Streak':   document.getElementById('Streak'),
+	'Subs':     document.getElementById('Subs'),
+	'SubsLeft': document.getElementById('SubsLeft'),
+	'Goal':     document.getElementById('Goal'),
+	'Tracker':  document.getElementById('Tracker'), // ! Outline Hack!
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		this.Streak.innerText = settings.Streak;
-		this.Subs.innerText   = settings.Subs;
-		this.Goal.innerText   = settings.Goal;
-		this.Tracker.title    = this.Tracker.innerText; // ! Outline Hack!
+		if(this.Streak)   this.Streak.innerText   = settings.Streak;
+		if(this.Subs)     this.Subs.innerText     = settings.Subs;
+		if(this.SubsLeft) this.SubsLeft.innerText = settings.SubsLeft;
+		if(this.Goal)     this.Goal.innerText     = settings.Goal;
+		if(this.Tracker)  this.Tracker.title      = this.Tracker.innerText; // ! Outline Hack!
 	}
 }
 
@@ -168,6 +170,7 @@ function connectWebsocket() {
 
 			// Calculate current Goal
 			settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
+			settings.SubsLeft = (settings.Goal - settings.Subs);
 
 			// Sanity checks
 			if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
@@ -198,6 +201,7 @@ function calcStreak() {
 		if(settings.Goal  < settings.GoalCap) {
 			settings.Goal += settings.GoalIncrement;
 		}
+		settings.SubsLeft = (settings.Goal - settings.Subs);
 		settings.Streak++;
 	}
 }
@@ -236,6 +240,7 @@ settings.Tier3         = Math.abs(settings.Tier3);
 settings.GoalIncrement = Math.abs(settings.GoalIncrement);
 settings.GoalCap       = Math.abs(settings.GoalCap);
 settings.InitialGoal   = settings.Goal;
+settings.SubsLeft      = settings.Goal;
 
 // Sanity checks
 if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
