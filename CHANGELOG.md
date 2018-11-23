@@ -1,6 +1,9 @@
 # Changelog
 
-## 1.5.2 - ???
+## 1.5.2 - Flexible Design
+
+* Added new value/element "SubsLeft", amount of subs needed to complete the next streak
+* Changed how the refresh works, none of the values/elements are required for the script to work, allowing for a more flexible design
 
 ## 1.5.1 - Cleanup and Improvements
 
