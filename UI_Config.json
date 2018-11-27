@@ -24,6 +24,18 @@
 		"label": "Goal Cap",
 		"tooltip": "Cap for the incremental Goals.\n\n(Won't go below the initial Goal.)"
 	},
+	"CountResubs": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Allow Resubs",
+		"tooltip": "Enables standard Resubs to be counted as well."
+	},
+	"CountFollows": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Allow Follows",
+		"tooltip": "Enables Follows to be counted as well."
+	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,

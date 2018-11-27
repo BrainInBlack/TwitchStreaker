@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.3 - Resubs and Follows
+
+* Added an options to count resubs as well as follows (default: off)
+	* Resubs are worth as much as the respective Tier Value (min: 1)
+	* Gifted Resubs will always count, as they did in previous versions
+	* Follows, if enabled, are worth one point
+
 ## 1.5.2 - Flexible Design
 
 * Added new value/element "SubsLeft", amount of subs needed to complete the next streak
