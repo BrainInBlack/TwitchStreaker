@@ -31,6 +31,7 @@ function connectWebsocket() {
 			events: [
 				// Streamlabs Events
 				'EVENT_SUB',
+				'EVENT_FOLLOW',
 				'EVENT_UPDATE_SETTINGS',
 				// Custom Events
 				'EVENT_ADD_SUB',
@@ -62,21 +63,30 @@ function connectWebsocket() {
 		var socketMessage = JSON.parse(message.data);
 
 		// Subscription Event
-		if (socketMessage.event == 'EVENT_SUB') {
+		if(socketMessage.event == 'EVENT_SUB') {
 			var data = JSON.parse(socketMessage.data);
-			// Check if new or gifted subscription
-			if (((data.is_gift && (data.display_name.toLowerCase() != data.gift_target.toLowerCase())) || !data.is_resub) &&
-				 (data.display_name.toLowerCase() != settings.StreamerName.toLowerCase())) {
-				switch(data.tier) {
-					case '3': settings.Subs += settings.Tier3; break;
-					case '2': settings.Subs += settings.Tier2; break;
-					default:  settings.Subs += settings.Tier1;
-				}
-				calcStreak();
-				Overlay.refresh();
-				console.log('TwitchStreaker: New/Gift sub added (Sub)');
+
+			if(data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) return;              // Ignore Streamer
+			if(data.is_gift && (data.display_name.toLowerCase() == data.gift_target.toLowerCase())) return; // Ignore SelfGiftSubs
+			if(!settings.CountResubs && data.is_resub && !data.is_gift) return;                             // Ignore Resubs
+
+			switch(data.tier) {
+				case '3': settings.Subs += settings.Tier3; break;
+				case '2': settings.Subs += settings.Tier2; break;
+				default:  settings.Subs += settings.Tier1;
 			}
-			return;
+
+			calcStreak();
+			Overlay.refresh();
+			console.log('TwitchStreaker: Sub added (Sub)');
+		}
+
+		if(socketMessage.event == 'EVENT_FOLLOW') {
+			if(settings.CountFollows) return;
+			settings.Subs++;
+			calcStreak();
+			Overlay.refresh();
+			console.log('TwitchStreaker: Follow added (Follow)');
 		}
 
 		// SubCounter Overwrite Events
@@ -167,6 +177,8 @@ function connectWebsocket() {
 			settings.Tier2           = Math.abs(data.Tier2);
 			settings.Tier3           = Math.abs(data.Tier3);
 			settings.InitialGoal     = settings.Goal;
+			settings.CountFollows    = data.CountFollows;
+			settings.CountResubs     = data.CountResubs;
 
 			// Calculate current Goal
 			settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
