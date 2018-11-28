@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.4 - Follower Fix
+
+* Fixed inverted follower logic
+
 ## 1.5.3 - Resubs and Follows
 
 * Added an options to count resubs as well as follows (default: off)

@@ -82,7 +82,7 @@ function connectWebsocket() {
 		}
 
 		if(socketMessage.event == 'EVENT_FOLLOW') {
-			if(settings.CountFollows) return;
+			if(!settings.CountFollows) return;
 			settings.Subs++;
 			calcStreak();
 			Overlay.refresh();
