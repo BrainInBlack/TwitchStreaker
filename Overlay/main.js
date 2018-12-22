@@ -76,7 +76,7 @@ function connectWebsocket() {
 				default:  settings.Subs += settings.Tier1;
 			}
 
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Sub added (Sub)');
 		}
@@ -84,7 +84,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_FOLLOW') {
 			if(!settings.CountFollows) return;
 			settings.Subs++;
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Follow added (Follow)');
 		}
@@ -92,7 +92,7 @@ function connectWebsocket() {
 		// SubCounter Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_SUB') {
 			settings.Subs++;
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Added Sub (Overwrite)');
 			return;
@@ -100,7 +100,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_SUB') {
 			if(settings.Subs > 0) {
 				settings.Subs--;
-				calcStreak();
+				calculateValues();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Removed Sub (Overwrite)');
 			}
@@ -110,7 +110,7 @@ function connectWebsocket() {
 		// StreakCounter Overwrite Events
 		if(socketMessage.event == 'EVENT_ADD_STREAK') {
 			settings.Streak++;
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Added Streak (Overwrite)');
 			return;
@@ -118,7 +118,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_STREAK') {
 			if(settings.Streak > 1) {
 				settings.Streak--;
-				calcStreak();
+				calculateValues();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Removed Streak (Overwrite)');
 			}
@@ -129,7 +129,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_ADD_TO_GOAL') {
 			if(settings.Goal < settings.GoalCap) {
 				settings.Goal++;
-				calcStreak();
+				calculateValues();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Added to Goal (Overwrite)');
 			}
@@ -138,7 +138,7 @@ function connectWebsocket() {
 		if(socketMessage.event == 'EVENT_SUBTRACT_FROM_GOAL') {
 			if(settings.Goal > settings.InitialGoal) {
 				settings.Goal--;
-				calcStreak();
+				calculateValues();
 				Overlay.refresh();
 				console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
 			}
@@ -158,7 +158,7 @@ function connectWebsocket() {
 			settings.Subs   = 0;
 			settings.Goal   = settings.InitialGoal;
 
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Reset Tracker (Overwrite)');
 			return;
@@ -182,7 +182,6 @@ function connectWebsocket() {
 
 			// Calculate current Goal
 			settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
-			settings.SubsLeft = (settings.Goal - settings.Subs);
 
 			// Sanity checks
 			if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
@@ -191,7 +190,7 @@ function connectWebsocket() {
 			if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
 			if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
 
-			calcStreak();
+			calculateValues();
 			Overlay.refresh();
 			console.log('TwitchStreaker: Settings updated (System)');
 			return;
@@ -207,15 +206,15 @@ function connectWebsocket() {
 };
 
 // Calculate Streak
-function calcStreak() {
+function calculateValues() {
 	while (settings.Subs >= settings.Goal) {
 		settings.Subs    -= settings.Goal;
 		if(settings.Goal  < settings.GoalCap) {
 			settings.Goal += settings.GoalIncrement;
 		}
-		settings.SubsLeft = (settings.Goal - settings.Subs);
 		settings.Streak++;
 	}
+	settings.SubsLeft = (settings.Goal - settings.Subs);
 }
 
 // API Key Check
@@ -252,7 +251,6 @@ settings.Tier3         = Math.abs(settings.Tier3);
 settings.GoalIncrement = Math.abs(settings.GoalIncrement);
 settings.GoalCap       = Math.abs(settings.GoalCap);
 settings.InitialGoal   = settings.Goal;
-settings.SubsLeft      = settings.Goal;
 
 // Sanity checks
 if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
@@ -262,6 +260,7 @@ if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
 if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
 
 // Connect Socket
+calculateValues();
 connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw
