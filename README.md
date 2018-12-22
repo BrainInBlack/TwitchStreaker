@@ -42,32 +42,52 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
 
 ## Customization
 
-Before you attempt to make any customization's, you need to be aware that we're using a workaround to get the text-outline working in the overlay. Meaning if you don't want/need a text-outline you should remove the following:
+Making your own designs for TwitchStreaker is straight forward and only require a few things to keep in mind. The single most important thing is to load the required JavaScript files in the correct order.
 
-[main.css](Overlay/main.css)
-```CSS
-#Tracker:before {
-  content: attr(title);
-  position: absolute;
-  -webkit-text-stroke: 0.09em #6441a4;
-  z-index: -1;
-}
+```HTML
+<html>
+  <head>
+    <!-- OtherStuff -->
+    <script src="API_Key.js"></script>
+    <script src="Settings.js"></script>
+    <script src="overlay/main.js" defer></script>
+    <!-- OtherScripts -->
+  </head>
+  <body>
+    <!-- Content -->
+  </body>
+</html>
 ```
 
-[main.js](Overlay/main.js)
-```Javascript
-'Tracker': document.getElementById('Tracker'), // ! Outline Hack!
-...
-this.Tracker.title = this.Tracker.innerText; // ! Outline Hack!
+The following element ID's are available for use in your design:
+
+ID | Description
+---|------------
+Subs | Current amount of Subs in the Streak
+SubsLeft | Amount of Subs left for the next Streak
+Streak | Current amount of Streaks
+Goal | Amount of Subs needed to complete the current Streak
+
+None of those ID's are required and can be placed anywhere in the document, in case of the default design we're only using ```Subs```, ```Streak``` and ```Goal```. Here a few examples:
+
+*"X Subs left until Wheel #1"*
+```HTML
+<div><span id="SubsLeft">2</span> Subs left until Wheel #<span id="Streak">1</span></div>
 ```
 
-With that out of the way, you're free to pretty much do what ever you want. Just make sure that there are elements with IDs around that correspond to the respective values (see [Overlay.html](Overlay.html)), otherwise the script will not work without messing around with the JavaScript, and at that point you probably know what you're doing anyway.
+*"X of X Subs, then we spin Wheel #1"*
+```HTML
+<div><span id="Subs">2</span> of <span id="Goal">7</span> Subs, then we spin Wheel #<span id="Streak">1</span></div>
+```
+
+The rest is just CSS and your own creativity.
 
 ## JavaScript Variables
 
 Variable | Description
 ---------|------------
 settings.Subs | Current amount of Subs in the Streak (min: 0)
+settings.SubLeft | Amount of subs left to the next Streak
 settings.Streak | Current amount Streaks (min: 1)
 settings.Goal | Amount of Subs needed to complete a Streak (min: 1)
 settings.GoalIncrement | Amount of which the Goal gets incremented each time a Streak is completed (min: 0)

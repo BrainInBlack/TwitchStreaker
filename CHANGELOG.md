@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.5 - SubsLeft Fix
+
+* Fixed SubsLeft only being calculated when a Goal is reached
+* Updated README.md
+
 ## 1.5.4 - Follower Fix
 
 * Fixed inverted follower logic
