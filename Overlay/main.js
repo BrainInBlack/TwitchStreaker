@@ -10,6 +10,18 @@ var Overlay = {
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
+
+		// Calculate Current Values
+		while (settings.Subs >= settings.Goal) {
+			settings.Subs    -= settings.Goal;
+			if(settings.Goal  < settings.GoalCap) {
+				settings.Goal += settings.GoalIncrement;
+			}
+			settings.Streak++;
+		}
+		settings.SubsLeft = (settings.Goal - settings.Subs);
+
+		// Update Overlay
 		if(this.Streak)   this.Streak.innerText   = settings.Streak;
 		if(this.Subs)     this.Subs.innerText     = settings.Subs;
 		if(this.SubsLeft) this.SubsLeft.innerText = settings.SubsLeft;
@@ -51,171 +63,125 @@ function connectWebsocket() {
 	socket.onclose = function () {
 		socket = null;
 		setTimeout(connectWebsocket, 5000); // 5 Second Delay
-		console.log('TwitchStreaker: Reconnecting (Socket)');
+		console.warn('TwitchStreaker: Reconnecting (Socket)');
 	}
 	// Output errors to the console (only works in a browser)
 	socket.onerror = function(error) {
-		console.log('Error: ' + error + ' (System)');
+		console.error('Error: ' + error + ' (System)');
 	}
 
 	// EventBus
 	socket.onmessage = function (message) {
 		var socketMessage = JSON.parse(message.data);
 
-		// Subscription Event
-		if(socketMessage.event == 'EVENT_SUB') {
-			var data = JSON.parse(socketMessage.data);
+		switch (socketMessage.event) {
+			case 'EVENT_SUB':
+				if(settings.ManualMode) return;
+				var data = JSON.parse(socketMessage.data);
 
-			if(data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) return;              // Ignore Streamer
-			if(data.is_gift && (data.display_name.toLowerCase() == data.gift_target.toLowerCase())) return; // Ignore SelfGiftSubs
-			if(!settings.CountResubs && data.is_resub && !data.is_gift) return;                             // Ignore Resubs
+				if(data.display_name.toLowerCase() == settings.StreamerName.toLowerCase()) return;
+				if(data.is_gift && (data.display_name.toLowerCase() == data.gift_target.toLowerCase())) return;
+				if(!settings.CountResubs && data.is_resub && !data.is_gift) return;
 
-			switch(data.tier) {
-				case '3': settings.Subs += settings.Tier3; break;
-				case '2': settings.Subs += settings.Tier2; break;
-				default:  settings.Subs += settings.Tier1;
-			}
+				switch(data.tier) {
+					case '3': settings.Subs += settings.Tier3; break;
+					case '2': settings.Subs += settings.Tier2; break;
+					default:  settings.Subs += settings.Tier1;
+				}
+				console.log('TwitchStreaker: Sub added (Sub)');
+				break;
 
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Sub added (Sub)');
+			case 'EVENT_FOLLOW':
+				if(!settings.CountFollows) return;
+				settings.Subs++;
+				console.log('TwitchStreaker: Follow added (Follow)');
+				break;
+
+			case 'EVENT_ADD_SUB':
+				settings.Subs++;
+				console.log('TwitchStreaker: Added Sub (Overwrite)');
+				break;
+			case 'EVENT_SUBTRACT_SUB':
+				if(settings.Subs > 0) {
+					settings.Subs--;
+					console.log('TwitchStreaker: Removed Sub (Overwrite)');
+				} else { return; } // Return if no change
+				break;
+
+			case 'EVENT_ADD_STREAK':
+				settings.Streak++;
+				console.log('TwitchStreaker: Added Streak (Overwrite)');
+				break;
+			case 'EVENT_SUBTRACT_STREAK':
+				if(settings.Streak > 1) {
+					settings.Streak--;
+					console.log('TwitchStreaker: Removed Streak (Overwrite)');
+				} else { return; } // Return if no change
+				break;
+
+			case 'EVENT_ADD_TO_GOAL':
+				if(settings.Goal < settings.GoalCap) {
+					settings.Goal++;
+					console.log('TwitchStreaker: Added to Goal (Overwrite)');
+				} else { return; } // Return if no change
+				break;
+			case 'EVENT_SUBTRACT_FROM_GOAL':
+				if(settings.Goal > settings.InitialGoal) {
+					settings.Goal--;
+					console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
+				} else { return; } // Return if no change
+				break;
+
+			case 'EVENT_FORCE_REDRAW': // Will fall through the redraw call!
+				console.log('TwitchStreaker: Force Redraw (Overwrite)');
+				break;
+
+			case 'EVENT_RESET':
+				settings.Streak = 1;
+				settings.Subs   = 0;
+				settings.Goal   = settings.InitialGoal;
+				console.log('TwitchStreaker: Reset Tracker (Overwrite)');
+				break;
+
+			case 'EVENT_UPDATE_SETTINGS':
+				var data = JSON.parse(socketMessage.data);
+
+				// Assign new values and ensure positive numbers
+				settings.Goal            = Math.abs(data.Goal);
+				settings.StreamerName    = Math.abs(data.StreamerName);
+				settings.GoalIncrement   = Math.abs(data.GoalIncrement);
+				settings.GoalCap         = Math.abs(data.GoalCap);
+				settings.Tier1           = Math.abs(data.Tier1);
+				settings.Tier2           = Math.abs(data.Tier2);
+				settings.Tier3           = Math.abs(data.Tier3);
+				settings.InitialGoal     = settings.Goal;
+				settings.CountFollows    = data.CountFollows;
+				settings.CountResubs     = data.CountResubs;
+				settings.ManualMode      = data.ManualMode;
+
+				// Calculate current Goal
+				settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
+
+				// Sanity checks
+				if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
+				if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
+				if(settings.Tier1 < 1)                      { settings.Tier1   = 1; }
+				if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
+				if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
+
+				console.log('TwitchStreaker: Settings updated (System)');
+				break;
+
+			default:
+				var sysEvents = ['EVENT_CONNECTED'];
+				if(socketMessage.event, sysEvents) { return; }
+
+				console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
+				return;
 		}
-
-		if(socketMessage.event == 'EVENT_FOLLOW') {
-			if(!settings.CountFollows) return;
-			settings.Subs++;
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Follow added (Follow)');
-		}
-
-		// SubCounter Overwrite Events
-		if(socketMessage.event == 'EVENT_ADD_SUB') {
-			settings.Subs++;
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Added Sub (Overwrite)');
-			return;
-		}
-		if(socketMessage.event == 'EVENT_SUBTRACT_SUB') {
-			if(settings.Subs > 0) {
-				settings.Subs--;
-				calculateValues();
-				Overlay.refresh();
-				console.log('TwitchStreaker: Removed Sub (Overwrite)');
-			}
-			return;
-		}
-
-		// StreakCounter Overwrite Events
-		if(socketMessage.event == 'EVENT_ADD_STREAK') {
-			settings.Streak++;
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Added Streak (Overwrite)');
-			return;
-		}
-		if(socketMessage.event == 'EVENT_SUBTRACT_STREAK') {
-			if(settings.Streak > 1) {
-				settings.Streak--;
-				calculateValues();
-				Overlay.refresh();
-				console.log('TwitchStreaker: Removed Streak (Overwrite)');
-			}
-			return;
-		}
-
-		// StreakGoal Overwrite Events
-		if(socketMessage.event == 'EVENT_ADD_TO_GOAL') {
-			if(settings.Goal < settings.GoalCap) {
-				settings.Goal++;
-				calculateValues();
-				Overlay.refresh();
-				console.log('TwitchStreaker: Added to Goal (Overwrite)');
-			}
-			return;
-		}
-		if(socketMessage.event == 'EVENT_SUBTRACT_FROM_GOAL') {
-			if(settings.Goal > settings.InitialGoal) {
-				settings.Goal--;
-				calculateValues();
-				Overlay.refresh();
-				console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
-			}
-			return;
-		}
-
-		// Redraw Overwrite Event
-		if(socketMessage.event == 'EVENT_FORCE_REDRAW') {
-			Overlay.refresh();
-			console.log('TwitchStreaker: Force Redraw (Overwrite)');
-			return;
-		}
-
-		// Reset Overwrite Event
-		if(socketMessage.event == 'EVENT_RESET') {
-			settings.Streak = 1;
-			settings.Subs   = 0;
-			settings.Goal   = settings.InitialGoal;
-
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Reset Tracker (Overwrite)');
-			return;
-		}
-
-		// Update Settings Event
-		if (socketMessage.event == 'EVENT_UPDATE_SETTINGS') {
-			var data = JSON.parse(socketMessage.data);
-
-			// Assign new values and ensure positive numbers
-			settings.Goal            = Math.abs(data.Goal);
-			settings.StreamerName    = Math.abs(data.StreamerName);
-			settings.GoalIncrement   = Math.abs(data.GoalIncrement);
-			settings.GoalCap         = Math.abs(data.GoalCap);
-			settings.Tier1           = Math.abs(data.Tier1);
-			settings.Tier2           = Math.abs(data.Tier2);
-			settings.Tier3           = Math.abs(data.Tier3);
-			settings.InitialGoal     = settings.Goal;
-			settings.CountFollows    = data.CountFollows;
-			settings.CountResubs     = data.CountResubs;
-
-			// Calculate current Goal
-			settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
-
-			// Sanity checks
-			if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
-			if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
-			if(settings.Tier1 < 1)                      { settings.Tier1   = 1; }
-			if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
-			if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
-
-			calculateValues();
-			Overlay.refresh();
-			console.log('TwitchStreaker: Settings updated (System)');
-			return;
-		}
-
-		// System Events (ignored events)
-		var sysEvents = ['EVENT_CONNECTED'];
-		if(socketMessage.event, sysEvents) { return; }
-
-		// Unknown Events
-		console.log('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
+		Overlay.refresh();
 	}
 };
-
-// Calculate Streak
-function calculateValues() {
-	while (settings.Subs >= settings.Goal) {
-		settings.Subs    -= settings.Goal;
-		if(settings.Goal  < settings.GoalCap) {
-			settings.Goal += settings.GoalIncrement;
-		}
-		settings.Streak++;
-	}
-	settings.SubsLeft = (settings.Goal - settings.Subs);
-}
 
 // API Key Check
 if (typeof API_Key === 'undefined' || typeof API_Socket === 'undefined') {
@@ -229,13 +195,16 @@ if (typeof settings === 'undefined') {
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Settings file not loaded or missing.');
 }
-// New Settings Check
+// Settings Check
 if (typeof settings.Tier1         === 'undefined' ||
 	typeof settings.Tier2         === 'undefined' ||
 	typeof settings.Tier3         === 'undefined' ||
 	typeof settings.GoalIncrement === 'undefined' ||
 	typeof settings.Goal          === "undefined" ||
-	typeof settings.GoalCap       === "undefined") {
+	typeof settings.GoalCap       === "undefined" ||
+	typeof settings.CountResubs   === "undefined" ||
+	typeof settings.CountFollows  === "undefined" ||
+	typeof settings.ManualMode    === "undefined") {
 	document.body.innerHTML     = 'New set of Settings!<br>Please check the Script Settings and the Changelog, then click "Save Settings".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
 	throw new Error('TwitchStreaker: Missing Settings.');
@@ -260,7 +229,6 @@ if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
 if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
 
 // Connect Socket
-calculateValues();
 connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw

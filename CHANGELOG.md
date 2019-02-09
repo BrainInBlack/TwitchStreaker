@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.6 - Cumulative Subs
+
+* Added Manual Mode Option (script will be entirely controlled by the overwrites if enabled)
+* Improved EventBus
+* Moved value calculations back into the refresh function
+* Fixed settings validation
+* Fixed README.md
+
 ## 1.5.5 - SubsLeft Fix
 
 * Fixed SubsLeft only being calculated when a Goal is reached

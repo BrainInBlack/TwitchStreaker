@@ -36,6 +36,12 @@
 		"label": "Allow Follows",
 		"tooltip": "Enables Follows to be counted as well."
 	},
+	"ManualMode": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Manual Mode",
+		"tooltip": "The script is controlled via the Overwrite Buttons, if enabled."
+	},
 	"Tier1": {
 		"type": "numberbox",
 		"value": 1,
