@@ -23,6 +23,7 @@ html, body {
 #Tracker:before {
   content: attr(title);
   position: absolute;
-  -webkit-text-stroke: 0.09em #6441a4;
+  -webkit-text-stroke: 0.1em #6441a4;
+  text-shadow: black 3px 3px 10px;
   z-index: -1;
 }

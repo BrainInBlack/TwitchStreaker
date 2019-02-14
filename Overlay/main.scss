@@ -27,7 +27,8 @@ html, body {
 	&:before {
 		content: attr(title);
 		position: absolute;
-		-webkit-text-stroke: 0.09em $glow;
+		-webkit-text-stroke: 0.10em $glow;
+		text-shadow: black 3px 3px 10px;
 		z-index: -1;
 	}
 }
