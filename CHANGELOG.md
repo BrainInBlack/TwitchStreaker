@@ -5,6 +5,7 @@
 * Added Manual Mode Option (script will be entirely controlled by the overwrites if enabled)
 * Improved EventBus
 * Moved value calculations back into the refresh function
+* Changed default design
 * Fixed settings validation
 * Fixed README.md
 
