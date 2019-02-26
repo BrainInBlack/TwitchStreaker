@@ -12,17 +12,23 @@
 		"label": "Goal",
 		"tooltip": "Amount of new/gifted subs needed to advance to the next streak."
 	},
+	"GoalMin": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Goal Min",
+		"tooltip": "Minimum value for the incremental Goals."
+	},
+	"GoalMax": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Goal Max",
+		"tooltip": "Maximum value for the incremental Goals."
+	},
 	"GoalIncrement": {
 		"type": "numberbox",
 		"value": 0,
 		"label": "Increment Goal By",
 		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
-	},
-	"GoalCap": {
-		"type": "numberbox",
-		"value": 10,
-		"label": "Goal Cap",
-		"tooltip": "Cap for the incremental Goals.\n\n(Won't go below the initial Goal.)"
 	},
 	"CountResubs": {
 		"type": "checkbox",
@@ -87,12 +93,44 @@
 		"wsevent": "EVENT_ADD_STREAK",
 		"group": "Overwrites"
 	},
+	"AddStreak5": {
+		"type": "button",
+		"label": "+ Streak (5)",
+		"tooltip": "Increments the Streak counter by five.",
+		"function": "Tick",
+		"wsevent": "EVENT_ADD_STREAK_5",
+		"group": "Overwrites"
+	},
+	"AddStreak10": {
+		"type": "button",
+		"label": "+ Streak (10)",
+		"tooltip": "Increments the Streak counter by ten.",
+		"function": "Tick",
+		"wsevent": "EVENT_ADD_STREAK_10",
+		"group": "Overwrites"
+	},
 	"SubtractStreak": {
 		"type": "button",
 		"label": "- Streak",
 		"tooltip": "Decrements the Streak counter by one.",
 		"function": "Tick",
 		"wsevent": "EVENT_SUBTRACT_STREAK",
+		"group": "Overwrites"
+	},
+	"SubtractStreak5": {
+		"type": "button",
+		"label": "- Streak (5)",
+		"tooltip": "Decrements the Streak counter by five.",
+		"function": "Tick",
+		"wsevent": "EVENT_SUBTRACT_STREAK_5",
+		"group": "Overwrites"
+	},
+	"SubtractStreak10": {
+		"type": "button",
+		"label": "- Streak (10)",
+		"tooltip": "Decrements the Streak counter by ten.",
+		"function": "Tick",
+		"wsevent": "EVENT_SUBTRACT_STREAK_10",
 		"group": "Overwrites"
 	},
 	"AddToGoal": {

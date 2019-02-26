@@ -6,7 +6,7 @@ var Overlay = {
 	'Subs':     document.getElementById('Subs'),
 	'SubsLeft': document.getElementById('SubsLeft'),
 	'Goal':     document.getElementById('Goal'),
-	'Tracker':  document.getElementById('Tracker'), // ! Outline Hack!
+	'Tracker':  document.getElementById('Tracker'),                             // ! Outline Hack!
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
@@ -14,7 +14,7 @@ var Overlay = {
 		// Calculate Current Values
 		while (settings.Subs >= settings.Goal) {
 			settings.Subs    -= settings.Goal;
-			if(settings.Goal  < settings.GoalCap) {
+			if(settings.Goal  < settings.GoalMax) {
 				settings.Goal += settings.GoalIncrement;
 			}
 			settings.Streak++;
@@ -26,7 +26,7 @@ var Overlay = {
 		if(this.Subs)     this.Subs.innerText     = settings.Subs;
 		if(this.SubsLeft) this.SubsLeft.innerText = settings.SubsLeft;
 		if(this.Goal)     this.Goal.innerText     = settings.Goal;
-		if(this.Tracker)  this.Tracker.title      = this.Tracker.innerText; // ! Outline Hack!
+		if(this.Tracker)  this.Tracker.title      = this.Tracker.innerText;     // ! Outline Hack!
 	}
 }
 
@@ -49,7 +49,11 @@ function connectWebsocket() {
 				'EVENT_ADD_SUB',
 				'EVENT_SUBTRACT_SUB',
 				'EVENT_ADD_STREAK',
+				'EVENT_ADD_STREAK_5',
+				'EVENT_ADD_STREAK_10',
 				'EVENT_SUBTRACT_STREAK',
+				'EVENT_SUBTRACT_STREAK_5',
+				'EVENT_SUBTRACT_STREAK_10',
 				'EVENT_ADD_TO_GOAL',
 				'EVENT_SUBTRACT_FROM_GOAL',
 				'EVENT_FORCE_REDRAW',
@@ -112,21 +116,42 @@ function connectWebsocket() {
 				settings.Streak++;
 				console.log('TwitchStreaker: Added Streak (Overwrite)');
 				break;
+			case 'EVENT_ADD_STREAK_5':
+				settings.Streak += 5;
+				console.log('TwitchStreaker: Added 5 Streaks (Overwrite)');
+				break;
+			case 'EVENT_ADD_STREAK_10':
+				settings.Streak += 10;
+				console.log('TwitchStreaker: Added 10 Streaks (Overwrite)');
+				break;
+
 			case 'EVENT_SUBTRACT_STREAK':
 				if(settings.Streak > 1) {
 					settings.Streak--;
 					console.log('TwitchStreaker: Removed Streak (Overwrite)');
 				} else { return; } // Return if no change
 				break;
+			case 'EVENT_SUBTRACT_STREAK_5':
+				if(settings.Streak > 5) {
+					settings.Streak -= 5;
+					console.log('TwitchStreaker: Removed 5 Streaks (Overwrite)');
+				} else { return; } // Return if no change
+				break;
+			case 'EVENT_SUBTRACT_STREAK_10':
+				if(settings.Streak > 10) {
+					settings.Streak -= 10;
+					console.log('TwitchStreaker: Removed 10 Streaks (Overwrite)');
+				} else { return; } // Return if no change
+				break;
 
 			case 'EVENT_ADD_TO_GOAL':
-				if(settings.Goal < settings.GoalCap) {
+				if(settings.Goal < settings.GoalMax) {
 					settings.Goal++;
 					console.log('TwitchStreaker: Added to Goal (Overwrite)');
 				} else { return; } // Return if no change
 				break;
 			case 'EVENT_SUBTRACT_FROM_GOAL':
-				if(settings.Goal > settings.InitialGoal) {
+				if(settings.Goal > settings.GoalMin) {
 					settings.Goal--;
 					console.log('TwitchStreaker: Subtracted from Goal (Overwrite)');
 				} else { return; } // Return if no change
@@ -150,7 +175,8 @@ function connectWebsocket() {
 				settings.Goal            = Math.abs(data.Goal);
 				settings.StreamerName    = Math.abs(data.StreamerName);
 				settings.GoalIncrement   = Math.abs(data.GoalIncrement);
-				settings.GoalCap         = Math.abs(data.GoalCap);
+				settings.GoalMin         = Math.abs(data.GoalMin);
+				settings.GoalMax         = Math.abs(data.GoalMax);
 				settings.Tier1           = Math.abs(data.Tier1);
 				settings.Tier2           = Math.abs(data.Tier2);
 				settings.Tier3           = Math.abs(data.Tier3);
@@ -163,8 +189,10 @@ function connectWebsocket() {
 				settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
 
 				// Sanity checks
-				if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
-				if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
+				if(settings.GoalMin < 1)                    { settings.GoalMin = 1; }
+				if(settings.GoalMin > settings.InitialGoal) { settings.GoalMin = settings.InitialGoal; }
+				if(settings.GoalMax < settings.InitialGoal) { settings.GoalMax = settings.InitialGoal; }
+				if(settings.Goal    > settings.GoalMax)     { settings.Goal    = settings.GoalMax; }
 				if(settings.Tier1 < 1)                      { settings.Tier1   = 1; }
 				if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
 				if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
@@ -201,7 +229,8 @@ if (typeof settings.Tier1         === 'undefined' ||
 	typeof settings.Tier3         === 'undefined' ||
 	typeof settings.GoalIncrement === 'undefined' ||
 	typeof settings.Goal          === "undefined" ||
-	typeof settings.GoalCap       === "undefined" ||
+	typeof settings.GoalMin       === "undefined" ||
+	typeof settings.GoalMax       === "undefined" ||
 	typeof settings.CountResubs   === "undefined" ||
 	typeof settings.CountFollows  === "undefined" ||
 	typeof settings.ManualMode    === "undefined") {
@@ -218,12 +247,15 @@ settings.Tier1         = Math.abs(settings.Tier1);
 settings.Tier2         = Math.abs(settings.Tier2);
 settings.Tier3         = Math.abs(settings.Tier3);
 settings.GoalIncrement = Math.abs(settings.GoalIncrement);
-settings.GoalCap       = Math.abs(settings.GoalCap);
+settings.GoalMin       = Math.abs(settings.GoalMin);
+settings.GoalMax       = Math.abs(settings.GoalMax);
 settings.InitialGoal   = settings.Goal;
 
 // Sanity checks
-if(settings.GoalCap < settings.InitialGoal) { settings.GoalCap = settings.InitialGoal; }
-if(settings.Goal    > settings.GoalCap)     { settings.Goal    = settings.GoalCap; }
+if(settings.GoalMin < 1)                    { settings.GoalMin = 1; }
+if(settings.GoalMin > settings.InitialGoal) { settings.GoalMin = settings.InitialGoal; }
+if(settings.GoalMax < settings.InitialGoal) { settings.GoalMax = settings.InitialGoal; }
+if(settings.Goal    > settings.GoalMax)     { settings.Goal    = settings.GoalMax; }
 if(settings.Tier1   < 1)                    { settings.Tier1   = 1; }
 if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
 if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
