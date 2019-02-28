@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.6.0 - Goal Rework
+
+**Settings and Variables have changed! Please check your settings and save them at least once!**
+
+* Added Min/Max Goal (Replaces the initial goal and goal cap mechanic)
+* Added +-5 and +-10 variants for the Streaks Overwrites (speeds up crash recovery with a high Streak)
+
+## 1.5.6 - Cumulative Subs
+
+* Added Manual Mode Option (script will be entirely controlled by the overwrites if enabled)
+* Improved EventBus
+* Moved value calculations back into the refresh function
+* Changed default design
+* Fixed settings validation
+* Fixed README.md
+
 ## 1.5.5 - SubsLeft Fix
 
 * Fixed SubsLeft only being calculated when a Goal is reached

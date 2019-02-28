@@ -3,6 +3,7 @@
 $font: 'Roboto', sans-serif;
 $color: rgba(255, 255, 255, 1);
 $glow: rgba(100, 65, 164, 1);
+$shadow: rgba(0, 0, 0, .35);
 
 html, body {
 	margin: 0;
@@ -23,11 +24,12 @@ html, body {
 	font-size: 72px;
 	letter-spacing: 0.06em;
 	color: $color;
+	text-shadow: 2px 2px 3px $shadow;
 
 	&:before {
 		content: attr(title);
 		position: absolute;
-		-webkit-text-stroke: 0.09em $glow;
+		-webkit-text-stroke: 0.12em $glow;
 		z-index: -1;
 	}
 }

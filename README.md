@@ -105,7 +105,7 @@ Button | Functionality
 \+ Sub | Adds a Sub, Streaks will increment if conditions are met.
 \- Sub | Removes a Sub, until 0 (zero) is reached.
 \+ Streak | Adds a Streak.
-\- Streak | Removes a Streak, until 0 (zero) is reached.
+\- Streak | Removes a Streak, until 1 (one) is reached.
 \+ Goal | Increments the Goal by one.
 \- Goal | Decrements the Goal by one, until 1 (one) is reached.
 Refresh Overlay | Refreshes the Overlay without loosing the current values.

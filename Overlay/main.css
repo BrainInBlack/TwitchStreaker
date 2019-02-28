@@ -18,11 +18,12 @@ html, body {
   font-size: 72px;
   letter-spacing: 0.06em;
   color: white;
+  text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.35);
 }
 
 #Tracker:before {
   content: attr(title);
   position: absolute;
-  -webkit-text-stroke: 0.09em #6441a4;
+  -webkit-text-stroke: 0.12em #6441a4;
   z-index: -1;
 }
