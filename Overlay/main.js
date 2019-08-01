@@ -1,4 +1,6 @@
-// OverlayLogic
+/*****************
+ * Overlay Logic *
+ *****************/
 var Overlay = {
 
 	// Elements
@@ -10,18 +12,6 @@ var Overlay = {
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-
-		// Calculate Current Values
-		while (settings.Subs >= settings.Goal) {
-			settings.Subs    -= settings.Goal;
-			if(settings.Goal  < settings.GoalMax) {
-				settings.Goal += settings.GoalIncrement;
-			}
-			settings.Streak++;
-		}
-		settings.SubsLeft = (settings.Goal - settings.Subs);
-
-		// Update Overlay
 		if(this.Streak)   this.Streak.innerText   = settings.Streak;
 		if(this.Subs)     this.Subs.innerText     = settings.Subs;
 		if(this.SubsLeft) this.SubsLeft.innerText = settings.SubsLeft;
@@ -30,7 +20,9 @@ var Overlay = {
 	}
 }
 
-// MainLogic
+/*****************
+ * Tracker Logic *
+ *****************/
 function connectWebsocket() {
 	var socket = new WebSocket(API_Socket);
 
@@ -45,17 +37,24 @@ function connectWebsocket() {
 				'EVENT_SUB',
 				'EVENT_FOLLOW',
 				'EVENT_UPDATE_SETTINGS',
-				// Custom Events
+
+				// Sub Events
 				'EVENT_ADD_SUB',
 				'EVENT_SUBTRACT_SUB',
+
+				// Streak Events
 				'EVENT_ADD_STREAK',
 				'EVENT_ADD_STREAK_5',
 				'EVENT_ADD_STREAK_10',
 				'EVENT_SUBTRACT_STREAK',
 				'EVENT_SUBTRACT_STREAK_5',
 				'EVENT_SUBTRACT_STREAK_10',
+
+				// Goal Events
 				'EVENT_ADD_TO_GOAL',
 				'EVENT_SUBTRACT_FROM_GOAL',
+
+				// Misc Events
 				'EVENT_FORCE_REDRAW',
 				'EVENT_RESET'
 			]
@@ -180,22 +179,15 @@ function connectWebsocket() {
 				settings.Tier1           = Math.abs(data.Tier1);
 				settings.Tier2           = Math.abs(data.Tier2);
 				settings.Tier3           = Math.abs(data.Tier3);
-				settings.InitialGoal     = settings.Goal;
 				settings.CountFollows    = data.CountFollows;
 				settings.CountResubs     = data.CountResubs;
 				settings.ManualMode      = data.ManualMode;
+				settings.InitialGoal     = settings.Goal;
 
 				// Calculate current Goal
 				settings.Goal += ((settings.Streak - 1) * settings.GoalIncrement);
 
-				// Sanity checks
-				if(settings.GoalMin < 1)                    { settings.GoalMin = 1; }
-				if(settings.GoalMin > settings.InitialGoal) { settings.GoalMin = settings.InitialGoal; }
-				if(settings.GoalMax < settings.InitialGoal) { settings.GoalMax = settings.InitialGoal; }
-				if(settings.Goal    > settings.GoalMax)     { settings.Goal    = settings.GoalMax; }
-				if(settings.Tier1 < 1)                      { settings.Tier1   = 1; }
-				if(settings.Tier2 < 1)                      { settings.Tier2   = 1; }
-				if(settings.Tier3 < 1)                      { settings.Tier3   = 1; }
+				sanityCheck();
 
 				console.log('TwitchStreaker: Settings updated (System)');
 				break;
@@ -207,11 +199,36 @@ function connectWebsocket() {
 				console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
 				return;
 		}
+		settings.SubsLeft = (settings.Goal - settings.Subs);
+
+		// Calculate Current Values
+		while (settings.Subs >= settings.Goal) {
+			settings.Subs    -= settings.Goal;
+			if(settings.Goal  < settings.GoalMax) {
+				settings.Goal += settings.GoalIncrement;
+			}
+			settings.Streak++;
+		}
 		Overlay.refresh();
 	}
 };
 
-// API Key Check
+// Sanity Check
+function sanityCheck() {
+	if(settings.GoalMin < 1)                    { settings.GoalMin = 1; }
+	if(settings.GoalMin > settings.InitialGoal) { settings.GoalMin = settings.InitialGoal; }
+	if(settings.GoalMax < settings.InitialGoal) { settings.GoalMax = settings.InitialGoal; }
+	if(settings.Goal    > settings.GoalMax)     { settings.Goal    = settings.GoalMax; }
+	if(settings.Tier1   < 1)                    { settings.Tier1   = 1; }
+	if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
+	if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
+}
+
+/***************
+ * Entry Point *
+ ***************/
+
+// API File Check
 if (typeof API_Key === 'undefined' || typeof API_Socket === 'undefined') {
 	document.body.innerHTML     = 'API Key not found!<br>Right-click on the TwitchStreaker Script in Streamlabs Chatbot and select "Insert API Key".';
 	document.body.style.cssText = 'font-family: sans-serif; font-size: 20pt; font-weight: bold; color: rgb(255, 22, 23); text-align: center;';
@@ -251,16 +268,7 @@ settings.GoalMin       = Math.abs(settings.GoalMin);
 settings.GoalMax       = Math.abs(settings.GoalMax);
 settings.InitialGoal   = settings.Goal;
 
-// Sanity checks
-if(settings.GoalMin < 1)                    { settings.GoalMin = 1; }
-if(settings.GoalMin > settings.InitialGoal) { settings.GoalMin = settings.InitialGoal; }
-if(settings.GoalMax < settings.InitialGoal) { settings.GoalMax = settings.InitialGoal; }
-if(settings.Goal    > settings.GoalMax)     { settings.Goal    = settings.GoalMax; }
-if(settings.Tier1   < 1)                    { settings.Tier1   = 1; }
-if(settings.Tier2   < 1)                    { settings.Tier2   = 1; }
-if(settings.Tier3   < 1)                    { settings.Tier3   = 1; }
-
-// Connect Socket
+sanityCheck();
 connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw
