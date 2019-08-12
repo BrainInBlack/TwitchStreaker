@@ -1,11 +1,5 @@
 {
 	"output_file": "Settings.json",
-	"StreamerName": {
-		"type": "textbox",
-		"value": "StreamerName",
-		"label": "Streamer Name",
-		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)"
-	},
 	"Goal": {
 		"type": "numberbox",
 		"value": 7,
@@ -42,11 +36,12 @@
 		"label": "Allow Follows",
 		"tooltip": "Enables Follows to be counted as well."
 	},
-	"ManualMode": {
-		"type": "checkbox",
-		"value": false,
-		"label": "Manual Mode",
-		"tooltip": "The script is controlled via the Overwrite Buttons, if enabled."
+	"SocketToken": {
+		"type": "textbox",
+		"value": "SocketToken",
+		"label": "Socket Token",
+		"tooltip": "Insert your Streamlabs Socket Token.\n\n(You can find your Token under Settings > API Settings > API Tokens, on the Streamlabs Website.)",
+		"group": "Streamlabs"
 	},
 	"Tier1": {
 		"type": "numberbox",
