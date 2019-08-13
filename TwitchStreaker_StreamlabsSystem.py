@@ -57,18 +57,25 @@ def Init():
 
 	if not Settings["SocketToken"] == "":
 		EventReceiver.Connect(Settings["SocketToken"])
+	else:
+		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
+
+	UpdateOverlay()
+	return
 
 # ---------------
 # Event Connected
 # ---------------
 def EventReceiverConnected(sender, args):
 	Parent.Log(ScriptName, "Connected")
+	return
 
 # ------------------
 # Event Disconnected
 # ------------------
 def EventReceiverDisconnected(sender, args):
 	Parent.Log(ScriptName, "Disconnected")
+	return
 
 # ----------
 # Event Main
@@ -93,10 +100,10 @@ def EventReceiverEvent(sender, args):
 		for message in data.Message:
 			if not message.IsLive and not message.IsTest:
 				continue
-			#if not Settings["CountResubs"] and message.SubType == "resub":
-			#	continue
-			#if message.Name == Parent.GetChannelName() or message.Name == message.Gifter:
-			#	continue
+			if not Settings["CountResubs"] and message.SubType == "resub":
+				continue
+			if message.Name == Parent.GetChannelName() or message.Name == message.Gifter:
+				continue
 			if message.SubPlan == "1000" or message.SubPlan == "Prime":
 				Session["CurrentSubs"] += Settings["Tier1"]
 			elif message.SubPlan == "2000":
@@ -104,18 +111,24 @@ def EventReceiverEvent(sender, args):
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
 
-	while Session["CurrentSubs"] >= Settings["Goal"]:
-		Session["CurrentSubs"] -= Settings["Goal"]
-		if Session["CurrentGoal"] < Settings["GoalMax"]:
-			Session["CurrentGoal"] += Session["GoalIncrement"]
-		Session["CurrentStreak"] += 1
-
 	UpdateOverlay()
+	return
 
 # --------------
 # Update Overlay
 # --------------
 def UpdateOverlay():
+	global Session
+	global Settings
+
+	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+		Session["CurrentSubs"] -= Session["CurrentGoal"]
+		if Session["CurrentGoal"] < Settings["GoalMax"]:
+			Session["CurrentGoal"] += Settings["GoalIncrement"]
+		Session["CurrentStreak"] += 1
+
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	SaveSession()
 	return
 
 # ------------
@@ -141,16 +154,7 @@ def SanityCheck():
 		Settings["Tier2"] = 1
 	if Settings["Tier3"] < 1:
 		Settings["Tier3"] = 1
-
-# ------------
-# Save Session
-# ------------
-def SaveSession():
-	global Session
-	global SessionFile
-	file = open(SessionFile, "w")
-	file.write(str(json.JSONEncoder().encode(Session)))
-	file.close()
+	return
 
 # ------------
 # Load Session
@@ -170,6 +174,18 @@ def LoadSession():
 			"CurrentGoal": 10,
 		}
 		SaveSession()
+	return
+
+# ------------
+# Save Session
+# ------------
+def SaveSession():
+	global Session
+	global SessionFile
+	file = open(SessionFile, "w")
+	file.write(str(json.JSONEncoder().encode(Session)))
+	file.close()
+	return
 
 # -------------
 # Reset Session
@@ -181,16 +197,8 @@ def ResetSession():
 	Session["CurrentStreak"] = 1
 	Session["CurrentGoal"] = Settings["Goal"]
 	SaveSession()
-
-# -------------
-# Save Settings
-# -------------
-def SaveSettings():
-	global Settings
-	global SettingsFile
-	file = open(SettingsFile, "w")
-	file.write(str(json.JSONEncoder().encode(Settings)))
-	file.close()
+	UpdateOverlay()
+	return
 
 # -------------
 # Load Settings
@@ -205,27 +213,93 @@ def LoadSettings():
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as file:
 			Settings = json.load(file, encoding="utf-8-sig")
 	except:
-		Settings = {
-			# Default
-			"Goal": 10,
-			"GoalMin": 5,
-			"GoalMax": 10,
-			"GoalIncrement": 1,
-			"Tier1": 1,
-			"Tier2": 1,
-			"Tier3": 1,
-			"CountFollows": False,
-			"CountResubs": True,
-			"SocketToken": ""
-		}
-		SaveSettings()
+		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
+	return
 
 # ---------------
 # Reload Settings
 # ---------------
 def ReloadSettings(jsonData):
 	LoadSettings()
+	SanityCheck()
+	UpdateOverlay()
 	Parent.Log(ScriptName, "Settings Reloaded")
+	return
+
+# -------------
+# Sub Functions
+# -------------
+def AddSub():
+	global Session
+	Session["CurrentSubs"] += 1
+	UpdateOverlay()
+	return
+
+def SubtractSub():
+	global Session
+	if Session["CurrentSubs"] > 0:
+		Session["CurrentSubs"] -= 1
+		UpdateOverlay()
+	return
+
+# ----------------
+# Streak Functions
+# ----------------
+def AddStreak():
+	global Session
+	Session["CurrentStreak"] += 1
+	UpdateOverlay()
+	return
+
+def AddStreak5():
+	global Session
+	Session["CurrentStreak"] += 5
+	UpdateOverlay()
+	return
+
+def AddStreak10():
+	global Session
+	Session["CurrentStreak"] += 10
+	UpdateOverlay()
+	return
+
+def SubtractStreak():
+	global Session
+	if Session["CurrentStreak"] > 1:
+		Session["CurrentStreak"] -= 1
+		UpdateOverlay()
+	return
+
+def SubtractStreak5():
+	global Session
+	if Session["CurrentStreak"] > 1:
+		Session["CurrentStreak"] -= 5
+		UpdateOverlay()
+	return
+
+def SubtractStreak10():
+	global Session
+	if Session["CurrentStreak"] > 1:
+		Session["CurrentStreak"] -= 10
+		UpdateOverlay()
+	return
+
+# -------------
+# Goal Function
+# -------------
+def AddToGoal():
+	global Session
+	if Session["CurrentGoal"] < Settings["GoalMax"]:
+		Session["CurrentGoal"] += 1
+		UpdateOverlay()
+	return
+
+def SubtractFromGoal():
+	global Session
+	if Session["CurrentGoal"] > Settings["GoalMin"]:
+		Session["CurrentGoal"] -= 1
+		UpdateOverlay()
+	return
 
 # ------
 # Unload
@@ -236,6 +310,7 @@ def Unload():
 		EventReceiver.Disconnect()
 	EventReceiver = None
 	SaveSession()
+	return
 
 # -------
 # Execute

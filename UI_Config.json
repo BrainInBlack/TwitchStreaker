@@ -68,80 +68,80 @@
 		"type": "button",
 		"label": "+ Sub",
 		"tooltip": "Increments the Sub counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_SUB",
+		"function": "AddSub",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractSub": {
 		"type": "button",
 		"label": "- Sub",
 		"tooltip": "Decrements the Sub counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_SUB",
+		"function": "SubtractSub",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak": {
 		"type": "button",
 		"label": "+ Streak",
 		"tooltip": "Increments the Streak counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK",
+		"function": "AddStreak",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak5": {
 		"type": "button",
 		"label": "+ Streak (5)",
 		"tooltip": "Increments the Streak counter by five.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK_5",
+		"function": "AddStreak5",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak10": {
 		"type": "button",
 		"label": "+ Streak (10)",
 		"tooltip": "Increments the Streak counter by ten.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK_10",
+		"function": "AddStreak10",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak": {
 		"type": "button",
 		"label": "- Streak",
 		"tooltip": "Decrements the Streak counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK",
+		"function": "SubtractStreak",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak5": {
 		"type": "button",
 		"label": "- Streak (5)",
 		"tooltip": "Decrements the Streak counter by five.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK_5",
+		"function": "SubtractStreak5",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak10": {
 		"type": "button",
 		"label": "- Streak (10)",
 		"tooltip": "Decrements the Streak counter by ten.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK_10",
+		"function": "SubtractStreak10",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddToGoal": {
 		"type": "button",
 		"label": "+ Goal",
 		"tooltip": "Increments the Subs Per Streak goal by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_TO_GOAL",
+		"function": "AddToGoal",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractFromGoal": {
 		"type": "button",
 		"label": "- Goal",
 		"tooltip": "Decrements the Subs Per Streak goal by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_FROM_GOAL",
+		"function": "SubtractFromGoal",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"ForceRedraw": {
@@ -156,8 +156,8 @@
 		"type": "button",
 		"label": "Reset Tracker",
 		"tooltip": "Resets the Tracker to zero.",
-		"function": "Tick",
-		"wsevent": "EVENT_RESET",
+		"function": "ResetSession",
+		"wsevent": "",
 		"group": "Overwrites"
 	}
 }
