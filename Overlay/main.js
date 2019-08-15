@@ -33,7 +33,7 @@ function connectWebsocket() {
 
 	// Connect to Socket and register Events
 	socket.onopen = function () {
-		var auth = {
+		socket.send(JSON.stringify({
 			author:  'BrainInBlack',
 			website: 'https://github.com/BrainInBlack/TwitchStreaker',
 			api_key:  API_Key,
@@ -41,8 +41,7 @@ function connectWebsocket() {
 				'EVENT_UPDATE_OVERLAY',
 				'EVENT_FORCE_REDRAW'
 			]
-		};
-		socket.send(JSON.stringify(auth));
+		}));
 		console.log('TwitchStreaker: Connected (Socket)');
 	};
 	// Attempt reconnect after connection loss
@@ -74,9 +73,7 @@ function connectWebsocket() {
 				break;
 
 			default:
-				var sysEvents = ['EVENT_CONNECTED'];
-				if(socketMessage.event, sysEvents) { return; }
-
+				if(socketMessage.event, ['EVENT_CONNECTED']) { return; }
 				console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
 				return;
 		}

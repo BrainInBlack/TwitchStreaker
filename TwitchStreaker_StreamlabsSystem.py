@@ -12,7 +12,7 @@ import codecs
 # ----------
 sys.path.append(os.path.dirname(__file__))
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "lib/StreamlabsEventReceiver.dll"))
+clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 # -----------
@@ -27,11 +27,10 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 # ----------------
 # Global Variables
 # ----------------
-OSPath = os.path.dirname(__file__)
-SessionFile = os.path.join(OSPath, "Session.json")
 Session = {}
-SettingsFile = os.path.join(OSPath, "Settings.json")
 Settings = {}
+SessionFile = os.path.join(os.path.dirname(__file__), "Session.json")
+SettingsFile = os.path.join(os.path.dirname(__file__), "Settings.json")
 
 EventReceiver = None
 
@@ -61,20 +60,6 @@ def Init():
 		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
 
 	UpdateOverlay()
-	return
-
-# ---------------
-# Event Connected
-# ---------------
-def EventReceiverConnected(sender, args):
-	Parent.Log(ScriptName, "Connected")
-	return
-
-# ------------------
-# Event Disconnected
-# ------------------
-def EventReceiverDisconnected(sender, args):
-	Parent.Log(ScriptName, "Disconnected")
 	return
 
 # ----------
@@ -112,6 +97,20 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentSubs"] += Settings["Tier3"]
 
 	UpdateOverlay()
+	return
+
+# ---------------
+# Event Connected
+# ---------------
+def EventReceiverConnected(sender, args):
+	Parent.Log(ScriptName, "Connected")
+	return
+
+# ------------------
+# Event Disconnected
+# ------------------
+def EventReceiverDisconnected(sender, args):
+	Parent.Log(ScriptName, "Disconnected")
 	return
 
 # --------------
