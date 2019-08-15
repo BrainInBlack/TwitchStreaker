@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0 - General Rework
+
+**IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst
+other things, your Subs and Streaks are now tracked across sessions and
+require a manual reset.
+
+Please take your time and consult the README.md there you find a guide for upgrading to 2.x
+
+* Moved core logic into the python part of the script for consistent tracking
+over multiple sessions (the reset is now done manually via the menu within the bot)
+* Updated README.md
+
 ## 1.6.0 - Goal Rework
 
 **Settings and Variables have changed! Please check your settings and save them at least once!**

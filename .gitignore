@@ -4,6 +4,7 @@
 
 # Exclude user specific Files
 API_Key.js
+Session.json
 Settings.js
 Settings.json
 
