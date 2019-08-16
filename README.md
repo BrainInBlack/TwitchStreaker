@@ -62,7 +62,7 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 
 #### Script not showing up after installation/update.
 
-    With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
+With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
 
 1. Open `Streamlabs Chatbot.exe.config` (Chatbot main folder) with a TextEditor
 2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
