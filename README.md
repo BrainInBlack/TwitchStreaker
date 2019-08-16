@@ -10,6 +10,7 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [Updates](#updates)
   - [Updating to 2.x](#updating-to-2.x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
+  - [Known Issues](#known-issues)
   - [Customization](#customization)
   - [JavaScript Variables](#javascript-variables)
   - [Manual Overwrites](#manual-overwrites)
@@ -38,7 +39,7 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
 4. Reapply your customization's.
 5. Reload the script and overlay.
 
-## Updating to 2.x
+## Updating to 2.x from 1.x
 
 With version 2.0.0 and onwards the Tracking is done in a different part of the Script, allowing us to track Subs and Streaks across multiple Sessions and different Overlays. All that without having to worry about loosing progress when switching Scenes or having the Chatbot crash on you.
 
@@ -56,6 +57,16 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 2. Click on ```API Tokens```
 3. Click the ```Copy``` Button next to the ```Your Socket API Token``` field
 4. Insert the Token under ```Streamlabs > Socket Token``` in the Script Settings
+
+## Known Issues
+
+#### Script not showing up after installation/update.
+
+    With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
+
+1. Open `Streamlabs Chatbot.exe.config` (Chatbot main folder) with a TextEditor
+2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
+3. Save and Restart the Chatbot
 
 ## Customization
 

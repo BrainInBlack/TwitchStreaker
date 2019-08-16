@@ -6,6 +6,7 @@ import sys
 import json
 import clr
 import codecs
+import time
 
 # ----------
 # References
@@ -32,7 +33,10 @@ Settings = {}
 SessionFile = os.path.join(os.path.dirname(__file__), "Session.json")
 SettingsFile = os.path.join(os.path.dirname(__file__), "Settings.json")
 
+ChannelName = None
 EventReceiver = None
+TimerDelay = 5
+TimerStamp = None
 
 # ----------
 # Initiation
@@ -41,6 +45,8 @@ def Init():
 	global EventReceiver
 	global Session
 	global Settings
+	global TimerStamp
+	global ChannelName
 
 	LoadSession()
 	LoadSettings()
@@ -59,6 +65,9 @@ def Init():
 	else:
 		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
 
+	TimerStamp = time.time()
+	ChannelName = Parent.GetChannelName().lower()
+
 	UpdateOverlay()
 	return
 
@@ -68,6 +77,7 @@ def Init():
 def EventReceiverEvent(sender, args):
 	global Session
 	global Settings
+	global ChannelName
 
 	data = args.Data
 
@@ -80,6 +90,7 @@ def EventReceiverEvent(sender, args):
 			if not message.IsLive and not message.IsTest:
 				continue
 			Settings["CurrentSubs"] += 1
+		SaveSession()
 
 	if data.Type == "subscription":
 		for message in data.Message:
@@ -88,7 +99,7 @@ def EventReceiverEvent(sender, args):
 			if not Settings["CountResubs"] and message.SubType == "resub":
 				Parent.Log(ScriptName, "Ignored Resub")
 				continue
-			if message.Gifter.lower() == Parent.GetChannelName().lower():
+			if message.Gifter.lower() == ChannelName:
 				Parent.Log(ScriptName, "Ignored StreamerGift")
 				continue
 			if message.Name.lower() == message.Gifter.lower():
@@ -100,6 +111,7 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentSubs"] += Settings["Tier2"]
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
+		SaveSession()
 
 	UpdateOverlay()
 	return
@@ -130,9 +142,9 @@ def UpdateOverlay():
 		if Session["CurrentGoal"] < Settings["GoalMax"]:
 			Session["CurrentGoal"] += Settings["GoalIncrement"]
 		Session["CurrentStreak"] += 1
+		SaveSession()
 
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	SaveSession()
 	return
 
 # ------------
@@ -218,6 +230,7 @@ def LoadSettings():
 			Settings = json.load(file, encoding="utf-8-sig")
 	except:
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
+
 	return
 
 # ---------------
@@ -326,4 +339,11 @@ def Execute(data):
 # Tick
 # ----
 def Tick():
+	global TimerDelay
+	global TimerStamp
+
+	if (time.time() - TimerStamp) > TimerDelay:
+		UpdateOverlay()
+		TimerStamp = time.time()
+
 	return

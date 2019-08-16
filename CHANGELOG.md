@@ -4,6 +4,9 @@
 
 * Fixed SelfGiftSubs and StreamerSubs being detected incorrectly
 * Moved Refresh Overlay function into the python part, since it makes more sense there
+* Added AutoRefresh every 5 seconds
+* Optimized Session handling (reduces file IO)
+* Updated README.md
 
 ## 2.0.0 - General Rework
 
