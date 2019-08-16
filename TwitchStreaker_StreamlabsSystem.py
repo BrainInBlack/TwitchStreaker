@@ -86,8 +86,13 @@ def EventReceiverEvent(sender, args):
 			if not message.IsLive and not message.IsTest:
 				continue
 			if not Settings["CountResubs"] and message.SubType == "resub":
+				Parent.Log(ScriptName, "Ignored Resub")
 				continue
-			if message.Name.lower() == Parent.GetChannelName().lower() or message.Name.lower() == message.Gifter.lower():
+			if message.Gifter.lower() == Parent.GetChannelName().lower():
+				Parent.Log(ScriptName, "Ignored StreamerGift")
+				continue
+			if message.Name.lower() == message.Gifter.lower():
+				Parent.Log(ScriptName, "Ignored SelfGift")
 				continue
 			if message.SubPlan == "1000" or message.SubPlan == "Prime":
 				Session["CurrentSubs"] += Settings["Tier1"]
