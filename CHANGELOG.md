@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.1 - Bug Fixes
+
+* Fixed SelfGiftSubs and StreamerSubs being detected incorrectly
+* Moved Refresh Overlay function into the python part, since it makes more sense there
+
 ## 2.0.0 - General Rework
 
 **IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst

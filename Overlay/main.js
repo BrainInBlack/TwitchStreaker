@@ -38,8 +38,7 @@ function connectWebsocket() {
 			website: 'https://github.com/BrainInBlack/TwitchStreaker',
 			api_key:  API_Key,
 			events: [
-				'EVENT_UPDATE_OVERLAY',
-				'EVENT_FORCE_REDRAW'
+				'EVENT_UPDATE_OVERLAY'
 			]
 		}));
 		console.log('TwitchStreaker: Connected (Socket)');
@@ -66,10 +65,6 @@ function connectWebsocket() {
 				Overlay.CurrentStreak = data.CurrentStreak;
 				Overlay.CurrentSubs = data.CurrentSubs;
 				Overlay.SubsLeft = Overlay.CurrentGoal - Overlay.CurrentSubs;
-				break;
-
-			case 'EVENT_FORCE_REDRAW': // Will fall through the redraw call!
-				console.log('TwitchStreaker: Force Redraw (Overwrite)');
 				break;
 
 			default:

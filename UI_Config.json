@@ -148,8 +148,8 @@
 		"type": "button",
 		"label": "Refresh Overlay",
 		"tooltip": "Refreshes the Overlay in case of rendering issues.",
-		"function": "Tick",
-		"wsevent": "EVENT_FORCE_REDRAW",
+		"function": "UpdateOverlay",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"ResetTracker": {

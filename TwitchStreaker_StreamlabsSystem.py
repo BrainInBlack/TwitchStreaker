@@ -87,7 +87,7 @@ def EventReceiverEvent(sender, args):
 				continue
 			if not Settings["CountResubs"] and message.SubType == "resub":
 				continue
-			if message.Name == Parent.GetChannelName() or message.Name == message.Gifter:
+			if message.Name.lower() == Parent.GetChannelName().lower() or message.Name.lower() == message.Gifter.lower():
 				continue
 			if message.SubPlan == "1000" or message.SubPlan == "Prime":
 				Session["CurrentSubs"] += Settings["Tier1"]
