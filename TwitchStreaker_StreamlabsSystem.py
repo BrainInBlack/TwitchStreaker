@@ -21,7 +21,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName = "Twitch Streaker"
 Website = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator = "BrainInBlack"
-Version = "2.0.0"
+Version = "2.0.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
