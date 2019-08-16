@@ -8,7 +8,7 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Updates](#updates)
-  - [Updating to 2.x](#updating-to-2.x)
+  - [Updating to 2.x from 1.x](#updating-to-2x-from-1x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
   - [Known Issues](#known-issues)
   - [Customization](#customization)
