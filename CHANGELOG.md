@@ -16,6 +16,10 @@ over multiple sessions (the reset is now done manually via the menu within the b
 * Optimized Session handling (reduces file IO)
 * Added Timer based Refresh
 * Removed manual Refresh
+* Allowed Test Alerts to bypass all restrictions
+* Removed UpdateOverlay function and moved it's functionality to the Tick function
+* Fixed potential bug when initializing the script while CurrentSubs is at Zero, potentially reverting the CurrentGoal to the default Goal
+* Fixed potential bug in the core logic
 
 ## 1.6.0 - Goal Rework
 

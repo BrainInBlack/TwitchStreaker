@@ -38,6 +38,7 @@ EventReceiver = None
 TimerDelay = 2
 TimerStamp = None
 
+
 # ----------
 # Initiation
 # ----------
@@ -48,11 +49,8 @@ def Init():
 	global TimerStamp
 	global ChannelName
 
-	LoadSession()
 	LoadSettings()
-
-	if Session["CurrentSubs"] == 0:
-		Session["CurrentGoal"] = Settings["Goal"]
+	LoadSession()
 	SanityCheck()
 
 	EventReceiver = StreamlabsEventClient()
@@ -69,6 +67,7 @@ def Init():
 	ChannelName = Parent.GetChannelName().lower()
 
 	return
+
 
 # ----------
 # Event Main
@@ -87,23 +86,30 @@ def EventReceiverEvent(sender, args):
 	if data.Type == "follow" and Settings["CountFollows"]:
 		for message in data.Message:
 			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
 				continue
 			Settings["CurrentSubs"] += 1
 		SaveSession()
 
 	if data.Type == "subscription":
 		for message in data.Message:
+
 			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
 				continue
-			if not Settings["CountResubs"] and message.SubType == "resub":
-				Parent.Log(ScriptName, "Ignored Resub")
+
+			if not message.Gifter == None:
+				if message.Gifter.lower() == ChannelName and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
+					continue
+				if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
+					continue
+
+			if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
 				continue
-			if message.Gifter.lower() == ChannelName:
-				Parent.Log(ScriptName, "Ignored StreamerGift")
-				continue
-			if message.Name.lower() == message.Gifter.lower():
-				Parent.Log(ScriptName, "Ignored SelfGift")
-				continue
+
 			if message.SubPlan == "1000" or message.SubPlan == "Prime":
 				Session["CurrentSubs"] += Settings["Tier1"]
 			elif message.SubPlan == "2000":
@@ -111,8 +117,8 @@ def EventReceiverEvent(sender, args):
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
 		SaveSession()
-
 	return
+
 
 # ---------------
 # Event Connected
@@ -121,6 +127,7 @@ def EventReceiverConnected(sender, args):
 	Parent.Log(ScriptName, "Connected")
 	return
 
+
 # ------------------
 # Event Disconnected
 # ------------------
@@ -128,22 +135,29 @@ def EventReceiverDisconnected(sender, args):
 	Parent.Log(ScriptName, "Disconnected")
 	return
 
-# --------------
-# Update Overlay
-# --------------
-def UpdateOverlay():
+
+# ----
+# Tick
+# ----
+def Tick():
 	global Session
 	global Settings
+	global TimerDelay
+	global TimerStamp
 
-	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
-		Session["CurrentSubs"] -= Session["CurrentGoal"]
-		if Session["CurrentGoal"] < Settings["GoalMax"]:
-			Session["CurrentGoal"] += Settings["GoalIncrement"]
-		Session["CurrentStreak"] += 1
-		SaveSession()
+	if (time.time() - TimerStamp) > TimerDelay:
+		TimerStamp = time.time()
 
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+		while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+			Session["CurrentSubs"] -= Session["CurrentGoal"]
+			if Session["CurrentGoal"] < Settings["GoalMax"]:
+				Session["CurrentGoal"] += Settings["GoalIncrement"]
+			Session["CurrentStreak"] += 1
+			SaveSession()
+
+		Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 	return
+
 
 # ------------
 # Sanity Check
@@ -151,6 +165,9 @@ def UpdateOverlay():
 def SanityCheck():
 	global Session
 	global Settings
+
+	if Session == None:
+		LoadSession()
 
 	if Settings["GoalMin"] < 1:
 		Settings["GoalMin"] = 1
@@ -170,12 +187,17 @@ def SanityCheck():
 		Settings["Tier3"] = 1
 	return
 
+
 # ------------
 # Load Session
 # ------------
 def LoadSession():
 	global Session
 	global SessionFile
+	global Settings
+
+	if Settings == None:
+		LoadSettings()
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as file:
@@ -185,10 +207,11 @@ def LoadSession():
 			# Default
 			"CurrentSubs": 0,
 			"CurrentStreak": 1,
-			"CurrentGoal": 10,
+			"CurrentGoal": Settings["Goal"]
 		}
 		SaveSession()
 	return
+
 
 # ------------
 # Save Session
@@ -196,10 +219,13 @@ def LoadSession():
 def SaveSession():
 	global Session
 	global SessionFile
+
 	file = open(SessionFile, "w")
 	file.write(str(json.JSONEncoder().encode(Session)))
 	file.close()
+
 	return
+
 
 # -------------
 # Reset Session
@@ -207,11 +233,14 @@ def SaveSession():
 def ResetSession():
 	global Session
 	global Settings
+
 	Session["CurrentSubs"] = 0
 	Session["CurrentStreak"] = 1
 	Session["CurrentGoal"] = Settings["Goal"]
 	SaveSession()
+
 	return
+
 
 # -------------
 # Load Settings
@@ -227,8 +256,8 @@ def LoadSettings():
 			Settings = json.load(file, encoding="utf-8-sig")
 	except:
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
-
 	return
+
 
 # ---------------
 # Reload Settings
@@ -236,8 +265,8 @@ def LoadSettings():
 def ReloadSettings(jsonData):
 	LoadSettings()
 	SanityCheck()
-	Parent.Log(ScriptName, "Settings Reloaded")
 	return
+
 
 # -------------
 # Sub Functions
@@ -252,6 +281,7 @@ def SubtractSub():
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
 	return
+
 
 # ----------------
 # Streak Functions
@@ -289,6 +319,7 @@ def SubtractStreak10():
 		Session["CurrentStreak"] -= 10
 	return
 
+
 # -------------
 # Goal Function
 # -------------
@@ -304,6 +335,7 @@ def SubtractFromGoal():
 		Session["CurrentGoal"] -= 1
 	return
 
+
 # ------
 # Unload
 # ------
@@ -315,21 +347,9 @@ def Unload():
 	SaveSession()
 	return
 
+
 # -------
 # Execute
 # -------
 def Execute(data):
-	return
-
-# ----
-# Tick
-# ----
-def Tick():
-	global TimerDelay
-	global TimerStamp
-
-	if (time.time() - TimerStamp) > TimerDelay:
-		UpdateOverlay()
-		TimerStamp = time.time()
-
 	return
