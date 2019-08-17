@@ -1,14 +1,6 @@
 # Changelog
 
-## 2.0.1 - Bug Fixes
-
-* Fixed SelfGiftSubs and StreamerSubs being detected incorrectly
-* Moved Refresh Overlay function into the python part, since it makes more sense there
-* Added AutoRefresh every 5 seconds
-* Optimized Session handling (reduces file IO)
-* Updated README.md
-
-## 2.0.0 - General Rework
+## 2.0.0 & 2.0.1 - General Rework
 
 **IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst
 other things, your Subs and Streaks are now tracked across sessions and
@@ -19,6 +11,11 @@ Please take your time and consult the README.md there you find a guide for upgra
 * Moved core logic into the python part of the script for consistent tracking
 over multiple sessions (the reset is now done manually via the menu within the bot)
 * Updated README.md
+* Fixed SelfGiftSubs and StreamerSubs being detected incorrectly
+* ~~Moved Refresh Overlay function into the python part, since it makes more sense there~~
+* Optimized Session handling (reduces file IO)
+* Added Timer based Refresh
+* Removed manual Refresh
 
 ## 1.6.0 - Goal Rework
 

@@ -35,7 +35,7 @@ SettingsFile = os.path.join(os.path.dirname(__file__), "Settings.json")
 
 ChannelName = None
 EventReceiver = None
-TimerDelay = 5
+TimerDelay = 2
 TimerStamp = None
 
 # ----------
@@ -68,7 +68,6 @@ def Init():
 	TimerStamp = time.time()
 	ChannelName = Parent.GetChannelName().lower()
 
-	UpdateOverlay()
 	return
 
 # ----------
@@ -113,7 +112,6 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentSubs"] += Settings["Tier3"]
 		SaveSession()
 
-	UpdateOverlay()
 	return
 
 # ---------------
@@ -213,7 +211,6 @@ def ResetSession():
 	Session["CurrentStreak"] = 1
 	Session["CurrentGoal"] = Settings["Goal"]
 	SaveSession()
-	UpdateOverlay()
 	return
 
 # -------------
@@ -239,7 +236,6 @@ def LoadSettings():
 def ReloadSettings(jsonData):
 	LoadSettings()
 	SanityCheck()
-	UpdateOverlay()
 	Parent.Log(ScriptName, "Settings Reloaded")
 	return
 
@@ -249,14 +245,12 @@ def ReloadSettings(jsonData):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
-	UpdateOverlay()
 	return
 
 def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
-		UpdateOverlay()
 	return
 
 # ----------------
@@ -265,40 +259,34 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
-	UpdateOverlay()
 	return
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
-	UpdateOverlay()
 	return
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
-	UpdateOverlay()
 	return
 
 def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
-		UpdateOverlay()
 	return
 
 def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
-		UpdateOverlay()
 	return
 
 def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
-		UpdateOverlay()
 	return
 
 # -------------
@@ -308,14 +296,12 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
-		UpdateOverlay()
 	return
 
 def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
-		UpdateOverlay()
 	return
 
 # ------

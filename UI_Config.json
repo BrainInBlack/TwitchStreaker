@@ -144,20 +144,11 @@
 		"wsevent": "",
 		"group": "Overwrites"
 	},
-	"ForceRedraw": {
-		"type": "button",
-		"label": "Refresh Overlay",
-		"tooltip": "Refreshes the Overlay in case of rendering issues.",
-		"function": "UpdateOverlay",
-		"wsevent": "",
-		"group": "Overwrites"
-	},
 	"ResetTracker": {
 		"type": "button",
 		"label": "Reset Tracker",
 		"tooltip": "Resets the Tracker to zero.",
 		"function": "ResetSession",
-		"wsevent": "",
-		"group": "Overwrites"
+		"wsevent": ""
 	}
 }
