@@ -1,11 +1,5 @@
 {
 	"output_file": "Settings.json",
-	"StreamerName": {
-		"type": "textbox",
-		"value": "StreamerName",
-		"label": "Streamer Name",
-		"tooltip": "Insert your Twitch-Display-Name.\n\n(Needed so that the script is able to ignore gifted-subs made by the streamer.)"
-	},
 	"Goal": {
 		"type": "numberbox",
 		"value": 7,
@@ -42,11 +36,12 @@
 		"label": "Allow Follows",
 		"tooltip": "Enables Follows to be counted as well."
 	},
-	"ManualMode": {
-		"type": "checkbox",
-		"value": false,
-		"label": "Manual Mode",
-		"tooltip": "The script is controlled via the Overwrite Buttons, if enabled."
+	"SocketToken": {
+		"type": "textbox",
+		"value": "SocketToken",
+		"label": "Socket Token",
+		"tooltip": "Insert your Streamlabs Socket Token.\n\n(You can find your Token under Settings > API Settings > API Tokens, on the Streamlabs Website.)",
+		"group": "Streamlabs"
 	},
 	"Tier1": {
 		"type": "numberbox",
@@ -73,96 +68,87 @@
 		"type": "button",
 		"label": "+ Sub",
 		"tooltip": "Increments the Sub counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_SUB",
+		"function": "AddSub",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractSub": {
 		"type": "button",
 		"label": "- Sub",
 		"tooltip": "Decrements the Sub counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_SUB",
+		"function": "SubtractSub",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak": {
 		"type": "button",
 		"label": "+ Streak",
 		"tooltip": "Increments the Streak counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK",
+		"function": "AddStreak",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak5": {
 		"type": "button",
 		"label": "+ Streak (5)",
 		"tooltip": "Increments the Streak counter by five.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK_5",
+		"function": "AddStreak5",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddStreak10": {
 		"type": "button",
 		"label": "+ Streak (10)",
 		"tooltip": "Increments the Streak counter by ten.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_STREAK_10",
+		"function": "AddStreak10",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak": {
 		"type": "button",
 		"label": "- Streak",
 		"tooltip": "Decrements the Streak counter by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK",
+		"function": "SubtractStreak",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak5": {
 		"type": "button",
 		"label": "- Streak (5)",
 		"tooltip": "Decrements the Streak counter by five.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK_5",
+		"function": "SubtractStreak5",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractStreak10": {
 		"type": "button",
 		"label": "- Streak (10)",
 		"tooltip": "Decrements the Streak counter by ten.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_STREAK_10",
+		"function": "SubtractStreak10",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"AddToGoal": {
 		"type": "button",
 		"label": "+ Goal",
 		"tooltip": "Increments the Subs Per Streak goal by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_ADD_TO_GOAL",
+		"function": "AddToGoal",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"SubtractFromGoal": {
 		"type": "button",
 		"label": "- Goal",
 		"tooltip": "Decrements the Subs Per Streak goal by one.",
-		"function": "Tick",
-		"wsevent": "EVENT_SUBTRACT_FROM_GOAL",
-		"group": "Overwrites"
-	},
-	"ForceRedraw": {
-		"type": "button",
-		"label": "Refresh Overlay",
-		"tooltip": "Refreshes the Overlay in case of rendering issues.",
-		"function": "Tick",
-		"wsevent": "EVENT_FORCE_REDRAW",
+		"function": "SubtractFromGoal",
+		"wsevent": "",
 		"group": "Overwrites"
 	},
 	"ResetTracker": {
 		"type": "button",
 		"label": "Reset Tracker",
 		"tooltip": "Resets the Tracker to zero.",
-		"function": "Tick",
-		"wsevent": "EVENT_RESET",
-		"group": "Overwrites"
+		"function": "ResetSession",
+		"wsevent": ""
 	}
 }

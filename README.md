@@ -8,6 +8,9 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Updates](#updates)
+  - [Updating to 2.x from 1.x](#updating-to-2x-from-1x)
+  - [Streamlabs SocketToken](#streamlabs-sockettoken)
+  - [Known Issues](#known-issues)
   - [Customization](#customization)
   - [JavaScript Variables](#javascript-variables)
   - [Manual Overwrites](#manual-overwrites)
@@ -22,13 +25,9 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
 2. Extract the downloaded archive into the```Chatbot > Services > Scripts``` directory.
 3. In Chatbot, open the Scripts Tab and click the ```Reload Scripts``` button.
 4. Right click on the ```TwitchStreaker``` script and click ```Insert API Key```.
-5. Enter your ```Twitch Name``` and the amount of subs required per streak.
+5. Enter your ```SocketToken``` and the amount of subs required per streak. [See here](#streamlabs-sockettoken)
 6. Add the [Overlay.html](Overlay.html) as Browser Source to your scene in your preferred streaming software.
-   1. Recommended Browser Source width: ```800px```
-
-**For OBS:** Make sure that ```Shutdown source when not visible``` and ```Refresh browser when scene becomes active``` are unchecked. If you want to use the Overlay in other scenes, use the existing Source.
-
-**For XSplit:** Make sure that ```Keep source in memory``` is checked, ```Reload on scene enter``` and ```Reload on source show``` are unchecked. If you want to use the Overlay in other scenes, copy&paste the source as a linked source to another scene.
+   - Recommended Browser Source width: ```800px```
 
 ## Updates
 
@@ -40,6 +39,35 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
 4. Reapply your customization's.
 5. Reload the script and overlay.
 
+## Updating to 2.x from 1.x
+
+With version 2.0.0 and onwards the Tracking is done in a different part of the Script, allowing us to track Subs and Streaks across multiple Sessions and different Overlays. All that without having to worry about loosing progress when switching Scenes or having the Chatbot crash on you.
+
+1. Make a Backup of the entire folder.
+2. Extract the 2.x archive and overwrite existing files.
+3. Delete ```Settings.js```and ```Settings.json``` from the folder.
+4. Enter your ```SocketToken``` [See here](#streamlabs-sockettoken).
+5. Reapply your Settings and Customizations.
+   - Modifications to the Script have to be redone, since most of the logic has been removed from the JavaScript part.
+7. Save the Settings
+
+## Streamlabs SocketToken
+
+1. Navigate to [Streamlabs API Settings](https://streamlabs.com/dashboard#/settings/api-settings)
+2. Click on ```API Tokens```
+3. Click the ```Copy``` Button next to the ```Your Socket API Token``` field
+4. Insert the Token under ```Streamlabs > Socket Token``` in the Script Settings
+
+## Known Issues
+
+#### Script not showing up after installation/update.
+
+With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
+
+1. Open `Streamlabs Chatbot.exe.config` (Chatbot main folder) with a TextEditor
+2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
+3. Save and Restart the Chatbot
+
 ## Customization
 
 Making your own designs for TwitchStreaker is straight forward and only require a few things to keep in mind. The single most important thing is to load the required JavaScript files in the correct order.
@@ -49,7 +77,6 @@ Making your own designs for TwitchStreaker is straight forward and only require 
   <head>
     <!-- OtherStuff -->
     <script src="API_Key.js"></script>
-    <script src="Settings.js"></script>
     <script src="overlay/main.js" defer></script>
     <!-- OtherScripts -->
   </head>
@@ -86,15 +113,10 @@ The rest is just CSS and your own creativity.
 
 Variable | Description
 ---------|------------
-settings.Subs | Current amount of Subs in the Streak (min: 0)
-settings.SubLeft | Amount of subs left to the next Streak
-settings.Streak | Current amount Streaks (min: 1)
-settings.Goal | Amount of Subs needed to complete a Streak (min: 1)
-settings.GoalIncrement | Amount of which the Goal gets incremented each time a Streak is completed (min: 0)
-settings.GoalCap | Cap for the incremental goals. (min: initial goal)
-settings.InitialGoal | Original Goal value upon init (needed for the reset)
-settings.StreamerName | Name of the Streamer (required to be able to ignore gifted Subs made by the streamer)
-settings.Tier1..3 | Worth of subs for each SubTier (min: 1)
+Overlay.CurrentGoal | Amount of Subs needed to complete a Streak (min: 1)
+Overlay.CurrentStreak | Current amount Streaks (min: 1)
+Overlay.CurrentSubs | Current amount of Subs in the Streak (min: 0)
+Overlay.CurrentSubsLeft | Amount of subs left to the next Streak
 
 ## Manual Overwrites
 
