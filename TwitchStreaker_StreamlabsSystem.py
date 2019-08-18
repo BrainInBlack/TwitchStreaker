@@ -98,7 +98,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
 				continue
 
-			if not message.Gifter == None:
+			if message.Gifter is not None:
 				if message.Gifter.lower() == ChannelName and not message.IsTest:
 					Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
 					continue
@@ -166,7 +166,7 @@ def SanityCheck():
 	global Session
 	global Settings
 
-	if Session == None:
+	if Session is None:
 		LoadSession()
 
 	if Settings["GoalMin"] < 1:
@@ -196,12 +196,12 @@ def LoadSession():
 	global SessionFile
 	global Settings
 
-	if Settings == None:
+	if Settings is None:
 		LoadSettings()
 
 	try:
-		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as file:
-			Session = json.load(file, encoding="utf-8-sig")
+		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
+			Session = json.load(f, encoding="utf-8-sig")
 	except:
 		Session = {
 			# Default
@@ -220,9 +220,9 @@ def SaveSession():
 	global Session
 	global SessionFile
 
-	file = open(SessionFile, "w")
-	file.write(str(json.JSONEncoder().encode(Session)))
-	file.close()
+	f = open(SessionFile, "w")
+	f.write(str(json.JSONEncoder().encode(Session)))
+	f.close()
 
 	return
 
@@ -252,8 +252,8 @@ def LoadSettings():
 	Settings = None
 
 	try:
-		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as file:
-			Settings = json.load(file, encoding="utf-8-sig")
+		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
+			Settings = json.load(f, encoding="utf-8-sig")
 	except:
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
 	return
@@ -276,6 +276,7 @@ def AddSub():
 	Session["CurrentSubs"] += 1
 	return
 
+
 def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
@@ -291,15 +292,18 @@ def AddStreak():
 	Session["CurrentStreak"] += 1
 	return
 
+
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
 	return
 
+
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
 	return
+
 
 def SubtractStreak():
 	global Session
@@ -307,11 +311,13 @@ def SubtractStreak():
 		Session["CurrentStreak"] -= 1
 	return
 
+
 def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
 	return
+
 
 def SubtractStreak10():
 	global Session
@@ -328,6 +334,7 @@ def AddToGoal():
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
 	return
+
 
 def SubtractFromGoal():
 	global Session

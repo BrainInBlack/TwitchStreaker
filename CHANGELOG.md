@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 - Fixes and Improvements
+
+* Improved Type Checks
+* Stopped using built-in names
+
 ## 2.0.0 & 2.0.1 - General Rework
 
 **IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst
