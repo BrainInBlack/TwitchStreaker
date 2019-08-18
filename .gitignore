@@ -1,6 +1,7 @@
 # Exclude Common Files and Folders
 .vscode/
 .notes/
+.idea/
 
 # Exclude user specific Files
 API_Key.js

@@ -19,24 +19,24 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 # -----------
 # Script Info
 # -----------
-ScriptName = "Twitch Streaker"
-Website = "https://github.com/BrainInBlack/TwitchStreaker"
-Creator = "BrainInBlack"
-Version = "2.0.1"
+ScriptName  = "Twitch Streaker"
+Website     = "https://github.com/BrainInBlack/TwitchStreaker"
+Creator     = "BrainInBlack"
+Version     = "2.0.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
 # Global Variables
 # ----------------
-Session = {}
-Settings = {}
-SessionFile = os.path.join(os.path.dirname(__file__), "Session.json")
-SettingsFile = os.path.join(os.path.dirname(__file__), "Settings.json")
+SessionFile   = os.path.join(os.path.dirname(__file__), "Session.json")
+SettingsFile  = os.path.join(os.path.dirname(__file__), "Settings.json")
 
-ChannelName = None
+ChannelName   = None
 EventReceiver = None
-TimerDelay = 2
-TimerStamp = None
+Session       = None
+Settings      = None
+TimerDelay    = 2
+TimerStamp    = None
 
 
 # ----------
@@ -53,17 +53,17 @@ def Init():
 	LoadSession()
 	SanityCheck()
 
-	EventReceiver = StreamlabsEventClient()
-	EventReceiver.StreamlabsSocketConnected += EventReceiverConnected
+	EventReceiver                               = StreamlabsEventClient()
+	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
 	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
-	EventReceiver.StreamlabsSocketEvent += EventReceiverEvent
+	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
 
 	if not Settings["SocketToken"] == "":
 		EventReceiver.Connect(Settings["SocketToken"])
 	else:
 		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
 
-	TimerStamp = time.time()
+	TimerStamp  = time.time()
 	ChannelName = Parent.GetChannelName().lower()
 
 	return
@@ -98,17 +98,18 @@ def EventReceiverEvent(sender, args):
 				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
 				continue
 
-			if not message.Gifter == None:
+			# GiftSub and Resub Checks
+			if message.Gifter is not None:
 				if message.Gifter.lower() == ChannelName and not message.IsTest:
 					Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
 					continue
 				if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
 					Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
 					continue
-
-			if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
-				continue
+			else:
+				if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
+					continue
 
 			if message.SubPlan == "1000" or message.SubPlan == "Prime":
 				Session["CurrentSubs"] += Settings["Tier1"]
@@ -148,11 +149,18 @@ def Tick():
 	if (time.time() - TimerStamp) > TimerDelay:
 		TimerStamp = time.time()
 
-		while Session["CurrentSubs"] >= Session["CurrentGoal"]:
-			Session["CurrentSubs"] -= Session["CurrentGoal"]
-			if Session["CurrentGoal"] < Settings["GoalMax"]:
+		while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
+			Session["CurrentSubs"]     -= Session["CurrentGoal"]
+
+			# Increment CurrentGoal
+			if Session["CurrentGoal"]   < Settings["GoalMax"]:
 				Session["CurrentGoal"] += Settings["GoalIncrement"]
-			Session["CurrentStreak"] += 1
+
+				# Limit CurrentGoal to GoalMax
+				if Session["CurrentGoal"]   > Settings["GoalMax"]:
+					Session["CurrentGoal"]  = Settings["GoalMax"]
+
+			Session["CurrentStreak"]   += 1
 			SaveSession()
 
 		Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
@@ -166,25 +174,45 @@ def SanityCheck():
 	global Session
 	global Settings
 
-	if Session == None:
+	if Session is None:
 		LoadSession()
 
-	if Settings["GoalMin"] < 1:
+	# Prevent GoalMin from being Zero
+	if Settings["GoalMin"]  < 1:
 		Settings["GoalMin"] = 1
-	if Settings["GoalMin"] > Settings["Goal"]:
+
+	# Prevent GoalMin from being higher than the Goal
+	if Settings["GoalMin"]  > Settings["Goal"]:
 		Settings["GoalMin"] = Settings["Goal"]
-	if Settings["GoalMax"] < Settings["Goal"]:
+
+	# Prevent GoalMax from being lower than the Goal
+	if Settings["GoalMax"]  < Settings["Goal"]:
 		Settings["GoalMax"] = Settings["Goal"]
-	if Session["CurrentGoal"] < Settings["GoalMin"]:
+
+	# Prevent CurrentGoal from being lower than GoalMin
+	if Session["CurrentGoal"]  < Settings["GoalMin"]:
 		Session["CurrentGoal"] = Settings["GoalMin"]
-	if Session["CurrentGoal"] > Settings["GoalMax"]:
+
+	# Prevent CurrentGoal from being higher than GoalMax
+	if Session["CurrentGoal"]  > Settings["GoalMax"]:
 		Session["CurrentGoal"] = Settings["GoalMax"]
-	if Settings["Tier1"] < 1:
+
+	# Prevent Tier1 from being less than 1
+	if Settings["Tier1"]  < 1:
 		Settings["Tier1"] = 1
-	if Settings["Tier2"] < 1:
+
+	# Prevent Tier2 from being less than 1
+	if Settings["Tier2"]  < 1:
 		Settings["Tier2"] = 1
-	if Settings["Tier3"] < 1:
+
+	# Prevent Tier3 from being less than 1
+	if Settings["Tier3"]  < 1:
 		Settings["Tier3"] = 1
+
+	# Prevent GoalIncrement from being less than 0
+	if Settings["GoalIncrement"] < 0:
+		Settings["GoalIncrement"] = 0
+
 	return
 
 
@@ -196,15 +224,16 @@ def LoadSession():
 	global SessionFile
 	global Settings
 
-	if Settings == None:
+	# Load Settings if they aren't loaded already
+	if Settings is None:
 		LoadSettings()
 
 	try:
-		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as file:
-			Session = json.load(file, encoding="utf-8-sig")
+		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
+			Session = json.load(f, encoding="utf-8-sig")
 	except:
+		# Setup default Session in case the load failed
 		Session = {
-			# Default
 			"CurrentSubs": 0,
 			"CurrentStreak": 1,
 			"CurrentGoal": Settings["Goal"]
@@ -220,9 +249,9 @@ def SaveSession():
 	global Session
 	global SessionFile
 
-	file = open(SessionFile, "w")
-	file.write(str(json.JSONEncoder().encode(Session)))
-	file.close()
+	f = open(SessionFile, "w")
+	f.write(str(json.JSONEncoder().encode(Session)))
+	f.close()
 
 	return
 
@@ -252,8 +281,8 @@ def LoadSettings():
 	Settings = None
 
 	try:
-		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as file:
-			Settings = json.load(file, encoding="utf-8-sig")
+		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
+			Settings = json.load(f, encoding="utf-8-sig")
 	except:
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
 	return
@@ -276,6 +305,7 @@ def AddSub():
 	Session["CurrentSubs"] += 1
 	return
 
+
 def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
@@ -291,15 +321,18 @@ def AddStreak():
 	Session["CurrentStreak"] += 1
 	return
 
+
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
 	return
 
+
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
 	return
+
 
 def SubtractStreak():
 	global Session
@@ -307,11 +340,13 @@ def SubtractStreak():
 		Session["CurrentStreak"] -= 1
 	return
 
+
 def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
 	return
+
 
 def SubtractStreak10():
 	global Session
@@ -328,6 +363,7 @@ def AddToGoal():
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
 	return
+
 
 def SubtractFromGoal():
 	global Session
