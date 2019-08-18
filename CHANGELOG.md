@@ -4,6 +4,10 @@
 
 * Improved Type Checks
 * Stopped using built-in names
+* Improved Sanity Checks
+* Added Comments to complex functions
+* Added additional checks for the GoalIncrement mechanic
+* Fixed Bug in the Resub detection
 
 ## 2.0.0 & 2.0.1 - General Rework
 
