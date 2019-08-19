@@ -22,7 +22,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.0.2"
+Version     = "2.1.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -119,6 +119,26 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentSubs"] += Settings["Tier3"]
 		SaveSession()
 	return
+
+# ---------------
+# Parse Parameter
+# ---------------
+def Parse(parseString, userid, username, targetid, targetname, message):
+	global Session
+
+	if "$tsGoal" in parseString:
+		return parseString.replace("$tsGoal", str(Session["CurrentGoal"]))
+
+	if "$tsStreak" in parseString:
+		return parseString.replace("$tsStreak", str(Session["CurrentStreak"]))
+
+	if "$tsSubs" in parseString:
+		return parseString.replace("$tsSubs", str(Session["CurrentSubs"]))
+
+	if "$tsSubsLeft" in parseString:
+		return parseString.replace("$tsSubsLeft", str(Session["CurrentGoal"] - Session["CurrentSubs"]))
+
+	return parseString
 
 
 # ---------------

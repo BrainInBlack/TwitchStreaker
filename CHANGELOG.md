@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.1.0 - Parameters
+
+* Added Parameters for Commands ($tsGoal, $tsSubs, $tsSubsLeft, $tsStreak)
+
 ## 2.0.2 - Fixes and Improvements
 
 * Improved Type Checks
