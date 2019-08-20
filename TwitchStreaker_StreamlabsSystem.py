@@ -35,7 +35,7 @@ ChannelName   = None
 EventReceiver = None
 Session       = None
 Settings      = None
-TimerDelay    = 2
+TimerDelay    = 5
 TimerStamp    = None
 
 
@@ -90,6 +90,7 @@ def EventReceiverEvent(sender, args):
 				continue
 			Settings["CurrentSubs"] += 1
 		SaveSession()
+		UpdateOverlay()
 
 	if data.Type == "subscription":
 		for message in data.Message:
@@ -118,7 +119,9 @@ def EventReceiverEvent(sender, args):
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
 		SaveSession()
+		UpdateOverlay()
 	return
+
 
 # ---------------
 # Parse Parameter
@@ -141,6 +144,29 @@ def Parse(parseString, userid, username, targetid, targetname, message):
 	return parseString
 
 
+# --------------
+# Update Overlay
+# --------------
+def UpdateOverlay():
+
+	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
+		Session["CurrentSubs"]     -= Session["CurrentGoal"]
+
+		# Increment CurrentGoal
+		if Session["CurrentGoal"]   < Settings["GoalMax"]:
+			Session["CurrentGoal"] += Settings["GoalIncrement"]
+
+			# Limit CurrentGoal to GoalMax
+			if Session["CurrentGoal"]   > Settings["GoalMax"]:
+				Session["CurrentGoal"]  = Settings["GoalMax"]
+
+		Session["CurrentStreak"]   += 1
+		SaveSession()
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+
+	return
+
+
 # ---------------
 # Event Connected
 # ---------------
@@ -161,29 +187,13 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global Session
-	global Settings
 	global TimerDelay
 	global TimerStamp
 
 	if (time.time() - TimerStamp) > TimerDelay:
 		TimerStamp = time.time()
+		UpdateOverlay()
 
-		while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
-			Session["CurrentSubs"]     -= Session["CurrentGoal"]
-
-			# Increment CurrentGoal
-			if Session["CurrentGoal"]   < Settings["GoalMax"]:
-				Session["CurrentGoal"] += Settings["GoalIncrement"]
-
-				# Limit CurrentGoal to GoalMax
-				if Session["CurrentGoal"]   > Settings["GoalMax"]:
-					Session["CurrentGoal"]  = Settings["GoalMax"]
-
-			Session["CurrentStreak"]   += 1
-			SaveSession()
-
-		Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 	return
 
 
@@ -323,6 +333,7 @@ def ReloadSettings(jsonData):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
+	UpdateOverlay()
 	return
 
 
@@ -330,6 +341,7 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
+		UpdateOverlay()
 	return
 
 
@@ -339,18 +351,21 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
+	UpdateOverlay()
 	return
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
+	UpdateOverlay()
 	return
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
+	UpdateOverlay()
 	return
 
 
@@ -358,6 +373,7 @@ def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
+		UpdateOverlay()
 	return
 
 
@@ -365,6 +381,7 @@ def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
+		UpdateOverlay()
 	return
 
 
@@ -372,6 +389,7 @@ def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
+		UpdateOverlay()
 	return
 
 
@@ -382,6 +400,7 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
+		UpdateOverlay()
 	return
 
 
@@ -389,6 +408,7 @@ def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
+		UpdateOverlay()
 	return
 
 

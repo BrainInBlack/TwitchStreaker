@@ -144,6 +144,13 @@
 		"wsevent": "",
 		"group": "Overwrites"
 	},
+	"RefreshOverlay": {
+		"type": "button",
+		"label": "Refresh Overlay",
+		"tooltip": "Forces a refresh on the Overlay.",
+		"function": "UpdateOverlay",
+		"wsevent": ""
+	},
 	"ResetTracker": {
 		"type": "button",
 		"label": "Reset Tracker",

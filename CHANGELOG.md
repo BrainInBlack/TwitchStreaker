@@ -3,6 +3,8 @@
 ## 2.1.0 - Parameters
 
 * Added Parameters for Commands ($tsGoal, $tsSubs, $tsSubsLeft, $tsStreak)
+* Increased the Automated Overlay Update Delay to 5 seconds
+* Reintroduced the UpdateOverlay function
 
 ## 2.0.2 - Fixes and Improvements
 
