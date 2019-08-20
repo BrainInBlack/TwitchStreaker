@@ -11,6 +11,7 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [Updating to 2.x from 1.x](#updating-to-2x-from-1x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
   - [Known Issues](#known-issues)
+  - [Chatbot Parameters](#chatbot-parameters)
   - [Customization](#customization)
   - [JavaScript Variables](#javascript-variables)
   - [Manual Overwrites](#manual-overwrites)
@@ -68,6 +69,22 @@ With version 2.x and onwards we're using an additional library that, depending o
 2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
 3. Save and Restart the Chatbot
 
+## Chatbot Parameters
+
+You can use the following Parameters in your Commands and Timers:
+
+Parameter | Description
+----------|------------
+$tsGoal | Amount of Subs needed per Streak
+$tsSubs | Current amount of Subs in the current Streak
+$tsSubsLeft | Amount of Subs needed to complete the current Streak
+$tsStreak | Current Streak
+
+#### Example
+
+* Command: `We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.`
+* Result: `We are currently working on Streak #5 and need 6 additional Subs.`
+
 ## Customization
 
 Making your own designs for TwitchStreaker is straight forward and only require a few things to keep in mind. The single most important thing is to load the required JavaScript files in the correct order.
@@ -90,10 +107,10 @@ The following element ID's are available for use in your design:
 
 ID | Description
 ---|------------
-Subs | Current amount of Subs in the Streak
-SubsLeft | Amount of Subs left for the next Streak
-Streak | Current amount of Streaks
-Goal | Amount of Subs needed to complete the current Streak
+Goal | Amount of Subs needed per Streak
+Subs | Current amount of Subs in the current Streak
+SubsLeft | Amount of Subs needed to complete the current Streak
+Streak | Current Streaks
 
 None of those ID's are required and can be placed anywhere in the document, in case of the default design we're only using ```Subs```, ```Streak``` and ```Goal```. Here a few examples:
 
