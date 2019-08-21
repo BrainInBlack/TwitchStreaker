@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1 - ???
+
+* Added Mixer support (beta)
+* Added YouTube support (beta)
+* Fixed Bug in Follower Mode
+
 ## 2.1.0 - Parameters
 
 * Added Parameters for Commands ($tsGoal, $tsSubs, $tsSubsLeft, $tsStreak)
