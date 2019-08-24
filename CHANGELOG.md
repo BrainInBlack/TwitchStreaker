@@ -1,10 +1,10 @@
 # Changelog
 
-## 2.1.1 - ???
+## 2.1.1 - Fixes and Improvements
 
-* Added Mixer support (beta)
-* Added YouTube support (beta)
+* Changed at what point Sessions are saved to the disc
 * Fixed Bug in Follower Mode
+* Added Mixer and YouTube support (beta)
 
 ## 2.1.0 - Parameters
 

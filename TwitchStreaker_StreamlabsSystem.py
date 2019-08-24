@@ -101,7 +101,6 @@ def TwitchEvent(data):
 				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
 				continue
 			Session["CurrentSubs"] += 1
-		SaveSession()
 		UpdateOverlay()
 
 	if data.Type == "subscription":
@@ -131,7 +130,6 @@ def TwitchEvent(data):
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
 
-		SaveSession()
 		UpdateOverlay()
 
 	return
@@ -151,7 +149,6 @@ def MixerEvent(data):
 				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
 				continue
 			Session["CurrentSubs"] += 1
-		SaveSession()
 		UpdateOverlay()
 
 	if data.Type == "subscription":
@@ -166,7 +163,6 @@ def MixerEvent(data):
 				continue
 
 			Session["CurrentSubs"] += 1
-			SaveSession()
 			UpdateOverlay()
 
 	return
@@ -186,7 +182,6 @@ def YoutubeEvent(data):
 				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
 				continue
 			Session["CurrentSubs"] +=1
-			SaveSession()
 			UpdateOverlay()
 
 	if data.Type == "subscription":
@@ -201,7 +196,6 @@ def YoutubeEvent(data):
 				continue
 
 			Session["CurrentSubs"] += 1
-			SaveSession()
 			UpdateOverlay()
 
 	return
@@ -245,7 +239,6 @@ def UpdateOverlay():
 				Session["CurrentGoal"]  = Settings["GoalMax"]
 
 		Session["CurrentStreak"]   += 1
-		SaveSession()
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
 	return
@@ -277,6 +270,7 @@ def Tick():
 	if (time.time() - TimerStamp) > TimerDelay:
 		TimerStamp = time.time()
 		UpdateOverlay()
+		SaveSession()
 
 	return
 
