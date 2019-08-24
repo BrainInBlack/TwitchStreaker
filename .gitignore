@@ -10,6 +10,6 @@ Settings.js
 Settings.json
 
 # Exclude personal Files (BrainInBlack)
-AnEternalEnigma/
-KatLink/
-PersonSuit/
+AnEternalEnigma
+KatLink
+PersonSuit

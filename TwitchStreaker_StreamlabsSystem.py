@@ -22,7 +22,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.0"
+Version     = "2.1.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -73,23 +73,34 @@ def Init():
 # Event Main
 # ----------
 def EventReceiverEvent(sender, args):
-	global Session
-	global Settings
-	global ChannelName
-
 	data = args.Data
 
-	if not data.For == "twitch_account":
-		Parent.Log(ScriptName, "Only Twitch is supported at this moment.")
-		return
+	if data.For == "twitch_account":
+		TwitchEvent(data)
+
+	if data.For == "mixer_account":
+		MixerEvent(data)
+
+	if data.For == "youtube_account":
+		YoutubeEvent(data)
+
+	return
+
+
+# -------------
+# Twitch Events
+# -------------
+def TwitchEvent(data):
+	global ChannelName
+	global Session
+	global Settings
 
 	if data.Type == "follow" and Settings["CountFollows"]:
 		for message in data.Message:
 			if not message.IsLive and not message.IsTest:
 				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
 				continue
-			Settings["CurrentSubs"] += 1
-		SaveSession()
+			Session["CurrentSubs"] += 1
 		UpdateOverlay()
 
 	if data.Type == "subscription":
@@ -118,8 +129,75 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentSubs"] += Settings["Tier2"]
 			elif message.SubPlan == "3000":
 				Session["CurrentSubs"] += Settings["Tier3"]
-		SaveSession()
+
 		UpdateOverlay()
+
+	return
+
+
+# ------------
+# Mixer Events
+# ------------
+def MixerEvent(data):
+	global ChannelName
+	global Session
+	global Settings
+
+	if data.Type == "follow" and Settings["CountFollows"]:
+		for message in data.Message:
+			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
+				continue
+			Session["CurrentSubs"] += 1
+		UpdateOverlay()
+
+	if data.Type == "subscription":
+		for message in data.Message:
+
+			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+				continue
+
+			if message.Months > 1 and not Settings["CountResubs"]:
+				Parent.Log("Ignored Resub by " + message.Name)
+				continue
+
+			Session["CurrentSubs"] += 1
+			UpdateOverlay()
+
+	return
+
+
+# --------------
+# Youtube Events
+# --------------
+def YoutubeEvent(data):
+	global ChannelName
+	global Session
+	global Settings
+
+	if data.Type == "follow" and Settings["CountFollows"]:
+		for message in data.Message:
+			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
+				continue
+			Session["CurrentSubs"] +=1
+			UpdateOverlay()
+
+	if data.Type == "subscription":
+		for message in data.Message:
+
+			if not message.IsLive and not message.IsTest:
+				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+				continue
+
+			if message.Months > 1 and not Settings["CountResubs"]:
+				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+				continue
+
+			Session["CurrentSubs"] += 1
+			UpdateOverlay()
+
 	return
 
 
@@ -161,7 +239,6 @@ def UpdateOverlay():
 				Session["CurrentGoal"]  = Settings["GoalMax"]
 
 		Session["CurrentStreak"]   += 1
-		SaveSession()
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
 	return
@@ -193,6 +270,7 @@ def Tick():
 	if (time.time() - TimerStamp) > TimerDelay:
 		TimerStamp = time.time()
 		UpdateOverlay()
+		SaveSession()
 
 	return
 

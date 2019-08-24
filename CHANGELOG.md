@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1 - Fixes and Improvements
+
+* Changed at what point Sessions are saved to the disc
+* Fixed Bug in Follower Mode
+* Added Mixer and YouTube support (beta)
+
 ## 2.1.0 - Parameters
 
 * Added Parameters for Commands ($tsGoal, $tsSubs, $tsSubsLeft, $tsStreak)
