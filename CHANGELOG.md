@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.1.2 - ???
+## 2.1.2 - Improvements
+
+* Improved timed Overlay Update, this should finally fix the clogged EventBus
 
 ## 2.1.1 - Fixes and Improvements
 

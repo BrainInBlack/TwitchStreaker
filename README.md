@@ -16,6 +16,7 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [JavaScript Variables](#javascript-variables)
   - [Manual Overwrites](#manual-overwrites)
   - [Support](#support)
+  - [Streamers using TwitchStreaker](#streamers-using-twitchstreaker)
   - [Contributing](#contributing)
   - [Contributor's](#contributors)
   - [Project Info](#project-info)
@@ -156,6 +157,16 @@ Reset Tracker | Resets everything to their initial values.
 
 [Twitter](http://twitter.com/BrainInBlack)
 
+## Streamers using TwitchStreaker
+
+[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma)
+
+[**BloodThunder**](http://twitch.tv/BloodThunder)
+
+[**KatLink**](http://twitch.tv/KatLink)
+
+[**PersonSuit**](http://twitch.tv/PersonSuit)
+
 ## Contributing
 
 1. Fork it!
@@ -166,11 +177,9 @@ Reset Tracker | Resets everything to their initial values.
 
 ## Contributor's
 
-[**BrainInBlack**](https://github.com/BrainInBlack)
+[**BrainInBlack**](https://github.com/BrainInBlack) - Programming
 
-[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma)
-
-[**KatLink**](http://twitch.tv/KatLink)
+[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma) - Initial Concept
 
 ## Project Info
 

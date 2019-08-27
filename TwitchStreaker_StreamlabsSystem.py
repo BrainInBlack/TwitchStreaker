@@ -22,7 +22,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.1"
+Version     = "2.1.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -226,6 +226,9 @@ def Parse(parseString, userid, username, targetid, targetname, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
+	global Session
+	global Settings
+	global TimerStamp
 
 	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]     -= Session["CurrentGoal"]
@@ -240,6 +243,7 @@ def UpdateOverlay():
 
 		Session["CurrentStreak"]   += 1
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	TimerStamp = time.time()
 
 	return
 
@@ -268,7 +272,6 @@ def Tick():
 	global TimerStamp
 
 	if (time.time() - TimerStamp) > TimerDelay:
-		TimerStamp = time.time()
 		UpdateOverlay()
 		SaveSession()
 
