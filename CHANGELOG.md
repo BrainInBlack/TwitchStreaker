@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.2 - Improvements
+
+* Improved timed Overlay Update, this should finally fix the clogged EventBus
+* Improved SanityCheck to save Session/Settings in case of value corrections
+
 ## 2.1.1 - Fixes and Improvements
 
 * Changed at what point Sessions are saved to the disc

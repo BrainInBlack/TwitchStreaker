@@ -22,7 +22,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.1"
+Version     = "2.1.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -66,8 +66,6 @@ def Init():
 	TimerStamp  = time.time()
 	ChannelName = Parent.GetChannelName().lower()
 
-	return
-
 
 # ----------
 # Event Main
@@ -83,8 +81,6 @@ def EventReceiverEvent(sender, args):
 
 	if data.For == "youtube_account":
 		YoutubeEvent(data)
-
-	return
 
 
 # -------------
@@ -132,8 +128,6 @@ def TwitchEvent(data):
 
 		UpdateOverlay()
 
-	return
-
 
 # ------------
 # Mixer Events
@@ -164,8 +158,6 @@ def MixerEvent(data):
 
 			Session["CurrentSubs"] += 1
 			UpdateOverlay()
-
-	return
 
 
 # --------------
@@ -198,8 +190,6 @@ def YoutubeEvent(data):
 			Session["CurrentSubs"] += 1
 			UpdateOverlay()
 
-	return
-
 
 # ---------------
 # Parse Parameter
@@ -226,6 +216,9 @@ def Parse(parseString, userid, username, targetid, targetname, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
+	global Session
+	global Settings
+	global TimerStamp
 
 	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]     -= Session["CurrentGoal"]
@@ -240,8 +233,7 @@ def UpdateOverlay():
 
 		Session["CurrentStreak"]   += 1
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-
-	return
+	TimerStamp = time.time()
 
 
 # ---------------
@@ -249,7 +241,6 @@ def UpdateOverlay():
 # ---------------
 def EventReceiverConnected(sender, args):
 	Parent.Log(ScriptName, "Connected")
-	return
 
 
 # ------------------
@@ -257,7 +248,6 @@ def EventReceiverConnected(sender, args):
 # ------------------
 def EventReceiverDisconnected(sender, args):
 	Parent.Log(ScriptName, "Disconnected")
-	return
 
 
 # ----
@@ -268,11 +258,8 @@ def Tick():
 	global TimerStamp
 
 	if (time.time() - TimerStamp) > TimerDelay:
-		TimerStamp = time.time()
 		UpdateOverlay()
 		SaveSession()
-
-	return
 
 
 # ------------
@@ -282,46 +269,62 @@ def SanityCheck():
 	global Session
 	global Settings
 
+	isSessionDirty = False
+	isSettingsDirty = False
+
 	if Session is None:
 		LoadSession()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
 		Settings["GoalMin"] = 1
+		isSettingsDirty = True
 
 	# Prevent GoalMin from being higher than the Goal
 	if Settings["GoalMin"]  > Settings["Goal"]:
 		Settings["GoalMin"] = Settings["Goal"]
+		isSettingsDirty = True
 
 	# Prevent GoalMax from being lower than the Goal
 	if Settings["GoalMax"]  < Settings["Goal"]:
 		Settings["GoalMax"] = Settings["Goal"]
+		isSettingsDirty = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
 	if Session["CurrentGoal"]  < Settings["GoalMin"]:
 		Session["CurrentGoal"] = Settings["GoalMin"]
+		isSessionDirty = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
 	if Session["CurrentGoal"]  > Settings["GoalMax"]:
 		Session["CurrentGoal"] = Settings["GoalMax"]
+		isSessionDirty = True
 
 	# Prevent Tier1 from being less than 1
 	if Settings["Tier1"]  < 1:
 		Settings["Tier1"] = 1
+		isSettingsDirty = True
 
 	# Prevent Tier2 from being less than 1
 	if Settings["Tier2"]  < 1:
 		Settings["Tier2"] = 1
+		isSettingsDirty = True
 
 	# Prevent Tier3 from being less than 1
 	if Settings["Tier3"]  < 1:
 		Settings["Tier3"] = 1
+		isSettingsDirty = True
 
 	# Prevent GoalIncrement from being less than 0
 	if Settings["GoalIncrement"] < 0:
 		Settings["GoalIncrement"] = 0
+		isSettingsDirty = True
 
-	return
+	if isSessionDirty:
+		SaveSession()
+
+	if isSettingsDirty:
+		SaveSettings()
 
 
 # ------------
@@ -347,7 +350,6 @@ def LoadSession():
 			"CurrentGoal": Settings["Goal"]
 		}
 		SaveSession()
-	return
 
 
 # ------------
@@ -361,8 +363,6 @@ def SaveSession():
 	f.write(str(json.JSONEncoder().encode(Session)))
 	f.close()
 
-	return
-
 
 # -------------
 # Reset Session
@@ -375,8 +375,6 @@ def ResetSession():
 	Session["CurrentStreak"] = 1
 	Session["CurrentGoal"] = Settings["Goal"]
 	SaveSession()
-
-	return
 
 
 # -------------
@@ -393,7 +391,18 @@ def LoadSettings():
 			Settings = json.load(f, encoding="utf-8-sig")
 	except:
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
-	return
+
+
+# ------------
+# Save Settings
+# ------------
+def SaveSettings():
+	global Settings
+	global SettingsFile
+
+	f = open(SettingsFile, "w")
+	f.write(str(json.JSONEncoder().encode(Settings)))
+	f.close()
 
 
 # ---------------
@@ -402,7 +411,6 @@ def LoadSettings():
 def ReloadSettings(jsonData):
 	LoadSettings()
 	SanityCheck()
-	return
 
 
 # -------------
@@ -412,7 +420,6 @@ def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
 	UpdateOverlay()
-	return
 
 
 def SubtractSub():
@@ -420,7 +427,6 @@ def SubtractSub():
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
 		UpdateOverlay()
-	return
 
 
 # ----------------
@@ -430,21 +436,18 @@ def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
 	UpdateOverlay()
-	return
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
 	UpdateOverlay()
-	return
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
 	UpdateOverlay()
-	return
 
 
 def SubtractStreak():
@@ -452,7 +455,6 @@ def SubtractStreak():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
 		UpdateOverlay()
-	return
 
 
 def SubtractStreak5():
@@ -460,7 +462,6 @@ def SubtractStreak5():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
 		UpdateOverlay()
-	return
 
 
 def SubtractStreak10():
@@ -468,7 +469,6 @@ def SubtractStreak10():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
 		UpdateOverlay()
-	return
 
 
 # -------------
@@ -479,7 +479,6 @@ def AddToGoal():
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
 		UpdateOverlay()
-	return
 
 
 def SubtractFromGoal():
@@ -487,7 +486,6 @@ def SubtractFromGoal():
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
 		UpdateOverlay()
-	return
 
 
 # ------
@@ -499,7 +497,6 @@ def Unload():
 		EventReceiver.Disconnect()
 	EventReceiver = None
 	SaveSession()
-	return
 
 
 # -------
