@@ -83,6 +83,20 @@ def EventReceiverEvent(sender, args):
 		YoutubeEvent(data)
 
 
+# ---------------
+# Event Connected
+# ---------------
+def EventReceiverConnected(sender, args):
+	Parent.Log(ScriptName, "Connected")
+
+
+# ------------------
+# Event Disconnected
+# ------------------
+def EventReceiverDisconnected(sender, args):
+	Parent.Log(ScriptName, "Disconnected")
+
+
 # -------------
 # Twitch Events
 # -------------
@@ -234,20 +248,6 @@ def UpdateOverlay():
 		Session["CurrentStreak"]   += 1
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 	TimerStamp = time.time()
-
-
-# ---------------
-# Event Connected
-# ---------------
-def EventReceiverConnected(sender, args):
-	Parent.Log(ScriptName, "Connected")
-
-
-# ------------------
-# Event Disconnected
-# ------------------
-def EventReceiverDisconnected(sender, args):
-	Parent.Log(ScriptName, "Disconnected")
 
 
 # ----
