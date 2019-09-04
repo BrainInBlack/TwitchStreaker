@@ -44,7 +44,6 @@ TimerStamp    = None
 # ----------
 def Init():
 	global EventReceiver
-	global Session
 	global Settings
 	global TimerStamp
 	global ChannelName
@@ -147,7 +146,6 @@ def TwitchEvent(data):
 # Mixer Events
 # ------------
 def MixerEvent(data):
-	global ChannelName
 	global Session
 	global Settings
 
@@ -178,7 +176,6 @@ def MixerEvent(data):
 # Youtube Events
 # --------------
 def YoutubeEvent(data):
-	global ChannelName
 	global Session
 	global Settings
 
@@ -208,22 +205,22 @@ def YoutubeEvent(data):
 # ---------------
 # Parse Parameter
 # ---------------
-def Parse(parseString, userid, username, targetid, targetname, message):
+def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
 
-	if "$tsGoal" in parseString:
-		return parseString.replace("$tsGoal", str(Session["CurrentGoal"]))
+	if "$tsGoal" in parse_string:
+		return parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
 
-	if "$tsStreak" in parseString:
-		return parseString.replace("$tsStreak", str(Session["CurrentStreak"]))
+	if "$tsStreak" in parse_string:
+		return parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
 
-	if "$tsSubs" in parseString:
-		return parseString.replace("$tsSubs", str(Session["CurrentSubs"]))
+	if "$tsSubs" in parse_string:
+		return parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
 
-	if "$tsSubsLeft" in parseString:
-		return parseString.replace("$tsSubsLeft", str(Session["CurrentGoal"] - Session["CurrentSubs"]))
+	if "$tsSubsLeft" in parse_string:
+		return parse_string.replace("$tsSubsLeft", str(Session["CurrentGoal"] - Session["CurrentSubs"]))
 
-	return parseString
+	return parse_string
 
 
 # --------------
@@ -269,8 +266,8 @@ def SanityCheck():
 	global Session
 	global Settings
 
-	isSessionDirty = False
-	isSettingsDirty = False
+	is_session_dirty = False
+	is_settings_dirty = False
 
 	if Session is None:
 		LoadSession()
@@ -278,52 +275,52 @@ def SanityCheck():
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
 		Settings["GoalMin"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalMin from being higher than the Goal
 	if Settings["GoalMin"]  > Settings["Goal"]:
 		Settings["GoalMin"] = Settings["Goal"]
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalMax from being lower than the Goal
 	if Settings["GoalMax"]  < Settings["Goal"]:
 		Settings["GoalMax"] = Settings["Goal"]
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
 	if Session["CurrentGoal"]  < Settings["GoalMin"]:
 		Session["CurrentGoal"] = Settings["GoalMin"]
-		isSessionDirty = True
+		is_session_dirty = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
 	if Session["CurrentGoal"]  > Settings["GoalMax"]:
 		Session["CurrentGoal"] = Settings["GoalMax"]
-		isSessionDirty = True
+		is_session_dirty = True
 
 	# Prevent Tier1 from being less than 1
 	if Settings["Tier1"]  < 1:
 		Settings["Tier1"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent Tier2 from being less than 1
 	if Settings["Tier2"]  < 1:
 		Settings["Tier2"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent Tier3 from being less than 1
 	if Settings["Tier3"]  < 1:
 		Settings["Tier3"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
 	if Settings["GoalIncrement"] < 0:
 		Settings["GoalIncrement"] = 0
-		isSettingsDirty = True
+		is_settings_dirty = True
 
-	if isSessionDirty:
+	if is_session_dirty:
 		SaveSession()
 
-	if isSettingsDirty:
+	if is_settings_dirty:
 		SaveSettings()
 
 
@@ -408,7 +405,7 @@ def SaveSettings():
 # ---------------
 # Reload Settings
 # ---------------
-def ReloadSettings(jsonData):
+def ReloadSettings(json_data):
 	LoadSettings()
 	SanityCheck()
 
