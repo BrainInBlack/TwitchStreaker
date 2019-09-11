@@ -33,8 +33,23 @@ SettingsFile  = os.path.join(os.path.dirname(__file__), "Settings.json")
 
 ChannelName   = None
 EventReceiver = None
-Session       = None
-Settings      = None
+Session = {
+	"CurrentSubs": 0,
+	"CurrentStreak": 1,
+	"CurrentGoal": 10
+}
+Settings = {
+	"Goal": 10,
+	"GoalMin": 5,
+	"GoalMax": 10,
+	"GoalIncrement": 1,
+	"CountResubs": False,
+	"CountFollow": False,
+	"SocketToken": None,
+	"Tier1": 1,
+	"Tier2": 1,
+	"Tier3": 1
+}
 TimerDelay    = 5
 TimerStamp    = None
 
@@ -43,10 +58,7 @@ TimerStamp    = None
 # Initiation
 # ----------
 def Init():
-	global EventReceiver
-	global Settings
-	global TimerStamp
-	global ChannelName
+	global ChannelName, EventReceiver, Settings, TimerStamp
 
 	LoadSettings()
 	LoadSession()
@@ -100,9 +112,7 @@ def EventReceiverDisconnected(sender, args):
 # Twitch Events
 # -------------
 def TwitchEvent(data):
-	global ChannelName
-	global Session
-	global Settings
+	global ChannelName, Session, Settings
 
 	if data.Type == "follow" and Settings["CountFollows"]:
 		for message in data.Message:
@@ -146,8 +156,7 @@ def TwitchEvent(data):
 # Mixer Events
 # ------------
 def MixerEvent(data):
-	global Session
-	global Settings
+	global Session, Settings
 
 	if data.Type == "follow" and Settings["CountFollows"]:
 		for message in data.Message:
@@ -176,8 +185,7 @@ def MixerEvent(data):
 # Youtube Events
 # --------------
 def YoutubeEvent(data):
-	global Session
-	global Settings
+	global Session, Settings
 
 	if data.Type == "follow" and Settings["CountFollows"]:
 		for message in data.Message:
@@ -227,9 +235,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
-	global Session
-	global Settings
-	global TimerStamp
+	global Session, Settings, TimerStamp
 
 	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]     -= Session["CurrentGoal"]
@@ -251,8 +257,7 @@ def UpdateOverlay():
 # Tick
 # ----
 def Tick():
-	global TimerDelay
-	global TimerStamp
+	global TimerDelay, TimerStamp
 
 	if (time.time() - TimerStamp) > TimerDelay:
 		UpdateOverlay()
@@ -263,8 +268,7 @@ def Tick():
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session
-	global Settings
+	global Session, Settings
 
 	is_session_dirty = False
 	is_settings_dirty = False
@@ -328,24 +332,13 @@ def SanityCheck():
 # Load Session
 # ------------
 def LoadSession():
-	global Session
-	global SessionFile
-	global Settings
-
-	# Load Settings if they aren't loaded already
-	if Settings is None:
-		LoadSettings()
+	global Session, SessionFile, Settings
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			Session = json.load(f, encoding="utf-8-sig")
+			Session["CurrentGoal"] = Settings["Goal"]
 	except:
-		# Setup default Session in case the load failed
-		Session = {
-			"CurrentSubs": 0,
-			"CurrentStreak": 1,
-			"CurrentGoal": Settings["Goal"]
-		}
 		SaveSession()
 
 
@@ -353,20 +346,18 @@ def LoadSession():
 # Save Session
 # ------------
 def SaveSession():
-	global Session
-	global SessionFile
+	global Session, SessionFile
 
-	f = open(SessionFile, "w")
-	f.write(str(json.JSONEncoder().encode(Session)))
-	f.close()
+	with open(SessionFile, "w") as f:
+		json.dump(Session, f, sort_keys=True, indent=4)
+		f.close()
 
 
 # -------------
 # Reset Session
 # -------------
 def ResetSession():
-	global Session
-	global Settings
+	global Session, Settings
 
 	Session["CurrentSubs"] = 0
 	Session["CurrentStreak"] = 1
@@ -378,10 +369,7 @@ def ResetSession():
 # Load Settings
 # -------------
 def LoadSettings():
-	global Settings
-	global SettingsFile
-
-	Settings = None
+	global Settings, SettingsFile
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
@@ -394,12 +382,11 @@ def LoadSettings():
 # Save Settings
 # ------------
 def SaveSettings():
-	global Settings
-	global SettingsFile
+	global Settings, SettingsFile
 
-	f = open(SettingsFile, "w")
-	f.write(str(json.JSONEncoder().encode(Settings)))
-	f.close()
+	with codecs.open(SettingsFile, "w") as f:
+		json.dump(Settings, f, sort_keys=True, indent=4)
+		f.close()
 
 
 # ---------------
