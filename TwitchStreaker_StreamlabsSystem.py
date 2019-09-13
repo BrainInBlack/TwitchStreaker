@@ -22,7 +22,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.2"
+Version     = "2.1.3"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -82,16 +82,101 @@ def Init():
 # Event Main
 # ----------
 def EventReceiverEvent(sender, args):
+	global ChannelName, Session, Settings
+
 	data = args.Data
 
+	# Twitch
 	if data.For == "twitch_account":
-		TwitchEvent(data)
 
+		if data.Type == "follow" and Settings["CountFollows"]:
+			for message in data.Message:
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
+					continue
+				Session["CurrentSubs"] += 1
+			UpdateOverlay()
+
+		if data.Type == "subscription":
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					continue
+
+				# GiftSub and Resub Checks
+				if message.Gifter is not None:
+					if message.Gifter.lower() == ChannelName and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
+						continue
+					if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
+						continue
+				else:
+					if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
+						continue
+
+				if message.SubPlan == "1000" or message.SubPlan == "Prime":
+					Session["CurrentSubs"] += Settings["Tier1"]
+				elif message.SubPlan == "2000":
+					Session["CurrentSubs"] += Settings["Tier2"]
+				elif message.SubPlan == "3000":
+					Session["CurrentSubs"] += Settings["Tier3"]
+
+			UpdateOverlay()
+
+	# Mixer
 	if data.For == "mixer_account":
-		MixerEvent(data)
 
+		if data.Type == "follow" and Settings["CountFollows"]:
+			for message in data.Message:
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
+					continue
+				Session["CurrentSubs"] += 1
+			UpdateOverlay()
+
+		if data.Type == "subscription":
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					continue
+
+				if message.Months > 1 and not Settings["CountResubs"]:
+					Parent.Log("Ignored Resub by " + message.Name)
+					continue
+
+				Session["CurrentSubs"] += 1
+				UpdateOverlay()
+
+	# Youtube
 	if data.For == "youtube_account":
-		YoutubeEvent(data)
+
+		if data.Type == "follow" and Settings["CountFollows"]:
+			for message in data.Message:
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
+					continue
+				Session["CurrentSubs"] +=1
+				UpdateOverlay()
+
+		if data.Type == "subscription":
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+					continue
+
+				if message.Months > 1 and not Settings["CountResubs"]:
+					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+					continue
+
+				Session["CurrentSubs"] += 1
+				UpdateOverlay()
+
+	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
 
 
 # ---------------
@@ -106,108 +191,6 @@ def EventReceiverConnected(sender, args):
 # ------------------
 def EventReceiverDisconnected(sender, args):
 	Parent.Log(ScriptName, "Disconnected")
-
-
-# -------------
-# Twitch Events
-# -------------
-def TwitchEvent(data):
-	global ChannelName, Session, Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-				continue
-			Session["CurrentSubs"] += 1
-		UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
-				continue
-
-			# GiftSub and Resub Checks
-			if message.Gifter is not None:
-				if message.Gifter.lower() == ChannelName and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
-					continue
-				if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
-					continue
-			else:
-				if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
-					continue
-
-			if message.SubPlan == "1000" or message.SubPlan == "Prime":
-				Session["CurrentSubs"] += Settings["Tier1"]
-			elif message.SubPlan == "2000":
-				Session["CurrentSubs"] += Settings["Tier2"]
-			elif message.SubPlan == "3000":
-				Session["CurrentSubs"] += Settings["Tier3"]
-
-		UpdateOverlay()
-
-
-# ------------
-# Mixer Events
-# ------------
-def MixerEvent(data):
-	global Session, Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-				continue
-			Session["CurrentSubs"] += 1
-		UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
-				continue
-
-			if message.Months > 1 and not Settings["CountResubs"]:
-				Parent.Log("Ignored Resub by " + message.Name)
-				continue
-
-			Session["CurrentSubs"] += 1
-			UpdateOverlay()
-
-
-# --------------
-# Youtube Events
-# --------------
-def YoutubeEvent(data):
-	global Session, Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
-				continue
-			Session["CurrentSubs"] +=1
-			UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
-				continue
-
-			if message.Months > 1 and not Settings["CountResubs"]:
-				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
-				continue
-
-			Session["CurrentSubs"] += 1
-			UpdateOverlay()
 
 
 # ---------------

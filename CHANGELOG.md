@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.3 - CleanUp
+
+* General Cleanup and Optimizations
+* Minor fixes
+
 ## 2.1.2 - Improvements
 
 * Improved timed Overlay Update, this should finally fix the clogged EventBus
