@@ -1,16 +1,17 @@
 # -------
 # Imports
 # -------
+import codecs
+import json
 import os
 import sys
-import json
-import clr
-import codecs
 import time
+
 
 # ----------
 # References
 # ----------
+import clr
 sys.path.append(os.path.dirname(__file__))
 clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
@@ -22,7 +23,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.2"
+Version     = "2.2.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -33,8 +34,24 @@ SettingsFile  = os.path.join(os.path.dirname(__file__), "Settings.json")
 
 ChannelName   = None
 EventReceiver = None
-Session       = None
-Settings      = None
+Session = {
+	"CurrentGoal": 10,
+	"CurrentSubs": 0,
+	"CurrentSubsLeft": 10,
+	"CurrentStreak": 1,
+	"CurrentTotalSubs": 0
+}
+Settings = {
+	"Goal": 10,
+	"GoalMin": 5,
+	"GoalMax": 10,
+	"GoalIncrement": 1,
+	"CountResubs": False,
+	"SocketToken": None,
+	"Tier1": 1,
+	"Tier2": 1,
+	"Tier3": 1
+}
 TimerDelay    = 5
 TimerStamp    = None
 
@@ -43,11 +60,7 @@ TimerStamp    = None
 # Initiation
 # ----------
 def Init():
-	global EventReceiver
-	global Session
-	global Settings
-	global TimerStamp
-	global ChannelName
+	global ChannelName, EventReceiver, Settings, TimerStamp
 
 	LoadSettings()
 	LoadSession()
@@ -71,169 +84,82 @@ def Init():
 # Event Main
 # ----------
 def EventReceiverEvent(sender, args):
+	global ChannelName, Session, Settings
+
 	data = args.Data
 
+	# Twitch
 	if data.For == "twitch_account":
-		TwitchEvent(data)
 
+		if data.Type == "subscription":
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					continue
+
+				# GiftSub and Resub Checks
+				if message.Gifter is not None:
+					if message.Gifter.lower() == ChannelName and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
+						continue
+					if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
+						continue
+				else:
+					if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
+						Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
+						continue
+
+				if message.SubPlan == "1000" or message.SubPlan == "Prime":
+					Session["CurrentSubs"]      += Settings["Tier1"]
+					Session["CurrentTotalSubs"] += Settings["Tier1"]
+				elif message.SubPlan == "2000":
+					Session["CurrentSubs"]      += Settings["Tier2"]
+					Session["CurrentTotalSubs"] += Settings["Tier2"]
+				elif message.SubPlan == "3000":
+					Session["CurrentSubs"]      += Settings["Tier3"]
+					Session["CurrentTotalSubs"] += Settings["Tier3"]
+
+			UpdateOverlay()
+
+	# Mixer
 	if data.For == "mixer_account":
-		MixerEvent(data)
 
+		if data.Type == "subscription":
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					continue
+
+				if message.Months > 1 and not Settings["CountResubs"]:
+					Parent.Log("Ignored Resub by " + message.Name)
+					continue
+
+				Session["CurrentSubs"]      += 1
+				Session["CurrentTotalSubs"] += 1
+				UpdateOverlay()
+
+	# Youtube
 	if data.For == "youtube_account":
-		YoutubeEvent(data)
 
+		if data.Type == "subscription":
+			for message in data.Message:
 
-# -------------
-# Twitch Events
-# -------------
-def TwitchEvent(data):
-	global ChannelName
-	global Session
-	global Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-				continue
-			Session["CurrentSubs"] += 1
-		UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
-				continue
-
-			# GiftSub and Resub Checks
-			if message.Gifter is not None:
-				if message.Gifter.lower() == ChannelName and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
-					continue
-				if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
-					continue
-			else:
-				if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
 					continue
 
-			if message.SubPlan == "1000" or message.SubPlan == "Prime":
-				Session["CurrentSubs"] += Settings["Tier1"]
-			elif message.SubPlan == "2000":
-				Session["CurrentSubs"] += Settings["Tier2"]
-			elif message.SubPlan == "3000":
-				Session["CurrentSubs"] += Settings["Tier3"]
+				if message.Months > 1 and not Settings["CountResubs"]:
+					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+					continue
 
-		UpdateOverlay()
+				Session["CurrentSubs"]      += 1
+				Session["CurrentTotalSubs"] += 1
+				UpdateOverlay()
 
-
-# ------------
-# Mixer Events
-# ------------
-def MixerEvent(data):
-	global ChannelName
-	global Session
-	global Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-				continue
-			Session["CurrentSubs"] += 1
-		UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
-				continue
-
-			if message.Months > 1 and not Settings["CountResubs"]:
-				Parent.Log("Ignored Resub by " + message.Name)
-				continue
-
-			Session["CurrentSubs"] += 1
-			UpdateOverlay()
-
-
-# --------------
-# Youtube Events
-# --------------
-def YoutubeEvent(data):
-	global ChannelName
-	global Session
-	global Settings
-
-	if data.Type == "follow" and Settings["CountFollows"]:
-		for message in data.Message:
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
-				continue
-			Session["CurrentSubs"] +=1
-			UpdateOverlay()
-
-	if data.Type == "subscription":
-		for message in data.Message:
-
-			if not message.IsLive and not message.IsTest:
-				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
-				continue
-
-			if message.Months > 1 and not Settings["CountResubs"]:
-				Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
-				continue
-
-			Session["CurrentSubs"] += 1
-			UpdateOverlay()
-
-
-# ---------------
-# Parse Parameter
-# ---------------
-def Parse(parseString, userid, username, targetid, targetname, message):
-	global Session
-
-	if "$tsGoal" in parseString:
-		return parseString.replace("$tsGoal", str(Session["CurrentGoal"]))
-
-	if "$tsStreak" in parseString:
-		return parseString.replace("$tsStreak", str(Session["CurrentStreak"]))
-
-	if "$tsSubs" in parseString:
-		return parseString.replace("$tsSubs", str(Session["CurrentSubs"]))
-
-	if "$tsSubsLeft" in parseString:
-		return parseString.replace("$tsSubsLeft", str(Session["CurrentGoal"] - Session["CurrentSubs"]))
-
-	return parseString
-
-
-# --------------
-# Update Overlay
-# --------------
-def UpdateOverlay():
-	global Session
-	global Settings
-	global TimerStamp
-
-	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
-		Session["CurrentSubs"]     -= Session["CurrentGoal"]
-
-		# Increment CurrentGoal
-		if Session["CurrentGoal"]   < Settings["GoalMax"]:
-			Session["CurrentGoal"] += Settings["GoalIncrement"]
-
-			# Limit CurrentGoal to GoalMax
-			if Session["CurrentGoal"]   > Settings["GoalMax"]:
-				Session["CurrentGoal"]  = Settings["GoalMax"]
-
-		Session["CurrentStreak"]   += 1
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	TimerStamp = time.time()
+	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
 
 
 # ---------------
@@ -250,12 +176,59 @@ def EventReceiverDisconnected(sender, args):
 	Parent.Log(ScriptName, "Disconnected")
 
 
+# ---------------
+# Parse Parameter
+# ---------------
+def Parse(parse_string, user_id, username, target_id, target_name, message):
+	global Session
+
+	if "$tsGoal" in parse_string:
+		return parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+
+	if "$tsStreak" in parse_string:
+		return parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+
+	if "$tsSubs" in parse_string:
+		return parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
+
+	if "$tsSubsLeft" in parse_string:
+		return parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
+
+	if "$tsTotalSubs" in parse_string:
+		return parse_string.replace("$tsSubsLeft", str(Session["CurrentTotalSubs"]))
+
+	return parse_string
+
+
+# --------------
+# Update Overlay
+# --------------
+def UpdateOverlay():
+	global Session, Settings, TimerStamp
+
+	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
+
+	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+		Session["CurrentSubs"]   -= Session["CurrentGoal"]
+
+		# Increment CurrentGoal
+		if Session["CurrentGoal"]   < Settings["GoalMax"]:
+			Session["CurrentGoal"] += Settings["GoalIncrement"]
+
+			# Limit CurrentGoal to GoalMax
+			if Session["CurrentGoal"]  > Settings["GoalMax"]:
+				Session["CurrentGoal"] = Settings["GoalMax"]
+
+		Session["CurrentStreak"] += 1
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	TimerStamp = time.time()
+
+
 # ----
 # Tick
 # ----
 def Tick():
-	global TimerDelay
-	global TimerStamp
+	global TimerDelay, TimerStamp
 
 	if (time.time() - TimerStamp) > TimerDelay:
 		UpdateOverlay()
@@ -266,11 +239,10 @@ def Tick():
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session
-	global Settings
+	global Session, Settings
 
-	isSessionDirty = False
-	isSettingsDirty = False
+	is_session_dirty = False
+	is_settings_dirty = False
 
 	if Session is None:
 		LoadSession()
@@ -278,113 +250,92 @@ def SanityCheck():
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
 		Settings["GoalMin"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalMin from being higher than the Goal
 	if Settings["GoalMin"]  > Settings["Goal"]:
 		Settings["GoalMin"] = Settings["Goal"]
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalMax from being lower than the Goal
 	if Settings["GoalMax"]  < Settings["Goal"]:
 		Settings["GoalMax"] = Settings["Goal"]
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
 	if Session["CurrentGoal"]  < Settings["GoalMin"]:
 		Session["CurrentGoal"] = Settings["GoalMin"]
-		isSessionDirty = True
+		is_session_dirty = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
 	if Session["CurrentGoal"]  > Settings["GoalMax"]:
 		Session["CurrentGoal"] = Settings["GoalMax"]
-		isSessionDirty = True
+		is_session_dirty = True
 
 	# Prevent Tier1 from being less than 1
 	if Settings["Tier1"]  < 1:
 		Settings["Tier1"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent Tier2 from being less than 1
 	if Settings["Tier2"]  < 1:
 		Settings["Tier2"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent Tier3 from being less than 1
 	if Settings["Tier3"]  < 1:
 		Settings["Tier3"] = 1
-		isSettingsDirty = True
+		is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
 	if Settings["GoalIncrement"] < 0:
 		Settings["GoalIncrement"] = 0
-		isSettingsDirty = True
+		is_settings_dirty = True
 
-	if isSessionDirty:
+	if is_session_dirty:
 		SaveSession()
 
-	if isSettingsDirty:
+	if is_settings_dirty:
 		SaveSettings()
 
 
-# ------------
-# Load Session
-# ------------
+# -----------------
+# Session Functions
+# -----------------
 def LoadSession():
-	global Session
-	global SessionFile
-	global Settings
-
-	# Load Settings if they aren't loaded already
-	if Settings is None:
-		LoadSettings()
+	global Session, SessionFile, Settings
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			Session = json.load(f, encoding="utf-8-sig")
+			Session["CurrentGoal"] = Settings["Goal"]
 	except:
-		# Setup default Session in case the load failed
-		Session = {
-			"CurrentSubs": 0,
-			"CurrentStreak": 1,
-			"CurrentGoal": Settings["Goal"]
-		}
 		SaveSession()
 
-
-# ------------
-# Save Session
-# ------------
 def SaveSession():
-	global Session
-	global SessionFile
+	global Session, SessionFile
 
-	f = open(SessionFile, "w")
-	f.write(str(json.JSONEncoder().encode(Session)))
-	f.close()
+	with open(SessionFile, "w") as f:
+		json.dump(Session, f, sort_keys=True, indent=4)
+		f.close()
 
 
-# -------------
-# Reset Session
-# -------------
 def ResetSession():
-	global Session
-	global Settings
+	global Session, Settings
 
-	Session["CurrentSubs"] = 0
-	Session["CurrentStreak"] = 1
-	Session["CurrentGoal"] = Settings["Goal"]
+	Session["CurrentGoal"]      = Settings["Goal"]
+	Session["CurrentSubs"]      = 0
+	Session["CurrentSubsLeft"]  = Session["CurrentGoal"]
+	Session["CurrentStreak"]    = 1
+	Session["CurrentTotalSubs"] = 0
 	SaveSession()
 
 
-# -------------
-# Load Settings
-# -------------
+# ------------------
+# Settings Functions
+# ------------------
 def LoadSettings():
-	global Settings
-	global SettingsFile
-
-	Settings = None
+	global Settings, SettingsFile
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
@@ -393,22 +344,15 @@ def LoadSettings():
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
 
 
-# ------------
-# Save Settings
-# ------------
 def SaveSettings():
-	global Settings
-	global SettingsFile
+	global Settings, SettingsFile
 
-	f = open(SettingsFile, "w")
-	f.write(str(json.JSONEncoder().encode(Settings)))
-	f.close()
+	with codecs.open(SettingsFile, "w") as f:
+		json.dump(Settings, f, sort_keys=True, indent=4)
+		f.close()
 
 
-# ---------------
-# Reload Settings
-# ---------------
-def ReloadSettings(jsonData):
+def ReloadSettings(json_data):
 	LoadSettings()
 	SanityCheck()
 
@@ -419,6 +363,7 @@ def ReloadSettings(jsonData):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
+	Session["CurrentTotalSubs"] += 1
 	UpdateOverlay()
 
 
@@ -426,6 +371,7 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
+		Session["CurrentTotalSubs"] -= 1
 		UpdateOverlay()
 
 
@@ -471,9 +417,9 @@ def SubtractStreak10():
 		UpdateOverlay()
 
 
-# -------------
-# Goal Function
-# -------------
+# --------------
+# Goal Functions
+# --------------
 def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
