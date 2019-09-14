@@ -1,16 +1,17 @@
 # -------
 # Imports
 # -------
+import codecs
+import json
 import os
 import sys
-import json
-import clr
-import codecs
 import time
+
 
 # ----------
 # References
 # ----------
+import clr
 sys.path.append(os.path.dirname(__file__))
 clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
@@ -22,7 +23,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.1.3"
+Version     = "2.2.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -34,9 +35,11 @@ SettingsFile  = os.path.join(os.path.dirname(__file__), "Settings.json")
 ChannelName   = None
 EventReceiver = None
 Session = {
+	"CurrentGoal": 10,
 	"CurrentSubs": 0,
+	"CurrentSubsLeft": 10,
 	"CurrentStreak": 1,
-	"CurrentGoal": 10
+	"CurrentTotalSubs": 0
 }
 Settings = {
 	"Goal": 10,
@@ -44,7 +47,6 @@ Settings = {
 	"GoalMax": 10,
 	"GoalIncrement": 1,
 	"CountResubs": False,
-	"CountFollow": False,
 	"SocketToken": None,
 	"Tier1": 1,
 	"Tier2": 1,
@@ -89,14 +91,6 @@ def EventReceiverEvent(sender, args):
 	# Twitch
 	if data.For == "twitch_account":
 
-		if data.Type == "follow" and Settings["CountFollows"]:
-			for message in data.Message:
-				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-					continue
-				Session["CurrentSubs"] += 1
-			UpdateOverlay()
-
 		if data.Type == "subscription":
 			for message in data.Message:
 
@@ -118,24 +112,19 @@ def EventReceiverEvent(sender, args):
 						continue
 
 				if message.SubPlan == "1000" or message.SubPlan == "Prime":
-					Session["CurrentSubs"] += Settings["Tier1"]
+					Session["CurrentSubs"]      += Settings["Tier1"]
+					Session["CurrentTotalSubs"] += Settings["Tier1"]
 				elif message.SubPlan == "2000":
-					Session["CurrentSubs"] += Settings["Tier2"]
+					Session["CurrentSubs"]      += Settings["Tier2"]
+					Session["CurrentTotalSubs"] += Settings["Tier2"]
 				elif message.SubPlan == "3000":
-					Session["CurrentSubs"] += Settings["Tier3"]
+					Session["CurrentSubs"]      += Settings["Tier3"]
+					Session["CurrentTotalSubs"] += Settings["Tier3"]
 
 			UpdateOverlay()
 
 	# Mixer
 	if data.For == "mixer_account":
-
-		if data.Type == "follow" and Settings["CountFollows"]:
-			for message in data.Message:
-				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Follow, Stream is not Live")
-					continue
-				Session["CurrentSubs"] += 1
-			UpdateOverlay()
 
 		if data.Type == "subscription":
 			for message in data.Message:
@@ -148,19 +137,12 @@ def EventReceiverEvent(sender, args):
 					Parent.Log("Ignored Resub by " + message.Name)
 					continue
 
-				Session["CurrentSubs"] += 1
+				Session["CurrentSubs"]      += 1
+				Session["CurrentTotalSubs"] += 1
 				UpdateOverlay()
 
 	# Youtube
 	if data.For == "youtube_account":
-
-		if data.Type == "follow" and Settings["CountFollows"]:
-			for message in data.Message:
-				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live. (YT)")
-					continue
-				Session["CurrentSubs"] +=1
-				UpdateOverlay()
 
 		if data.Type == "subscription":
 			for message in data.Message:
@@ -173,7 +155,8 @@ def EventReceiverEvent(sender, args):
 					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
 					continue
 
-				Session["CurrentSubs"] += 1
+				Session["CurrentSubs"]      += 1
+				Session["CurrentTotalSubs"] += 1
 				UpdateOverlay()
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
@@ -209,7 +192,10 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 		return parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
 
 	if "$tsSubsLeft" in parse_string:
-		return parse_string.replace("$tsSubsLeft", str(Session["CurrentGoal"] - Session["CurrentSubs"]))
+		return parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
+
+	if "$tsTotalSubs" in parse_string:
+		return parse_string.replace("$tsSubsLeft", str(Session["CurrentTotalSubs"]))
 
 	return parse_string
 
@@ -220,18 +206,20 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 def UpdateOverlay():
 	global Session, Settings, TimerStamp
 
-	while Session["CurrentSubs"]   >= Session["CurrentGoal"]:
-		Session["CurrentSubs"]     -= Session["CurrentGoal"]
+	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
+
+	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+		Session["CurrentSubs"]   -= Session["CurrentGoal"]
 
 		# Increment CurrentGoal
 		if Session["CurrentGoal"]   < Settings["GoalMax"]:
 			Session["CurrentGoal"] += Settings["GoalIncrement"]
 
 			# Limit CurrentGoal to GoalMax
-			if Session["CurrentGoal"]   > Settings["GoalMax"]:
-				Session["CurrentGoal"]  = Settings["GoalMax"]
+			if Session["CurrentGoal"]  > Settings["GoalMax"]:
+				Session["CurrentGoal"] = Settings["GoalMax"]
 
-		Session["CurrentStreak"]   += 1
+		Session["CurrentStreak"] += 1
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 	TimerStamp = time.time()
 
@@ -311,9 +299,9 @@ def SanityCheck():
 		SaveSettings()
 
 
-# ------------
-# Load Session
-# ------------
+# -----------------
+# Session Functions
+# -----------------
 def LoadSession():
 	global Session, SessionFile, Settings
 
@@ -324,10 +312,6 @@ def LoadSession():
 	except:
 		SaveSession()
 
-
-# ------------
-# Save Session
-# ------------
 def SaveSession():
 	global Session, SessionFile
 
@@ -336,21 +320,20 @@ def SaveSession():
 		f.close()
 
 
-# -------------
-# Reset Session
-# -------------
 def ResetSession():
 	global Session, Settings
 
-	Session["CurrentSubs"] = 0
-	Session["CurrentStreak"] = 1
-	Session["CurrentGoal"] = Settings["Goal"]
+	Session["CurrentGoal"]      = Settings["Goal"]
+	Session["CurrentSubs"]      = 0
+	Session["CurrentSubsLeft"]  = Session["CurrentGoal"]
+	Session["CurrentStreak"]    = 1
+	Session["CurrentTotalSubs"] = 0
 	SaveSession()
 
 
-# -------------
-# Load Settings
-# -------------
+# ------------------
+# Settings Functions
+# ------------------
 def LoadSettings():
 	global Settings, SettingsFile
 
@@ -361,9 +344,6 @@ def LoadSettings():
 		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
 
 
-# ------------
-# Save Settings
-# ------------
 def SaveSettings():
 	global Settings, SettingsFile
 
@@ -372,9 +352,6 @@ def SaveSettings():
 		f.close()
 
 
-# ---------------
-# Reload Settings
-# ---------------
 def ReloadSettings(json_data):
 	LoadSettings()
 	SanityCheck()
@@ -386,6 +363,7 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
+	Session["CurrentTotalSubs"] += 1
 	UpdateOverlay()
 
 
@@ -393,6 +371,7 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
+		Session["CurrentTotalSubs"] -= 1
 		UpdateOverlay()
 
 
@@ -438,9 +417,9 @@ def SubtractStreak10():
 		UpdateOverlay()
 
 
-# -------------
-# Goal Function
-# -------------
+# --------------
+# Goal Functions
+# --------------
 def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:

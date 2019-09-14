@@ -7,21 +7,24 @@ var Overlay = {
 	'CurrentStreak': 1,
 	'CurrentSubs': 0,
 	'CurrentSubsLeft': 10,
+	'CurrentTotalSubs': 0,
 
 	// Elements
-	'Streak':   document.getElementById('Streak'),
-	'Subs':     document.getElementById('Subs'),
-	'SubsLeft': document.getElementById('SubsLeft'),
-	'Goal':     document.getElementById('Goal'),
-	'Tracker':  document.getElementById('Tracker'),                             // ! Outline Hack!
+	'Goal':      document.getElementById('Goal'),
+	'Subs':      document.getElementById('Subs'),
+	'SubsLeft':  document.getElementById('SubsLeft'),
+	'Streak':    document.getElementById('Streak'),
+	'TotalSubs': document.getElementById('TotalSubs'),
+	'Tracker':   document.getElementById('Tracker'),                             // ! Outline Hack!
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		if(this.Streak)   this.Streak.innerText   = this.CurrentStreak;
-		if(this.Subs)     this.Subs.innerText     = this.CurrentSubs;
-		if(this.SubsLeft) this.SubsLeft.innerText = this.CurrentSubsLeft;
-		if(this.Goal)     this.Goal.innerText     = this.CurrentGoal;
-		if(this.Tracker)  this.Tracker.title      = this.Tracker.innerText;     // ! Outline Hack!
+		if(this.Goal)      this.Goal.innerText      = this.CurrentGoal;
+		if(this.Subs)      this.Subs.innerText      = this.CurrentSubs;
+		if(this.SubsLeft)  this.SubsLeft.innerText  = this.CurrentSubsLeft;
+		if(this.Streak)    this.Streak.innerText    = this.CurrentStreak;
+		if(this.TotalSubs) this.TotalSubs.innerText = this.CurrentTotalSubs;
+		if(this.Tracker)   this.Tracker.title       = this.Tracker.innerText;     // ! Outline Hack!
 	}
 }
 
@@ -61,10 +64,11 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
-				Overlay.CurrentGoal = data.CurrentGoal;
-				Overlay.CurrentStreak = data.CurrentStreak;
-				Overlay.CurrentSubs = data.CurrentSubs;
-				Overlay.SubsLeft = Overlay.CurrentGoal - Overlay.CurrentSubs;
+				Overlay.CurrentGoal      = data.CurrentGoal;
+				Overlay.CurrentStreak    = data.CurrentStreak;
+				Overlay.CurrentSubs      = data.CurrentSubs;
+				Overlay.CurrentSubsLeft  = data.CurrentSubsLeft;
+				Overlay.CurrentTotalSubs = data.CurrentTotalSubs
 				break;
 
 			default:

@@ -1,9 +1,21 @@
 # Changelog
 
-## 2.1.3 - CleanUp
+## 2.2.0 - CleanUp
 
-* General Cleanup and Optimizations
-* Minor fixes
+This Updates some things in the Settings and Session files, you might have to save the Settings at least once and reset the Tracker.
+
+* Removed Option to include Follows (unused Feature)
+* Added TotalSubs per Session
+* Moved SubsLeft calculation into the python part
+* Fixed SubsLeft in main.js
+* Improved/Updated Documentation
+* Minor Fixes and Cleanup
+
+### Changed Overlay Files
+
+* Overlay/main.js
+
+*No update needed for the other Overlay Files and can be skipped.*
 
 ## 2.1.2 - Improvements
 
@@ -81,9 +93,9 @@ over multiple sessions (the reset is now done manually via the menu within the b
 ## 1.5.3 - Resubs and Follows
 
 * Added an options to count resubs as well as follows (default: off)
-	* Resubs are worth as much as the respective Tier Value (min: 1)
-	* Gifted Resubs will always count, as they did in previous versions
-	* Follows, if enabled, are worth one point
+  * Resubs are worth as much as the respective Tier Value (min: 1)
+  * Gifted Resubs will always count, as they did in previous versions
+  * Follows, if enabled, are worth one point
 
 ## 1.5.2 - Flexible Design
 

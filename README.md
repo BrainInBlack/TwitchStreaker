@@ -11,7 +11,8 @@ Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnE
   - [Updating to 2.x from 1.x](#updating-to-2x-from-1x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
   - [Known Issues](#known-issues)
-  - [Chatbot Parameters](#chatbot-parameters)
+    - [Script not showing up after Installation/Update](#script-not-showing-up-after-installationupdate)
+  - [Chatbot Command Parameters](#chatbot-command-parameters)
   - [Customization](#customization)
   - [JavaScript Variables](#javascript-variables)
   - [Manual Overwrites](#manual-overwrites)
@@ -51,7 +52,7 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 4. Enter your ```SocketToken``` [See here](#streamlabs-sockettoken).
 5. Reapply your Settings and Customizations.
    - Modifications to the Script have to be redone, since most of the logic has been removed from the JavaScript part.
-7. Save the Settings
+6. Save the Settings
 
 ## Streamlabs SocketToken
 
@@ -62,7 +63,7 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 
 ## Known Issues
 
-#### Script not showing up after Installation/Update.
+### Script not showing up after Installation/Update
 
 With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
 
@@ -70,7 +71,7 @@ With version 2.x and onwards we're using an additional library that, depending o
 2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
 3. Save and Restart the Chatbot
 
-## Chatbot Parameters
+## Chatbot Command Parameters
 
 You can use the following Parameters in your Commands and Timers:
 
@@ -80,11 +81,12 @@ $tsGoal | Amount of Subs needed per Streak
 $tsSubs | Current amount of Subs in the current Streak
 $tsSubsLeft | Amount of Subs needed to complete the current Streak
 $tsStreak | Current Streak
+$tsTotalSubs | Amount of Subs accumulated in the current Session
 
-#### Example
+### Example
 
-* Command: `We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.`
-* Result: `We are currently working on Streak #5 and need 6 additional Subs.`
+- Command: `We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.`
+- Result: `We are currently working on Streak #5 and need 6 additional Subs.`
 
 ## Customization
 
@@ -112,15 +114,18 @@ Goal | Amount of Subs needed per Streak
 Subs | Current amount of Subs in the current Streak
 SubsLeft | Amount of Subs needed to complete the current Streak
 Streak | Current Streaks
+TotalSubs | Amount of Subs accumulated in the current Session
 
 None of those ID's are required and can be placed anywhere in the document, in case of the default design we're only using ```Subs```, ```Streak``` and ```Goal```. Here a few examples:
 
-*"X Subs left until Wheel #1"*
+### "X Subs left until Wheel #1"
+
 ```HTML
 <div><span id="SubsLeft">2</span> Subs left until Wheel #<span id="Streak">1</span></div>
 ```
 
-*"X of X Subs, then we spin Wheel #1"*
+### "X of X Subs, then we spin Wheel #1"
+
 ```HTML
 <div><span id="Subs">2</span> of <span id="Goal">7</span> Subs, then we spin Wheel #<span id="Streak">1</span></div>
 ```
@@ -135,6 +140,7 @@ Overlay.CurrentGoal | Amount of Subs needed to complete a Streak (min: 1)
 Overlay.CurrentStreak | Current amount Streaks (min: 1)
 Overlay.CurrentSubs | Current amount of Subs in the Streak (min: 0)
 Overlay.CurrentSubsLeft | Amount of subs left to the next Streak
+Overlay.CurrentTotalSubs | Amount of Subs accumulated in the current Session
 
 ## Manual Overwrites
 
