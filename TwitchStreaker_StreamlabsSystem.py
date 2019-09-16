@@ -23,7 +23,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.2.0"
+Version     = "2.2.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -120,6 +120,7 @@ def EventReceiverEvent(sender, args):
 				elif message.SubPlan == "3000":
 					Session["CurrentSubs"]      += Settings["Tier3"]
 					Session["CurrentTotalSubs"] += Settings["Tier3"]
+				Parent.Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 
@@ -139,7 +140,9 @@ def EventReceiverEvent(sender, args):
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				UpdateOverlay()
+				Parent.Log("Counted Sub by {}".format(message.Name))
+
+			UpdateOverlay()
 
 	# Youtube
 	if data.For == "youtube_account":
@@ -157,7 +160,9 @@ def EventReceiverEvent(sender, args):
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				UpdateOverlay()
+				Parent.Log("Counted Sub by {}".format(message.Name))
+
+			UpdateOverlay()
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
 
@@ -363,7 +368,6 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
-	Session["CurrentTotalSubs"] += 1
 	UpdateOverlay()
 
 
@@ -371,7 +375,6 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
-		Session["CurrentTotalSubs"] -= 1
 		UpdateOverlay()
 
 

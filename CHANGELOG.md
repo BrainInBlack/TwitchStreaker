@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.1 - Logs
+
+* Added Log message for each counted Subscription
+* Removed TotalSubs from Overwrite Functions
+* Fixed Overlay Refresh firing on each Loop (Mixer/YouTube)
+
 ## 2.2.0 - CleanUp
 
 This Updates some things in the Settings and Session files, you might have to save the Settings at least once and reset the Tracker.
