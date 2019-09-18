@@ -23,7 +23,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.2.1"
+Version     = "2.2.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -52,15 +52,17 @@ Settings = {
 	"Tier2": 1,
 	"Tier3": 1
 }
-TimerDelay    = 5
-TimerStamp    = None
+RefreshDelay = 5
+RefreshStamp = None
+SaveDelay    = 300
+SaveStamp    = None
 
 
 # ----------
 # Initiation
 # ----------
 def Init():
-	global ChannelName, EventReceiver, Settings, TimerStamp
+	global ChannelName, EventReceiver, Settings, RefreshStamp, SaveStamp
 
 	LoadSettings()
 	LoadSession()
@@ -76,8 +78,9 @@ def Init():
 	else:
 		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
 
-	TimerStamp  = time.time()
-	ChannelName = Parent.GetChannelName().lower()
+	SaveStamp    = time.time()
+	RefreshStamp = time.time()
+	ChannelName  = Parent.GetChannelName().lower()
 
 
 # ----------
@@ -123,6 +126,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
+		return
 
 	# Mixer
 	if data.For == "mixer_account":
@@ -143,6 +147,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
+		return
 
 	# Youtube
 	if data.For == "youtube_account":
@@ -163,6 +168,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
+		return
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
 
@@ -209,7 +215,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
-	global Session, Settings, TimerStamp
+	global Session, Settings, RefreshStamp
 
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
@@ -226,18 +232,21 @@ def UpdateOverlay():
 
 		Session["CurrentStreak"] += 1
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	TimerStamp = time.time()
+	RefreshStamp = time.time()
 
 
 # ----
 # Tick
 # ----
 def Tick():
-	global TimerDelay, TimerStamp
+	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
-	if (time.time() - TimerStamp) > TimerDelay:
+	if (time.time() - RefreshStamp) > RefreshDelay:
 		UpdateOverlay()
+
+	if (time.time() - SaveStamp) > SaveDelay:
 		SaveSession()
+		SaveStamp = time.time()
 
 
 # ------------
@@ -316,6 +325,7 @@ def LoadSession():
 			Session["CurrentGoal"] = Settings["Goal"]
 	except:
 		SaveSession()
+
 
 def SaveSession():
 	global Session, SessionFile
