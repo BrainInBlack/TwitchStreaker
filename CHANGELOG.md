@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.2 - Improvements
+
+* Added Return Statement to prevent Events from falling through
+* Changed Session now saves every 5 minutes, instead of 5 seconds
+* Changed some Variables to be easy to understand
+
 ## 2.2.1 - Logs
 
 * Added Log message for each counted Subscription
