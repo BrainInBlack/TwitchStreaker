@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0 - Donations
+
+* Added Donations to be counted as a sub, if they exceed a certain amount (Requested by BloodThunder)
+  * A Donation of 12.00 with a specified amount of 5.00, will be counted as 2 Subs
+* Fixed missing Script reference in Log Messages
+
 ## 2.2.2 - Improvements
 
 * Added Return Statement to prevent Events from falling through

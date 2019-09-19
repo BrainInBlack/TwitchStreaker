@@ -24,6 +24,18 @@
 		"label": "Increment Goal By",
 		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
 	},
+	"DonationMinAmount": {
+		"type": "numberbox",
+		"value": 5.00,
+		"label": "Minimal Donation Amount",
+		"tooltip": "Minimum amount that needs to be donated for the Donation to be counted as a Subscription.\n\n(Donations that exceed a multiple of the specified amount will be counted as multiple Subs, i.e. a Donation of 12.00 with a Minimum of 5.00 will be counted as 2 Subs)"
+	},
+	"CountDonations": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Allow Donations",
+		"tooltip": "Allows Donations above the specified amount to be counted as Subs.\n\n(Donations that exceed a multiple of the specified amount will be counted as multiple Subs)."
+	},
 	"CountResubs": {
 		"type": "checkbox",
 		"value": false,
