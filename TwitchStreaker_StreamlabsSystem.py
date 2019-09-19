@@ -3,6 +3,7 @@
 # -------
 import codecs
 import json
+import math
 import os
 import sys
 import time
@@ -23,7 +24,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.2.2"
+Version     = "2.3.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -42,11 +43,13 @@ Session = {
 	"CurrentTotalSubs": 0
 }
 Settings = {
+	"CountDonations": False,
+	"CountResubs": False,
+	"DonationMinAmount": 5.0,
 	"Goal": 10,
 	"GoalMin": 5,
 	"GoalMax": 10,
 	"GoalIncrement": 1,
-	"CountResubs": False,
 	"SocketToken": None,
 	"Tier1": 1,
 	"Tier2": 1,
@@ -104,14 +107,14 @@ def EventReceiverEvent(sender, args):
 				# GiftSub and Resub Checks
 				if message.Gifter is not None:
 					if message.Gifter.lower() == ChannelName and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored StreamerGift from " + message.Gifter)
+						Parent.Log(ScriptName, "Ignored StreamerGift from {}".format(message.Gifter))
 						continue
 					if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored SelfGift from " + message.Gifter)
+						Parent.Log(ScriptName, "Ignored SelfGift from {}".format(message.Gifter))
 						continue
 				else:
 					if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored Resub by " + message.Name)
+						Parent.Log(ScriptName, "Ignored Resub by {}".format(message.Name))
 						continue
 
 				if message.SubPlan == "1000" or message.SubPlan == "Prime":
@@ -123,7 +126,7 @@ def EventReceiverEvent(sender, args):
 				elif message.SubPlan == "3000":
 					Session["CurrentSubs"]      += Settings["Tier3"]
 					Session["CurrentTotalSubs"] += Settings["Tier3"]
-				Parent.Log("Counted Sub by {}".format(message.Name))
+				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 		return
@@ -139,12 +142,12 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Months > 1 and not Settings["CountResubs"]:
-					Parent.Log("Ignored Resub by " + message.Name)
+					Parent.Log("Ignored Resub by {}".format(message.Name))
 					continue
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				Parent.Log("Counted Sub by {}".format(message.Name))
+				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 		return
@@ -165,9 +168,27 @@ def EventReceiverEvent(sender, args):
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				Parent.Log("Counted Sub by {}".format(message.Name))
+				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
+		return
+
+	#Streamlabs
+	if data.For == "streamlabs":
+
+		if data.Type == "donation" and Settings["CountDonations"]:
+			for message in data.Message:
+
+				if not message.IsLive and not message.IsTest:
+					Parent.Log(Script, "Ignored Donation, Stream is not Live.")
+					continue
+
+				if message.Amount > Settings["DonationMinAmount"]:
+					res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+					Session["CurrentSubs"]      += res
+					Session["CurrentTotalSubs"] += res
+					Parent.Log(ScriptName, "Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
+
 		return
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
