@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.3.1 - Improved Donations
+
+* Added Option to only count Donations once, regardless if they are a multiple of the minimum Donation amount.
+* Script now checks if the bot is connected properly. (See LogMessages)
+* LoadSettings now creates a Settings File in case there is none. Settings still have to be applied for the Script to work properly!
+* Fixed Log Message using the wrong Variable
+* Fixed another missed ScriptName Reference in LogMessages
+* Fixed Overlay not updating after a Donation was processed
+
 ## 2.3.0 - Donations
 
 * Added Donations to be counted as a sub, if they exceed a certain amount (Requested by BloodThunder)
