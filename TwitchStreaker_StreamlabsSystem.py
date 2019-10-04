@@ -1,19 +1,13 @@
 # -------
 # Imports
 # -------
-import codecs
-import json
-import math
-import os
-import sys
-import time
+import codecs, json, math, os, sys, time
 
 
 # ----------
 # References
 # ----------
 import clr
-sys.path.append(os.path.dirname(__file__))
 clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
@@ -24,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.3.0"
+Version     = "2.3.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -44,6 +38,7 @@ Session = {
 }
 Settings = {
 	"CountDonations": False,
+	"CountDonationsOnce": False,
 	"CountResubs": False,
 	"DonationMinAmount": 5.0,
 	"Goal": 10,
@@ -83,7 +78,11 @@ def Init():
 
 	SaveStamp    = time.time()
 	RefreshStamp = time.time()
-	ChannelName  = Parent.GetChannelName().lower()
+	ChannelName  = Parent.GetChannelName()
+	if ChannelName is None:
+		Parent.Log(ScriptName, "Bot or Streamer Account are not connected, please check your connections!")
+	else:
+		ChannelName  = ChannelName.lower()
 
 
 # ----------
@@ -142,7 +141,7 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Months > 1 and not Settings["CountResubs"]:
-					Parent.Log("Ignored Resub by {}".format(message.Name))
+					Parent.Log(ScriptName, "Ignored Resub by {}".format(message.Name))
 					continue
 
 				Session["CurrentSubs"]      += 1
@@ -173,22 +172,24 @@ def EventReceiverEvent(sender, args):
 			UpdateOverlay()
 		return
 
-	#Streamlabs
+	# Streamlabs
 	if data.For == "streamlabs":
 
 		if data.Type == "donation" and Settings["CountDonations"]:
 			for message in data.Message:
 
 				if not message.IsLive and not message.IsTest:
-					Parent.Log(Script, "Ignored Donation, Stream is not Live.")
+					Parent.Log(ScriptName, "Ignored Donation, Stream is not Live.")
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+					if Settings["CountDonationsOnce"]: res = 1
+					else: res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"]      += res
 					Session["CurrentTotalSubs"] += res
 					Parent.Log(ScriptName, "Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
+			UpdateOverlay()
 		return
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
@@ -377,7 +378,7 @@ def LoadSettings():
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
 	except:
-		Parent.Log(ScriptName, "Unable to load Settings, please Save the Settings at least once!")
+		SaveSettings()
 
 
 def SaveSettings():
