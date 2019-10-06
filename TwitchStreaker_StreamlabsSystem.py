@@ -18,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.3.1"
+Version     = "2.3.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -128,7 +128,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
-		return
+		return # /Twitch
 
 	# Mixer
 	if data.For == "mixer_account":
@@ -149,7 +149,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
-		return
+		return # /Mixer
 
 	# Youtube
 	if data.For == "youtube_account":
@@ -170,7 +170,7 @@ def EventReceiverEvent(sender, args):
 				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
-		return
+		return # /Youtube
 
 	# Streamlabs
 	if data.For == "streamlabs":
@@ -190,7 +190,7 @@ def EventReceiverEvent(sender, args):
 					Parent.Log(ScriptName, "Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
 			UpdateOverlay()
-		return
+		return # /Streamlabs
 
 	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
 
@@ -216,19 +216,19 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
 
 	if "$tsGoal" in parse_string:
-		return parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
 
 	if "$tsStreak" in parse_string:
-		return parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
 
 	if "$tsSubs" in parse_string:
-		return parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
+		parse_string = parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
 
 	if "$tsSubsLeft" in parse_string:
-		return parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
+		parse_string = parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
 
 	if "$tsTotalSubs" in parse_string:
-		return parse_string.replace("$tsSubsLeft", str(Session["CurrentTotalSubs"]))
+		parse_string = parse_string.replace("$tsSubsLeft", str(Session["CurrentTotalSubs"]))
 
 	return parse_string
 
@@ -241,6 +241,7 @@ def UpdateOverlay():
 
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
+	# Streak Calculations
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]   -= Session["CurrentGoal"]
 
@@ -248,11 +249,14 @@ def UpdateOverlay():
 		if Session["CurrentGoal"]   < Settings["GoalMax"]:
 			Session["CurrentGoal"] += Settings["GoalIncrement"]
 
-			# Limit CurrentGoal to GoalMax
+			# Goal Correction
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
 
+		# Increment Streak
 		Session["CurrentStreak"] += 1
+
+	# Send Update and refresh Timestamp
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 	RefreshStamp = time.time()
 
@@ -263,9 +267,11 @@ def UpdateOverlay():
 def Tick():
 	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
+	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 		UpdateOverlay()
 
+	# Timed Session Save
 	if (time.time() - SaveStamp) > SaveDelay:
 		SaveSession()
 		SaveStamp = time.time()
@@ -280,8 +286,11 @@ def SanityCheck():
 	is_session_dirty = False
 	is_settings_dirty = False
 
+	# Load Session/Settings if not loaded
 	if Session is None:
 		LoadSession()
+	if Settings is None:
+		LoadSettings()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
@@ -328,9 +337,9 @@ def SanityCheck():
 		Settings["GoalIncrement"] = 0
 		is_settings_dirty = True
 
+	# Save Session/Settings if dirty
 	if is_session_dirty:
 		SaveSession()
-
 	if is_settings_dirty:
 		SaveSettings()
 
@@ -340,6 +349,9 @@ def SanityCheck():
 # -----------------
 def LoadSession():
 	global Session, SessionFile, Settings
+
+	if Settings is None:
+		LoadSettings()
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
@@ -359,6 +371,9 @@ def SaveSession():
 
 def ResetSession():
 	global Session, Settings
+
+	if Settings is None:
+		LoadSettings()
 
 	Session["CurrentGoal"]      = Settings["Goal"]
 	Session["CurrentSubs"]      = 0
