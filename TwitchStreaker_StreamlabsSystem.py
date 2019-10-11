@@ -74,13 +74,13 @@ def Init():
 	if not Settings["SocketToken"] == "":
 		EventReceiver.Connect(Settings["SocketToken"])
 	else:
-		Parent.Log(ScriptName, "No SocketToken! Please follow the instructions in the README.md")
+		Log("No SocketToken! Please follow the instructions in the README.md")
 
 	SaveStamp    = time.time()
 	RefreshStamp = time.time()
 	ChannelName  = Parent.GetChannelName()
 	if ChannelName is None:
-		Parent.Log(ScriptName, "Bot or Streamer Account are not connected, please check your connections!")
+		Log("Bot or Streamer Account are not connected, please check your connections!")
 	else:
 		ChannelName  = ChannelName.lower()
 
@@ -100,20 +100,20 @@ def EventReceiverEvent(sender, args):
 			for message in data.Message:
 
 				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					Log("Ignored Subscription, Stream is not Live")
 					continue
 
 				# GiftSub and Resub Checks
 				if message.Gifter is not None:
 					if message.Gifter.lower() == ChannelName and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored StreamerGift from {}".format(message.Gifter))
+						Log("Ignored StreamerGift from {}".format(message.Gifter))
 						continue
 					if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored SelfGift from {}".format(message.Gifter))
+						Log("Ignored SelfGift from {}".format(message.Gifter))
 						continue
 				else:
 					if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-						Parent.Log(ScriptName, "Ignored Resub by {}".format(message.Name))
+						Log("Ignored Resub by {}".format(message.Name))
 						continue
 
 				if message.SubPlan == "1000" or message.SubPlan == "Prime":
@@ -125,7 +125,7 @@ def EventReceiverEvent(sender, args):
 				elif message.SubPlan == "3000":
 					Session["CurrentSubs"]      += Settings["Tier3"]
 					Session["CurrentTotalSubs"] += Settings["Tier3"]
-				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
+				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 		return # /Twitch
@@ -137,16 +137,16 @@ def EventReceiverEvent(sender, args):
 			for message in data.Message:
 
 				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Subscription, Stream is not Live")
+					Log("Ignored Subscription, Stream is not Live")
 					continue
 
 				if message.Months > 1 and not Settings["CountResubs"]:
-					Parent.Log(ScriptName, "Ignored Resub by {}".format(message.Name))
+					Log("Ignored Resub by {}".format(message.Name))
 					continue
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
+				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 		return # /Mixer
@@ -158,16 +158,16 @@ def EventReceiverEvent(sender, args):
 			for message in data.Message:
 
 				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+					Log("Ignored Sponsor, Stream is not Live. (YT)")
 					continue
 
 				if message.Months > 1 and not Settings["CountResubs"]:
-					Parent.Log(ScriptName, "Ignored Sponsor, Stream is not Live. (YT)")
+					Log("Ignored Sponsor, Stream is not Live. (YT)")
 					continue
 
 				Session["CurrentSubs"]      += 1
 				Session["CurrentTotalSubs"] += 1
-				Parent.Log(ScriptName, "Counted Sub by {}".format(message.Name))
+				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
 		return # /Youtube
@@ -179,7 +179,7 @@ def EventReceiverEvent(sender, args):
 			for message in data.Message:
 
 				if not message.IsLive and not message.IsTest:
-					Parent.Log(ScriptName, "Ignored Donation, Stream is not Live.")
+					Log("Ignored Donation, Stream is not Live.")
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
@@ -187,26 +187,26 @@ def EventReceiverEvent(sender, args):
 					else: res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"]      += res
 					Session["CurrentTotalSubs"] += res
-					Parent.Log(ScriptName, "Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
+					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
 			UpdateOverlay()
 		return # /Streamlabs
 
-	Parent.Log(ScriptName, "Unknown/Unsupported Platform {}!".format(data.For))
+	Log("Unknown/Unsupported Platform {}!".format(data.For))
 
 
 # ---------------
 # Event Connected
 # ---------------
 def EventReceiverConnected(sender, args):
-	Parent.Log(ScriptName, "Connected")
+	Log("Connected")
 
 
 # ------------------
 # Event Disconnected
 # ------------------
 def EventReceiverDisconnected(sender, args):
-	Parent.Log(ScriptName, "Disconnected")
+	Log("Disconnected")
 
 
 # ---------------
@@ -500,3 +500,9 @@ def Unload():
 # -------
 def Execute(data):
 	return
+
+# -----------
+# Log Wrapper
+# -----------
+def Log(message):
+	Parent.Log(ScriptName, message)

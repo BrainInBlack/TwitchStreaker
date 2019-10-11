@@ -4,6 +4,7 @@
 
 * Fixed Command parser only processing one keyword at a time
 * Sanity Check now loads Settings if not loaded
+* Added wrapper function for Log messages to prevent further mishaps
 
 ## 2.3.1 - Improved Donations
 
