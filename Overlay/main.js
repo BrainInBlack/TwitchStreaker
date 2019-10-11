@@ -15,7 +15,7 @@ var Overlay = {
 	'SubsLeft':  document.getElementById('SubsLeft'),
 	'Streak':    document.getElementById('Streak'),
 	'TotalSubs': document.getElementById('TotalSubs'),
-	'Tracker':   document.getElementById('Tracker'),                             // ! Outline Hack!
+	'Tracker':   document.getElementById('Tracker'),                            // ! Outline Hack!
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
@@ -24,7 +24,7 @@ var Overlay = {
 		if(this.SubsLeft)  this.SubsLeft.innerText  = this.CurrentSubsLeft;
 		if(this.Streak)    this.Streak.innerText    = this.CurrentStreak;
 		if(this.TotalSubs) this.TotalSubs.innerText = this.CurrentTotalSubs;
-		if(this.Tracker)   this.Tracker.title       = this.Tracker.innerText;     // ! Outline Hack!
+		if(this.Tracker)   this.Tracker.title       = this.Tracker.innerText;   // ! Outline Hack!
 	}
 }
 
