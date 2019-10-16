@@ -59,21 +59,42 @@
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 1",
-		"tooltip": "Value for Tier 1 subs.",
+		"tooltip": "Value for Tier 1 Subs.",
+		"group": "Tier Values"
+	},
+	"Resub1": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 1 Resub",
+		"tooltip": "Value for a Tier 1 Resub.",
 		"group": "Tier Values"
 	},
 	"Tier2": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 2",
-		"tooltip": "Value for Tier 2 subs.",
+		"tooltip": "Value for Tier 2 Subs.",
+		"group": "Tier Values"
+	},
+	"Resub2": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 2 Resub",
+		"tooltip": "Value for a Tier 2 Resub.",
 		"group": "Tier Values"
 	},
 	"Tier3": {
 		"type": "numberbox",
 		"value": 1,
 		"label": "Tier 3",
-		"tooltip": "Value for Tier 3 subs.",
+		"tooltip": "Value for Tier 3 Subs.",
+		"group": "Tier Values"
+	},
+	"Resub3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Tier 3 Resub",
+		"tooltip": "Value for a Tier 3 Resub.",
 		"group": "Tier Values"
 	},
 	"AddSub": {
