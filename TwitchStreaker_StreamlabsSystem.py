@@ -18,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.4.0"
+Version     = "2.4.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -81,6 +81,19 @@ def Init():
 		Log("Bot or Streamer Account are not connected, please check your connections and reload the script!")
 		return
 	ChannelName  = ChannelName.lower()
+
+	EventReceiver                               = StreamlabsEventClient()
+	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
+	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
+	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
+	EventReceiver.Connect(Settings["SocketToken"])
+
+
+def ReInit():
+	global ChannelName, EventReceiver, Settings
+
+	if ChannelName is None: return
+	ChannelName = ChannelName.lower()
 
 	EventReceiver                               = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -281,10 +294,11 @@ def UpdateOverlay():
 # Tick
 # ----
 def Tick():
-	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global ChannelName, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
+		if ChannelName is None: ReInit()
 		UpdateOverlay()
 
 	# Timed Session Save
