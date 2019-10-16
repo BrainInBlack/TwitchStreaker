@@ -1,10 +1,15 @@
 # Changelog
 
+## 2.4.1 - Fixes
+
+* Script will attempt to re-initialize on a 5 second interval, to remove the need of reloading the script when the connection was lost.
+* Script will abort the initialization, if the bot is not connected properly. (Undocumented Change from previous release)
+
 ## 2.4.0 - Tiered ReSubs
 
 * Added Options to give resubs a separate value than new subs.
-* Changed Init function to cancel if there are any issues that would prevent the script from running properly.
   * Resubs need to be enabled for this feature!
+* Changed Init function to cancel if there are any issues that would prevent the script from running properly.
 
 ## 2.3.2 - Improvements
 
