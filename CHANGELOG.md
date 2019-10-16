@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.4.0 - Tiered ReSubs
+
+* Added Options to give resubs a separate value than new subs.
+* Changed Init function to cancel if there are any issues that would prevent the script from running properly.
+  * Resubs need to be enabled for this feature!
+
 ## 2.3.2 - Improvements
 
 * Fixed Command parser only processing one keyword at a time

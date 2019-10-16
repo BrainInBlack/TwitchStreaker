@@ -18,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.3.2"
+Version     = "2.4.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -47,8 +47,11 @@ Settings = {
 	"GoalIncrement": 1,
 	"SocketToken": None,
 	"Tier1": 1,
+	"Resub1": 1,
 	"Tier2": 1,
-	"Tier3": 1
+	"Resub2": 1,
+	"Tier3": 1,
+	"Resub3": 1
 }
 RefreshDelay = 5
 RefreshStamp = None
@@ -66,23 +69,24 @@ def Init():
 	LoadSession()
 	SanityCheck()
 
+	ChannelName  = Parent.GetChannelName()
+	RefreshStamp = time.time()
+	SaveStamp    = time.time()
+
+	if Settings["SocketToken"] == "":
+		Log("No SocketToken found! Please follow the instructions in the README.md and reload the script!")
+		return
+
+	if ChannelName is None:
+		Log("Bot or Streamer Account are not connected, please check your connections and reload the script!")
+		return
+	ChannelName  = ChannelName.lower()
+
 	EventReceiver                               = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
 	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
 	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
-
-	if not Settings["SocketToken"] == "":
-		EventReceiver.Connect(Settings["SocketToken"])
-	else:
-		Log("No SocketToken! Please follow the instructions in the README.md")
-
-	SaveStamp    = time.time()
-	RefreshStamp = time.time()
-	ChannelName  = Parent.GetChannelName()
-	if ChannelName is None:
-		Log("Bot or Streamer Account are not connected, please check your connections!")
-	else:
-		ChannelName  = ChannelName.lower()
+	EventReceiver.Connect(Settings["SocketToken"])
 
 
 # ----------
@@ -117,14 +121,26 @@ def EventReceiverEvent(sender, args):
 						continue
 
 				if message.SubPlan == "1000" or message.SubPlan == "Prime":
-					Session["CurrentSubs"]      += Settings["Tier1"]
-					Session["CurrentTotalSubs"] += Settings["Tier1"]
+					if message.SubType == "resub":
+						Session["CurrentSubs"]      += Settings["Resub1"]
+						Session["CurrentTotalSubs"] += Settings["Resub1"]
+					else:
+						Session["CurrentSubs"]      += Settings["Tier1"]
+						Session["CurrentTotalSubs"] += Settings["Tier1"]
 				elif message.SubPlan == "2000":
-					Session["CurrentSubs"]      += Settings["Tier2"]
-					Session["CurrentTotalSubs"] += Settings["Tier2"]
+					if message.SubType == "resub":
+						Session["CurrentSubs"]      += Settings["Resub2"]
+						Session["CurrentTotalSubs"] += Settings["Resub2"]
+					else:
+						Session["CurrentSubs"]      += Settings["Tier2"]
+						Session["CurrentTotalSubs"] += Settings["Tier2"]
 				elif message.SubPlan == "3000":
-					Session["CurrentSubs"]      += Settings["Tier3"]
-					Session["CurrentTotalSubs"] += Settings["Tier3"]
+					if message.SubType == "resub":
+						Session["CurrentSubs"]      += Settings["Resub3"]
+						Session["CurrentTotalSubs"] += Settings["Resub3"]
+					else:
+						Session["CurrentSubs"]      += Settings["Tier3"]
+						Session["CurrentTotalSubs"] += Settings["Tier3"]
 				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
@@ -322,14 +338,29 @@ def SanityCheck():
 		Settings["Tier1"] = 1
 		is_settings_dirty = True
 
+	# Prevent Resub1 from being less than 1
+	if Settings["Resub1"]  < 1:
+		Settings["Resub1"] = 1
+		is_settings_dirty = True
+
 	# Prevent Tier2 from being less than 1
 	if Settings["Tier2"]  < 1:
 		Settings["Tier2"] = 1
 		is_settings_dirty = True
 
+	# Prevent Resub2 from being less than 1
+	if Settings["Resub2"]  < 1:
+		Settings["Resub2"] = 1
+		is_settings_dirty = True
+
 	# Prevent Tier3 from being less than 1
 	if Settings["Tier3"]  < 1:
 		Settings["Tier3"] = 1
+		is_settings_dirty = True
+
+	# Prevent Resub3 from being less than 1
+	if Settings["Resub3"]  < 1:
+		Settings["Resub3"] = 1
 		is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
@@ -381,6 +412,8 @@ def ResetSession():
 	Session["CurrentStreak"]    = 1
 	Session["CurrentTotalSubs"] = 0
 	SaveSession()
+	UpdateOverlay()
+	Log("Session Reset!")
 
 
 # ------------------
