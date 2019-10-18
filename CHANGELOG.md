@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.5.0 - Separated Subs
+
+This Update requires you to redo your Settings. The new Feature required for a bunch of Settings to be renamed, to make more sense when viewed in the config file and source code.
+
+* Changed how Subscriptions are counted for Twitch
+  * Subscription Tiers now can be separated between gifted-subs and self-subs
+
 ## 2.4.1 - Fixes
 
 * Script will attempt to re-initialize on a 5 second interval, to remove the need of reloading the script when the connection was lost.

@@ -18,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.4.1"
+Version     = "2.5.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -39,24 +39,37 @@ Session = {
 Settings = {
 	"CountDonations": False,
 	"CountDonationsOnce": False,
-	"CountResubs": False,
+	"CountReSubs": False,
 	"DonationMinAmount": 5.0,
 	"Goal": 10,
 	"GoalMin": 5,
 	"GoalMax": 10,
 	"GoalIncrement": 1,
 	"SocketToken": None,
-	"Tier1": 1,
-	"Resub1": 1,
-	"Tier2": 1,
-	"Resub2": 1,
-	"Tier3": 1,
-	"Resub3": 1
+	"Sub1": 1,
+	"Sub2": 1,
+	"Sub3": 1,
+	"ReSub1": 1,
+	"ReSub2": 1,
+	"ReSub3": 1,
+	"GiftSub1": 1,
+	"GiftSub2": 1,
+	"GiftSub3": 1,
+	"GiftReSub1": 1,
+	"GiftReSub2": 1,
+	"GiftReSub3": 1
 }
 RefreshDelay = 5
 RefreshStamp = None
 SaveDelay    = 300
 SaveStamp    = None
+
+TierArray = [
+	"Sub1", "Sub2", "Sub3",
+	"ReSub1", "ReSub2", "ReSub3",
+	"GiftSub1", "GiftSub2", "GiftSub3",
+	"GiftReSub1", "GiftReSub2", "GiftReSub3"
+]
 
 
 # ----------
@@ -133,27 +146,50 @@ def EventReceiverEvent(sender, args):
 						Log("Ignored Resub by {}".format(message.Name))
 						continue
 
-				if message.SubPlan == "1000" or message.SubPlan == "Prime":
-					if message.SubType == "resub":
-						Session["CurrentSubs"]      += Settings["Resub1"]
-						Session["CurrentTotalSubs"] += Settings["Resub1"]
+				if message.Gifter is None:
+					if message.SubType != "resub":
+						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["Sub1"]
+							Session["CurrentTotalSubs"] += Settings["Sub1"]
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["Sub2"]
+							Session["CurrentTotalSubs"] += Settings["Sub2"]
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["Sub3"]
+							Session["CurrentTotalSubs"] += Settings["Sub3"]
+					elif Settings["CountReSubs"]:
+						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["ReSub1"]
+							Session["CurrentTotalSubs"] += Settings["ReSub1"]
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["ReSub2"]
+							Session["CurrentTotalSubs"] += Settings["ReSub2"]
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["ReSub3"]
+							Session["CurrentTotalSubs"] += Settings["ReSub3"]
 					else:
-						Session["CurrentSubs"]      += Settings["Tier1"]
-						Session["CurrentTotalSubs"] += Settings["Tier1"]
-				elif message.SubPlan == "2000":
-					if message.SubType == "resub":
-						Session["CurrentSubs"]      += Settings["Resub2"]
-						Session["CurrentTotalSubs"] += Settings["Resub2"]
+						continue
+				else:
+					if message.SubType != "resub":
+						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftedSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftedSub1"]
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftedSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftedSub2"]
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftedSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftedSub3"]
 					else:
-						Session["CurrentSubs"]      += Settings["Tier2"]
-						Session["CurrentTotalSubs"] += Settings["Tier2"]
-				elif message.SubPlan == "3000":
-					if message.SubType == "resub":
-						Session["CurrentSubs"]      += Settings["Resub3"]
-						Session["CurrentTotalSubs"] += Settings["Resub3"]
-					else:
-						Session["CurrentSubs"]      += Settings["Tier3"]
-						Session["CurrentTotalSubs"] += Settings["Tier3"]
+						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftedReSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftedReSub1"]
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftedReSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftedReSub2"]
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftedReSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftedReSub3"]
 				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
@@ -173,8 +209,8 @@ def EventReceiverEvent(sender, args):
 					Log("Ignored Resub by {}".format(message.Name))
 					continue
 
-				Session["CurrentSubs"]      += 1
-				Session["CurrentTotalSubs"] += 1
+				Session["CurrentSubs"]      += Settings["Sub1"]
+				Session["CurrentTotalSubs"] += Settings["Sub1"]
 				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
@@ -194,8 +230,8 @@ def EventReceiverEvent(sender, args):
 					Log("Ignored Sponsor, Stream is not Live. (YT)")
 					continue
 
-				Session["CurrentSubs"]      += 1
-				Session["CurrentTotalSubs"] += 1
+				Session["CurrentSubs"]      += Settings["Sub1"]
+				Session["CurrentTotalSubs"] += Settings["Sub1"]
 				Log("Counted Sub by {}".format(message.Name))
 
 			UpdateOverlay()
@@ -311,7 +347,7 @@ def Tick():
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings
+	global Session, Settings, TierArray
 
 	is_session_dirty = False
 	is_settings_dirty = False
@@ -347,35 +383,11 @@ def SanityCheck():
 		Session["CurrentGoal"] = Settings["GoalMax"]
 		is_session_dirty = True
 
-	# Prevent Tier1 from being less than 1
-	if Settings["Tier1"]  < 1:
-		Settings["Tier1"] = 1
-		is_settings_dirty = True
-
-	# Prevent Resub1 from being less than 1
-	if Settings["Resub1"]  < 1:
-		Settings["Resub1"] = 1
-		is_settings_dirty = True
-
-	# Prevent Tier2 from being less than 1
-	if Settings["Tier2"]  < 1:
-		Settings["Tier2"] = 1
-		is_settings_dirty = True
-
-	# Prevent Resub2 from being less than 1
-	if Settings["Resub2"]  < 1:
-		Settings["Resub2"] = 1
-		is_settings_dirty = True
-
-	# Prevent Tier3 from being less than 1
-	if Settings["Tier3"]  < 1:
-		Settings["Tier3"] = 1
-		is_settings_dirty = True
-
-	# Prevent Resub3 from being less than 1
-	if Settings["Resub3"]  < 1:
-		Settings["Resub3"] = 1
-		is_settings_dirty = True
+	# Tier Validation
+	for tier in TierArray:
+		if tier < 1:
+			Settings[tier] = 1
+			is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
 	if Settings["GoalIncrement"] < 0:

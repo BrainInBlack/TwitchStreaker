@@ -24,11 +24,17 @@
 		"label": "Increment Goal By",
 		"tooltip": "Increments the Goal by the defined amount, each time a streak is completed.\n\n(Leave at zero to disable.)"
 	},
-	"CountResubs": {
+	"CountReSubs": {
 		"type": "checkbox",
 		"value": false,
 		"label": "Allow Resubs",
-		"tooltip": "Enables standard Resubs to be counted as well."
+		"tooltip": "Enables ReSubs to be counted as well.\n\n(Gifted-Sub will always be counted.)"
+	},
+	"CountSubsSeparate": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Count Subs Separately",
+		"tooltip": "Separates Self and Gifted Subs, allowing for each Category to have their own values."
 	},
 	"DonationMinAmount": {
 		"type": "numberbox",
@@ -55,47 +61,89 @@
 		"tooltip": "Insert your Streamlabs Socket Token.\n\n(You can find your Token under Settings > API Settings > API Tokens, on the Streamlabs Website.)",
 		"group": "Streamlabs"
 	},
-	"Tier1": {
+	"Sub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 1",
-		"tooltip": "Value for Tier 1 Subs.",
-		"group": "Tier Values"
+		"label": "Self-Sub Tier 1",
+		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"group": "Tier 1 Values"
 	},
-	"Resub1": {
+	"ReSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 1 Resub",
-		"tooltip": "Value for a Tier 1 Resub.",
-		"group": "Tier Values"
+		"label": "Self-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"group": "Tier 1 Values"
 	},
-	"Tier2": {
+	"GiftSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 2",
-		"tooltip": "Value for Tier 2 Subs.",
-		"group": "Tier Values"
+		"label": "Gift-Sub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-Sub.",
+		"group": "Tier 1 Values"
 	},
-	"Resub2": {
+	"GiftReSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 2 Resub",
-		"tooltip": "Value for a Tier 2 Resub.",
-		"group": "Tier Values"
+		"label": "Gifted-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"group": "Tier 1 Values"
 	},
-	"Tier3": {
+	"Sub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 3",
-		"tooltip": "Value for Tier 3 Subs.",
-		"group": "Tier Values"
+		"label": "Self-Sub Tier 1",
+		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"group": "Tier 2 Values"
 	},
-	"Resub3": {
+	"ReSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Tier 3 Resub",
-		"tooltip": "Value for a Tier 3 Resub.",
-		"group": "Tier Values"
+		"label": "Self-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"group": "Tier 2 Values"
+	},
+	"GiftSub2": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Gift-Sub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-Sub.",
+		"group": "Tier 2 Values"
+	},
+	"GiftReSub2": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Gifted-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"group": "Tier 2 Values"
+	},
+	"Sub3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Self-Sub Tier 1",
+		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"group": "Tier 3 Values"
+	},
+	"ReSub3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Self-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"group": "Tier 3 Values"
+	},
+	"GiftSub3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Gift-Sub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-Sub.",
+		"group": "Tier 3 Values"
+	},
+	"GiftReSub3": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Gifted-ReSub Tier 1",
+		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"group": "Tier 3 Values"
 	},
 	"AddSub": {
 		"type": "button",
