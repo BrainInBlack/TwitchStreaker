@@ -3,6 +3,21 @@
 # -------
 import codecs, json, math, os, sys, time
 
+# -----
+# Paths
+# -----
+ScriptFolder = os.path.dirname(__file__)
+TextFolder   = os.path.join(ScriptFolder, "Text/")
+
+SessionFile  = os.path.join(ScriptFolder, "Session.json")
+SettingsFile = os.path.join(ScriptFolder, "Settings.json")
+
+GoalFile      = os.path.join(TextFolder, "Goal.txt")
+SubsFile      = os.path.join(TextFolder, "Subs.txt")
+SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
+StreakFile    = os.path.join(TextFolder, "Streak.txt")
+TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
+
 
 # ----------
 # References
@@ -24,18 +39,6 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 # ----------------
 # Global Variables
 # ----------------
-ScriptFolder = os.path.dirname(__file__)
-TextFolder    = os.path.join(ScriptFolder, "Text/")
-
-SessionFile  = os.path.join(ScriptFolder, "Session.json")
-SettingsFile = os.path.join(ScriptFolder, "Settings.json")
-
-GoalFile      = os.path.join(TextFolder, "Goal.txt")
-SubsFile      = os.path.join(TextFolder, "Subs.txt")
-SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
-StreakFile    = os.path.join(TextFolder, "Streak.txt")
-TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
-
 ChannelName   = None
 EventReceiver = None
 Session = {
@@ -92,7 +95,7 @@ def Init():
 		return
 
 	if ChannelName is None:
-		Log("Bot or Streamer Account are not connected, please check your connections and reload the script!")
+		Log("Bot or Streamer Account are not connected, please check your connections!")
 		return
 	ChannelName  = ChannelName.lower()
 
@@ -462,7 +465,7 @@ def Tick():
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 		if ChannelName is None: ReInit()
-		UpdateOverlay() #! Needs to be before SaveText (refactor soon)
+		UpdateOverlay() #! Needs to be before SaveText, unless we split the update further apart
 		SaveText()
 
 	# Timed Session Save
@@ -611,6 +614,16 @@ def LoadSettings():
 			Settings = json.load(f, encoding="utf-8-sig")
 	except:
 		SaveSettings()
+
+	# Cleanup
+	dirty = False
+	for v in ["Tier1", "Tier2", "Tier3", "Resub1", "Resub2", "Resub3", "CountResubs", "CountFollows"]:
+		if Settings.has_key(v):
+			del Settings[v]
+			dirty = True
+
+	if dirty: SaveSettings()
+
 
 
 def SaveSettings():

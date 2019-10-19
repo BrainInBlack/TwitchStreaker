@@ -2,15 +2,21 @@
 
 ## 2.5.2 - Text Files
 
-* Added corresponding text files for each value that is available in the Overlay (see Text Folder)
+* Added text files for each value that is available in the Overlay (see Text Folder)
   * This allows for simple access to those values for other applications
-  * Text files are updated on a 5 second Timer
-* Removed UpdateOverlay from EventBus to prevent excess SocketEvents to be triggered
-  * This hopefully fixes the issue of the script seemingly breaking when a lot of subscriptions roll in at the same time
+  * Text files are updated every 5 seconds
+* Removed UpdateOverlay from EventBus to prevent excess SocketEvents
+  * This hopefully fixes the issue of the script breaking when a lot of subscriptions roll in at the same time
   * Overlay will update every 5 seconds
-  * Overwrites will update instantly
+  * Overwrites will update instantly, as the did before the change
 * Added Comments to the EventBus to make code navigation easier
 * Simplified file and folder path declarations
+* Added cleanup procedure for Settings, will remove no longer used Settings to keep the file clean (does not apply to Settings.js)
+
+* Added Library dependencies (untested)
+  * This should remove the requirement of changing the "Streamlabs Chatbot.exe.config" file
+  * However, I was not able to test this for myself in a reliable manner, meaning that this might not work
+  * Feedback is very welcome!
 
 ## 2.5.1 - Fixes
 
