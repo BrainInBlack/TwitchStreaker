@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.5.2 - Text Files
+
+* Added corresponding text files for each value that is available in the Overlay (see Text Folder)
+  * This allows for simple access to those values for other applications
+  * Text files are updated on a 5 second Timer
+* Removed UpdateOverlay from EventBus to prevent excess SocketEvents to be triggered
+  * This hopefully fixes the issue of the script seemingly breaking when a lot of subscriptions roll in at the same time
+  * Overlay will update every 5 seconds
+  * Overwrites will update instantly
+* Added Comments to the EventBus to make code navigation easier
+* Simplified file and folder path declarations
+
 ## 2.5.1 - Fixes
 
 * Fixed Issue with the script not registering certain types/tiers of Subs

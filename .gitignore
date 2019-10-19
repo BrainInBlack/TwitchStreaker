@@ -3,7 +3,10 @@
 .notes/
 .idea/
 
-# Exclude user specific Files
+# Exclude Folder
+Text/
+
+# Exclude Files
 API_Key.js
 Session.json
 Settings.js
