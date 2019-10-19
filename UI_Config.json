@@ -92,57 +92,57 @@
 	"Sub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-Sub Tier 1",
-		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"label": "Self-Sub Tier 2",
+		"tooltip": "Value for s Tier 2 Self-Sub.",
 		"group": "Tier 2 Values"
 	},
 	"ReSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"label": "Self-ReSub Tier 2",
+		"tooltip": "Value for a Tier 2 Self-ReSub.",
 		"group": "Tier 2 Values"
 	},
 	"GiftSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gift-Sub Tier 1",
-		"tooltip": "Value for a Tier 1 Gifted-Sub.",
+		"label": "Gift-Sub Tier 2",
+		"tooltip": "Value for a Tier 2 Gifted-Sub.",
 		"group": "Tier 2 Values"
 	},
 	"GiftReSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gifted-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"label": "Gifted-ReSub Tier 2",
+		"tooltip": "Value for a Tier 2 Gifted-ReSub.",
 		"group": "Tier 2 Values"
 	},
 	"Sub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-Sub Tier 1",
-		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"label": "Self-Sub Tier 3",
+		"tooltip": "Value for s Tier 3 Self-Sub.",
 		"group": "Tier 3 Values"
 	},
 	"ReSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"label": "Self-ReSub Tier 3",
+		"tooltip": "Value for a Tier 3 Self-ReSub.",
 		"group": "Tier 3 Values"
 	},
 	"GiftSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gift-Sub Tier 1",
-		"tooltip": "Value for a Tier 1 Gifted-Sub.",
+		"label": "Gift-Sub Tier 3",
+		"tooltip": "Value for a Tier 3 Gifted-Sub.",
 		"group": "Tier 3 Values"
 	},
 	"GiftReSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gifted-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"label": "Gifted-ReSub Tier 3",
+		"tooltip": "Value for a Tier 3 Gifted-ReSub.",
 		"group": "Tier 3 Values"
 	},
 	"AddSub": {

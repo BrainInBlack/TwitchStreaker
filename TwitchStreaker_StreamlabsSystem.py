@@ -18,7 +18,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.0"
+Version     = "2.5.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -133,64 +133,161 @@ def EventReceiverEvent(sender, args):
 					Log("Ignored Subscription, Stream is not Live")
 					continue
 
-				# GiftSub and Resub Checks
-				if message.Gifter is not None:
-					if message.Gifter.lower() == ChannelName and not message.IsTest:
+				# GiftSub
+				if message.SubType == "subgift":
+					if message.Gifter == ChannelName and not message.IsTest:
 						Log("Ignored StreamerGift from {}".format(message.Gifter))
 						continue
-					if message.Name.lower() == message.Gifter.lower() and not message.IsTest:
+					if message.Name == message.Gifter and not message.IsTest:
 						Log("Ignored SelfGift from {}".format(message.Gifter))
 						continue
-				else:
-					if message.SubType == "resub" and not Settings["CountResubs"] and not message.IsTest:
-						Log("Ignored Resub by {}".format(message.Name))
+
+				# ReSub
+				if message.SubType == "resub" and not Settings["CountReSubs"] and not message.IsTest:
+					Log("Ignored Resub by {}".format(message.Name))
+					continue
+
+				if message.SubType == "subgift":
+
+					if message.Months is not None:
+
+						if message.SubPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+
+						elif message.SubPlan == "1000":
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftReSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub2"]
+
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftReSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
+
+						else:
+							continue
+
+						Log("Counted {} for {}".format(message.SubType, message.Name))
+
+					else:
+
+						if message.SubPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+
+						elif message.SubPlan == "1000":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub2"]
+
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
+
+						else:
+							continue
+
+						Log("Counted {} for {}".format(message.SubType, message.Name))
+
+				elif message.SubType == "anonsubgift":
+
+					if message.Months is not None:
+
+						if message.SubPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+
+						elif message.SubPlan == "1000":
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftReSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub2"]
+
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftReSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
+
+						else:
+							continue
+
+						Log("Counted {} for {}".format(message.SubType, message.Name))
+
+					else:
+
+						if message.SubPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+
+						elif message.SubPlan == "1000":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftSub2"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub2"]
+
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftSub3"]
+							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
+
+						else:
+							continue
+
+						Log("Counted {} for {}".format(message.SubType, message.Name))
+
+				elif message.SubType == "resub":
+
+					if message.SubPlan == "Prime":
+						Session["CurrentSubs"]      += Settings["ReSub1"]
+						Session["CurrentTotalSubs"] += Settings["ReSub1"]
+
+					elif message.SubPlan == "1000":
+						Session["CurrentSubs"]      += Settings["ReSub1"]
+						Session["CurrentTotalSubs"] += Settings["ReSub1"]
+
+					elif message.SubPlan == "2000":
+						Session["CurrentSubs"]      += Settings["ReSub2"]
+						Session["CurrentTotalSubs"] += Settings["ReSub2"]
+
+					elif message.SubPlan == "3000":
+						Session["CurrentSubs"]      += Settings["ReSub3"]
+						Session["CurrentTotalSubs"] += Settings["ReSub3"]
+
+					else:
 						continue
 
-				if message.Gifter is None:
-					if message.SubType != "resub":
-						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["Sub1"]
-							Session["CurrentTotalSubs"] += Settings["Sub1"]
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["Sub2"]
-							Session["CurrentTotalSubs"] += Settings["Sub2"]
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["Sub3"]
-							Session["CurrentTotalSubs"] += Settings["Sub3"]
-					elif Settings["CountReSubs"]:
-						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["ReSub1"]
-							Session["CurrentTotalSubs"] += Settings["ReSub1"]
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["ReSub2"]
-							Session["CurrentTotalSubs"] += Settings["ReSub2"]
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["ReSub3"]
-							Session["CurrentTotalSubs"] += Settings["ReSub3"]
+					Log("Counted {} by {}".format(message.SubType, message.Name))
+
+				else:
+
+					if message.SubPlan == "Prime":
+						Session["CurrentSubs"]      += Settings["Sub1"]
+						Session["CurrentTotalSubs"] += Settings["Sub1"]
+
+					elif message.SubPlan == "1000":
+						Session["CurrentSubs"]      += Settings["Sub1"]
+						Session["CurrentTotalSubs"] += Settings["Sub1"]
+
+					elif message.SubPlan == "2000":
+						Session["CurrentSubs"]      += Settings["Sub2"]
+						Session["CurrentTotalSubs"] += Settings["Sub2"]
+
+					elif message.SubPlan == "3000":
+						Session["CurrentSubs"]      += Settings["Sub3"]
+						Session["CurrentTotalSubs"] += Settings["Sub3"]
+
 					else:
 						continue
-				else:
-					if message.SubType != "resub":
-						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftedSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftedSub1"]
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftedSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftedSub2"]
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftedSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftedSub3"]
-					else:
-						if message.SubPlan == "1000" or message.SubsPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftedReSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftedReSub1"]
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftedReSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftedReSub2"]
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftedReSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftedReSub3"]
-				Log("Counted Sub by {}".format(message.Name))
+
+					Log("Counted {} by {}".format(message.SubType, message.Name))
 
 			UpdateOverlay()
 		return # /Twitch
