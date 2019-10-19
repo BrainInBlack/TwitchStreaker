@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.1 - Fixes
+
+* Fixed Issue with the script not registering certain types/tiers of Subs
+  * The last few Updates broke a bunch of stuff, everything should be fixed now
+* Fixed Typo in Config UI
+
 ## 2.5.0 - Separated Subs
 
 This Update requires you to redo your Settings. The new Feature required for a bunch of Settings to be renamed, to make more sense when viewed in the config file and source code.
