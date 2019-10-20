@@ -3,6 +3,21 @@
 # -------
 import codecs, json, math, os, sys, time
 
+# -----
+# Paths
+# -----
+ScriptFolder = os.path.dirname(__file__)
+TextFolder   = os.path.join(ScriptFolder, "Text/")
+
+SessionFile  = os.path.join(ScriptFolder, "Session.json")
+SettingsFile = os.path.join(ScriptFolder, "Settings.json")
+
+GoalFile      = os.path.join(TextFolder, "Goal.txt")
+SubsFile      = os.path.join(TextFolder, "Subs.txt")
+SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
+StreakFile    = os.path.join(TextFolder, "Streak.txt")
+TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
+
 
 # ----------
 # References
@@ -18,15 +33,12 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.1"
+Version     = "2.5.2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
 # Global Variables
 # ----------------
-SessionFile   = os.path.join(os.path.dirname(__file__), "Session.json")
-SettingsFile  = os.path.join(os.path.dirname(__file__), "Settings.json")
-
 ChannelName   = None
 EventReceiver = None
 Session = {
@@ -46,18 +58,10 @@ Settings = {
 	"GoalMax": 10,
 	"GoalIncrement": 1,
 	"SocketToken": None,
-	"Sub1": 1,
-	"Sub2": 1,
-	"Sub3": 1,
-	"ReSub1": 1,
-	"ReSub2": 1,
-	"ReSub3": 1,
-	"GiftSub1": 1,
-	"GiftSub2": 1,
-	"GiftSub3": 1,
-	"GiftReSub1": 1,
-	"GiftReSub2": 1,
-	"GiftReSub3": 1
+	"Sub1": 1, "Sub2": 1, "Sub3": 1,
+	"ReSub1": 1, "ReSub2": 1, "ReSub3": 1,
+	"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
+	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1
 }
 RefreshDelay = 5
 RefreshStamp = None
@@ -91,7 +95,7 @@ def Init():
 		return
 
 	if ChannelName is None:
-		Log("Bot or Streamer Account are not connected, please check your connections and reload the script!")
+		Log("Bot or Streamer Account are not connected, please check your connections!")
 		return
 	ChannelName  = ChannelName.lower()
 
@@ -129,26 +133,33 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
+				# Live Check
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Subscription, Stream is not Live")
 					continue
 
-				# GiftSub
+				# GiftSub Check
 				if message.SubType == "subgift":
+
+					# Ignore Gifted Subs by Streamer
 					if message.Gifter == ChannelName and not message.IsTest:
 						Log("Ignored StreamerGift from {}".format(message.Gifter))
 						continue
+
+					# Ignore Self-Gifted Subs
 					if message.Name == message.Gifter and not message.IsTest:
 						Log("Ignored SelfGift from {}".format(message.Gifter))
 						continue
 
-				# ReSub
+				# ReSub Check
 				if message.SubType == "resub" and not Settings["CountReSubs"] and not message.IsTest:
 					Log("Ignored Resub by {}".format(message.Name))
 					continue
 
+				# Gifted Subs
 				if message.SubType == "subgift":
 
+					# GiftedSubs (normal)
 					if message.Months is not None:
 
 						if message.SubPlan == "Prime":
@@ -167,11 +178,15 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftReSub3"]
 							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
 
-						else:
+						else: # Skip if invalid plan
+							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
 						Log("Counted {} for {}".format(message.SubType, message.Name))
+						continue
+					# /GiftedSubs (normal)
 
+					# GiftedSubs (resubs)
 					else:
 
 						if message.SubPlan == "Prime":
@@ -190,13 +205,19 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftSub3"]
 							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
 
-						else:
+						else: # Skip if invalid plan
+							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
 						Log("Counted {} for {}".format(message.SubType, message.Name))
+						continue
+					# /GiftedSubs (resubs)
+				# GiftedSubs - END
 
+				# AnonGiftedSubs
 				elif message.SubType == "anonsubgift":
 
+					# AnonGiftedSubs (normal)
 					if message.Months is not None:
 
 						if message.SubPlan == "Prime":
@@ -215,11 +236,15 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftReSub3"]
 							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
 
-						else:
+						else: # Skip if invalid plan
+							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
 						Log("Counted {} for {}".format(message.SubType, message.Name))
+						continue
+					# /AnonGiftedSubs (normal)
 
+					# AnonGiftedSubs (resubs)
 					else:
 
 						if message.SubPlan == "Prime":
@@ -238,11 +263,16 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftSub3"]
 							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
 
-						else:
+						else: # Skip if invalid plan
+							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
 						Log("Counted {} for {}".format(message.SubType, message.Name))
+						continue
+					# /AnonGiftedSubs (resubs)
+				# AnonGiftedSubs - END
 
+				# ReSubs
 				elif message.SubType == "resub":
 
 					if message.SubPlan == "Prime":
@@ -261,11 +291,15 @@ def EventReceiverEvent(sender, args):
 						Session["CurrentSubs"]      += Settings["ReSub3"]
 						Session["CurrentTotalSubs"] += Settings["ReSub3"]
 
-					else:
+					else: # Skip if invalid plan
+						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 						continue
 
 					Log("Counted {} by {}".format(message.SubType, message.Name))
+					continue
+				# Resubs - END
 
+				# Subs
 				else:
 
 					if message.SubPlan == "Prime":
@@ -284,12 +318,14 @@ def EventReceiverEvent(sender, args):
 						Session["CurrentSubs"]      += Settings["Sub3"]
 						Session["CurrentTotalSubs"] += Settings["Sub3"]
 
-					else:
+					else: # Skip if invalid plan
+						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 						continue
 
 					Log("Counted {} by {}".format(message.SubType, message.Name))
+					continue
+				# Subs - END
 
-			UpdateOverlay()
 		return # /Twitch
 
 	# Mixer
@@ -310,7 +346,6 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalSubs"] += Settings["Sub1"]
 				Log("Counted Sub by {}".format(message.Name))
 
-			UpdateOverlay()
 		return # /Mixer
 
 	# Youtube
@@ -331,7 +366,6 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalSubs"] += Settings["Sub1"]
 				Log("Counted Sub by {}".format(message.Name))
 
-			UpdateOverlay()
 		return # /Youtube
 
 	# Streamlabs
@@ -351,7 +385,6 @@ def EventReceiverEvent(sender, args):
 					Session["CurrentTotalSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
-			UpdateOverlay()
 		return # /Streamlabs
 
 	Log("Unknown/Unsupported Platform {}!".format(data.For))
@@ -432,12 +465,43 @@ def Tick():
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 		if ChannelName is None: ReInit()
-		UpdateOverlay()
+		UpdateOverlay() #! Needs to be before SaveText, unless we split the update further apart
+		SaveText()
 
 	# Timed Session Save
 	if (time.time() - SaveStamp) > SaveDelay:
 		SaveSession()
 		SaveStamp = time.time()
+
+
+# --------
+# SaveText
+# --------
+def SaveText():
+	global Session, GoalFile, SubsFile, SubsLeftFile, StreakFile, TotalSubsFile, TextFolder
+
+	if not os.path.isdir(TextFolder):
+		os.mkdir(TextFolder)
+
+	with open(GoalFile, "w") as f:
+		f.write(str(Session["CurrentGoal"]))
+		f.close()
+
+	with open(SubsFile, "w") as f:
+		f.write(str(Session["CurrentSubs"]))
+		f.close()
+
+	with open(SubsLeftFile, "w") as f:
+		f.write(str(Session["CurrentSubsLeft"]))
+		f.close()
+
+	with open(StreakFile, "w") as f:
+		f.write(str(Session["CurrentStreak"]))
+		f.close()
+
+	with open(TotalSubsFile, "w") as f:
+		f.write(str(Session["CurrentTotalSubs"]))
+		f.close()
 
 
 # ------------
@@ -550,6 +614,16 @@ def LoadSettings():
 			Settings = json.load(f, encoding="utf-8-sig")
 	except:
 		SaveSettings()
+
+	# Cleanup
+	dirty = False
+	for v in ["Tier1", "Tier2", "Tier3", "Resub1", "Resub2", "Resub3", "CountResubs", "CountFollows"]:
+		if Settings.has_key(v):
+			del Settings[v]
+			dirty = True
+
+	if dirty: SaveSettings()
+
 
 
 def SaveSettings():
