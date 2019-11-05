@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.5.3 - Fixes
+
+* Total Subs now reflect the amount of subs gathered, instead of the point value assigned to them
+* Donations no longer have an impact on the Total Subs
+* Load Functions now close the file-handler properly
+
 ## 2.5.2 - Text Files
 
 * Added text files for each value that is available in the Overlay (see Text Folder)

@@ -33,7 +33,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.2"
+Version     = "2.5.3"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -159,51 +159,24 @@ def EventReceiverEvent(sender, args):
 				# Gifted Subs
 				if message.SubType == "subgift":
 
-					# GiftedSubs (normal)
+					# GiftedSubs (resubs)
 					if message.Months is not None:
 
 						if message.SubPlan == "Prime":
 							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "1000":
 							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "2000":
 							Session["CurrentSubs"]      += Settings["GiftReSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub2"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "3000":
 							Session["CurrentSubs"]      += Settings["GiftReSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
-
-						else: # Skip if invalid plan
-							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
-							continue
-
-						Log("Counted {} for {}".format(message.SubType, message.Name))
-						continue
-					# /GiftedSubs (normal)
-
-					# GiftedSubs (resubs)
-					else:
-
-						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
-
-						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
-
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub2"]
-
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
+							Session["CurrentTotalSubs"] += 1
 
 						else: # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
@@ -212,29 +185,25 @@ def EventReceiverEvent(sender, args):
 						Log("Counted {} for {}".format(message.SubType, message.Name))
 						continue
 					# /GiftedSubs (resubs)
-				# GiftedSubs - END
 
-				# AnonGiftedSubs
-				elif message.SubType == "anonsubgift":
-
-					# AnonGiftedSubs (normal)
-					if message.Months is not None:
+					# GiftedSubs (normal)
+					else:
 
 						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub1"]
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftReSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub2"]
+							Session["CurrentSubs"]      += Settings["GiftSub2"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftReSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftReSub3"]
+							Session["CurrentSubs"]      += Settings["GiftSub3"]
+							Session["CurrentTotalSubs"] += 1
 
 						else: # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
@@ -242,26 +211,30 @@ def EventReceiverEvent(sender, args):
 
 						Log("Counted {} for {}".format(message.SubType, message.Name))
 						continue
-					# /AnonGiftedSubs (normal)
+					# /GiftedSubs (normal)
+				# GiftedSubs - END
+
+				# AnonGiftedSubs
+				elif message.SubType == "anonsubgift":
 
 					# AnonGiftedSubs (resubs)
-					else:
+					if message.Months is not None:
 
 						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub1"]
+							Session["CurrentSubs"]      += Settings["GiftReSub1"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftSub2"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub2"]
+							Session["CurrentSubs"]      += Settings["GiftReSub2"]
+							Session["CurrentTotalSubs"] += 1
 
 						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftSub3"]
-							Session["CurrentTotalSubs"] += Settings["GiftSub3"]
+							Session["CurrentSubs"]      += Settings["GiftReSub3"]
+							Session["CurrentTotalSubs"] += 1
 
 						else: # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
@@ -270,6 +243,33 @@ def EventReceiverEvent(sender, args):
 						Log("Counted {} for {}".format(message.SubType, message.Name))
 						continue
 					# /AnonGiftedSubs (resubs)
+
+					# AnonGiftedSubs (normal)
+					else:
+
+						if message.SubPlan == "Prime":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += 1
+
+						elif message.SubPlan == "1000":
+							Session["CurrentSubs"]      += Settings["GiftSub1"]
+							Session["CurrentTotalSubs"] += 1
+
+						elif message.SubPlan == "2000":
+							Session["CurrentSubs"]      += Settings["GiftSub2"]
+							Session["CurrentTotalSubs"] += 1
+
+						elif message.SubPlan == "3000":
+							Session["CurrentSubs"]      += Settings["GiftSub3"]
+							Session["CurrentTotalSubs"] += 1
+
+						else: # Skip if invalid plan
+							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
+							continue
+
+						Log("Counted {} for {}".format(message.SubType, message.Name))
+						continue
+					# /AnonGiftedSubs (normal)
 				# AnonGiftedSubs - END
 
 				# ReSubs
@@ -277,19 +277,19 @@ def EventReceiverEvent(sender, args):
 
 					if message.SubPlan == "Prime":
 						Session["CurrentSubs"]      += Settings["ReSub1"]
-						Session["CurrentTotalSubs"] += Settings["ReSub1"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "1000":
 						Session["CurrentSubs"]      += Settings["ReSub1"]
-						Session["CurrentTotalSubs"] += Settings["ReSub1"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "2000":
 						Session["CurrentSubs"]      += Settings["ReSub2"]
-						Session["CurrentTotalSubs"] += Settings["ReSub2"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "3000":
 						Session["CurrentSubs"]      += Settings["ReSub3"]
-						Session["CurrentTotalSubs"] += Settings["ReSub3"]
+						Session["CurrentTotalSubs"] += 1
 
 					else: # Skip if invalid plan
 						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
@@ -304,19 +304,19 @@ def EventReceiverEvent(sender, args):
 
 					if message.SubPlan == "Prime":
 						Session["CurrentSubs"]      += Settings["Sub1"]
-						Session["CurrentTotalSubs"] += Settings["Sub1"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "1000":
 						Session["CurrentSubs"]      += Settings["Sub1"]
-						Session["CurrentTotalSubs"] += Settings["Sub1"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "2000":
 						Session["CurrentSubs"]      += Settings["Sub2"]
-						Session["CurrentTotalSubs"] += Settings["Sub2"]
+						Session["CurrentTotalSubs"] += 1
 
 					elif message.SubPlan == "3000":
 						Session["CurrentSubs"]      += Settings["Sub3"]
-						Session["CurrentTotalSubs"] += Settings["Sub3"]
+						Session["CurrentTotalSubs"] += 1
 
 					else: # Skip if invalid plan
 						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
@@ -343,7 +343,7 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				Session["CurrentSubs"]      += Settings["Sub1"]
-				Session["CurrentTotalSubs"] += Settings["Sub1"]
+				Session["CurrentTotalSubs"] += 1
 				Log("Counted Sub by {}".format(message.Name))
 
 		return # /Mixer
@@ -363,7 +363,7 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				Session["CurrentSubs"]      += Settings["Sub1"]
-				Session["CurrentTotalSubs"] += Settings["Sub1"]
+				Session["CurrentTotalSubs"] += 1
 				Log("Counted Sub by {}".format(message.Name))
 
 		return # /Youtube
@@ -381,8 +381,7 @@ def EventReceiverEvent(sender, args):
 				if message.Amount > Settings["DonationMinAmount"]:
 					if Settings["CountDonationsOnce"]: res = 1
 					else: res = math.trunc(message.Amount / Settings["DonationMinAmount"])
-					Session["CurrentSubs"]      += res
-					Session["CurrentTotalSubs"] += res
+					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
 		return # /Streamlabs
@@ -456,24 +455,6 @@ def UpdateOverlay():
 	RefreshStamp = time.time()
 
 
-# ----
-# Tick
-# ----
-def Tick():
-	global ChannelName, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
-
-	# Timed Overlay Update
-	if (time.time() - RefreshStamp) > RefreshDelay:
-		if ChannelName is None: ReInit()
-		UpdateOverlay() #! Needs to be before SaveText, unless we split the update further apart
-		SaveText()
-
-	# Timed Session Save
-	if (time.time() - SaveStamp) > SaveDelay:
-		SaveSession()
-		SaveStamp = time.time()
-
-
 # --------
 # SaveText
 # --------
@@ -502,6 +483,24 @@ def SaveText():
 	with open(TotalSubsFile, "w") as f:
 		f.write(str(Session["CurrentTotalSubs"]))
 		f.close()
+
+
+# ----
+# Tick
+# ----
+def Tick():
+	global ChannelName, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+
+	# Timed Overlay Update
+	if (time.time() - RefreshStamp) > RefreshDelay:
+		if ChannelName is None: ReInit()
+		UpdateOverlay() #! Needs to be before SaveText, unless we split the update further apart
+		SaveText()
+
+	# Timed Session Save
+	if (time.time() - SaveStamp) > SaveDelay:
+		SaveSession()
+		SaveStamp = time.time()
 
 
 # ------------
@@ -575,6 +574,7 @@ def LoadSession():
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			Session = json.load(f, encoding="utf-8-sig")
 			Session["CurrentGoal"] = Settings["Goal"]
+			f.close()
 	except:
 		SaveSession()
 
@@ -612,6 +612,7 @@ def LoadSettings():
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
+			f.close()
 	except:
 		SaveSettings()
 
