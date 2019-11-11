@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.4 - Double GiftSub Fix
+
+* Fixed an issue with gift subs
+
 ## 2.5.3 - Fixes
 
 * Total Subs now reflect the amount of subs gathered, instead of the point value assigned to them
