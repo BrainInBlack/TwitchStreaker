@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.4 - More Fixes
+
+* Reverted the "fix" for Subs getting registered that aren't supposed to be tracked (2.5.3)
+
 ## 2.5.3 - Fixes
 
 * Total Subs now reflect the amount of subs gathered, instead of the point value assigned to them
