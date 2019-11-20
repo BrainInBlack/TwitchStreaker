@@ -33,7 +33,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.3"
+Version     = "2.5.4"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -300,7 +300,7 @@ def EventReceiverEvent(sender, args):
 				# Resubs - END
 
 				# Subs
-				elif message.SubType == "subscription":
+				else:
 
 					if message.SubPlan == "Prime":
 						Session["CurrentSubs"]      += Settings["Sub1"]
@@ -325,10 +325,6 @@ def EventReceiverEvent(sender, args):
 					Log("Counted {} by {}".format(message.SubType, message.Name))
 					continue
 				# Subs - END
-
-				else:
-
-					Log("Unknown SubType: {}".format(message.SubType))
 
 		return # /Twitch
 
