@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.5.5 - Improvements
+
+* Fixed ReInit not setting the channel name
+* Improved Settings CleanUp
+
 ## 2.5.4 - More Fixes
 
 * Reverted the "fix" for Subs getting registered that aren't supposed to be tracked (2.5.3)
