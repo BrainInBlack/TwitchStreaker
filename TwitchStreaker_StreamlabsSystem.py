@@ -6,18 +6,17 @@ import codecs, json, math, os, sys, time
 # -----
 # Paths
 # -----
-ScriptFolder = os.path.dirname(__file__)
-TextFolder   = os.path.join(ScriptFolder, "Text/")
+ScriptFolder  = os.path.dirname(__file__)
+TextFolder    = os.path.join(ScriptFolder, "Text/")
 
-SessionFile  = os.path.join(ScriptFolder, "Session.json")
-SettingsFile = os.path.join(ScriptFolder, "Settings.json")
+SessionFile   = os.path.join(ScriptFolder, "Session.json")
+SettingsFile  = os.path.join(ScriptFolder, "Settings.json")
 
 GoalFile      = os.path.join(TextFolder, "Goal.txt")
 SubsFile      = os.path.join(TextFolder, "Subs.txt")
 SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
 StreakFile    = os.path.join(TextFolder, "Streak.txt")
 TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
-
 
 # ----------
 # References
@@ -33,13 +32,13 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.4"
+Version     = "2.5.5"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
 # Global Variables
 # ----------------
-ChannelName   = None
+ChannelName = None
 EventReceiver = None
 Session = {
 	"CurrentGoal": 10,
@@ -97,7 +96,7 @@ def Init():
 	if ChannelName is None:
 		Log("Bot or Streamer Account are not connected, please check your connections!")
 		return
-	ChannelName  = ChannelName.lower()
+	ChannelName = ChannelName.lower()
 
 	EventReceiver                               = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -109,10 +108,11 @@ def Init():
 def ReInit():
 	global ChannelName, EventReceiver, Settings
 
+	ChannelName = Parent.GetChannelName()
 	if ChannelName is None: return
 	ChannelName = ChannelName.lower()
 
-	EventReceiver                               = StreamlabsEventClient()
+	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
 	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
 	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
@@ -178,7 +178,7 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftReSub3"]
 							Session["CurrentTotalSubs"] += 1
 
-						else: # Skip if invalid plan
+						else:  # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
@@ -205,7 +205,7 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftSub3"]
 							Session["CurrentTotalSubs"] += 1
 
-						else: # Skip if invalid plan
+						else:  # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
@@ -236,7 +236,7 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftReSub3"]
 							Session["CurrentTotalSubs"] += 1
 
-						else: # Skip if invalid plan
+						else:  # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
@@ -263,7 +263,7 @@ def EventReceiverEvent(sender, args):
 							Session["CurrentSubs"]      += Settings["GiftSub3"]
 							Session["CurrentTotalSubs"] += 1
 
-						else: # Skip if invalid plan
+						else:  # Skip if invalid plan
 							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 							continue
 
@@ -291,7 +291,7 @@ def EventReceiverEvent(sender, args):
 						Session["CurrentSubs"]      += Settings["ReSub3"]
 						Session["CurrentTotalSubs"] += 1
 
-					else: # Skip if invalid plan
+					else:  # Skip if invalid plan
 						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 						continue
 
@@ -318,7 +318,7 @@ def EventReceiverEvent(sender, args):
 						Session["CurrentSubs"]      += Settings["Sub3"]
 						Session["CurrentTotalSubs"] += 1
 
-					else: # Skip if invalid plan
+					else:  # Skip if invalid plan
 						Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
 						continue
 
@@ -326,7 +326,7 @@ def EventReceiverEvent(sender, args):
 					continue
 				# Subs - END
 
-		return # /Twitch
+		return  # /Twitch
 
 	# Mixer
 	if data.For == "mixer_account":
@@ -346,7 +346,7 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalSubs"] += 1
 				Log("Counted Sub by {}".format(message.Name))
 
-		return # /Mixer
+		return  # /Mixer
 
 	# Youtube
 	if data.For == "youtube_account":
@@ -366,7 +366,7 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalSubs"] += 1
 				Log("Counted Sub by {}".format(message.Name))
 
-		return # /Youtube
+		return  # /Youtube
 
 	# Streamlabs
 	if data.For == "streamlabs":
@@ -384,7 +384,7 @@ def EventReceiverEvent(sender, args):
 					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
-		return # /Streamlabs
+		return  # /Streamlabs
 
 	Log("Unknown/Unsupported Platform {}!".format(data.For))
 
@@ -499,7 +499,7 @@ def Tick():
 			ReInit()
 			if ChannelName is None: return
 
-		UpdateOverlay() #! Needs to be before SaveText, unless we split the update further apart
+		UpdateOverlay()  # ! Needs to be before SaveText, unless we split the update further apart
 		SaveText()
 
 	# Timed Session Save
@@ -526,38 +526,38 @@ def SanityCheck():
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
 		Settings["GoalMin"] = 1
-		is_settings_dirty = True
+		is_settings_dirty   = True
 
 	# Prevent GoalMin from being higher than the Goal
 	if Settings["GoalMin"]  > Settings["Goal"]:
 		Settings["GoalMin"] = Settings["Goal"]
-		is_settings_dirty = True
+		is_settings_dirty   = True
 
 	# Prevent GoalMax from being lower than the Goal
 	if Settings["GoalMax"]  < Settings["Goal"]:
 		Settings["GoalMax"] = Settings["Goal"]
-		is_settings_dirty = True
+		is_settings_dirty   = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
 	if Session["CurrentGoal"]  < Settings["GoalMin"]:
 		Session["CurrentGoal"] = Settings["GoalMin"]
-		is_session_dirty = True
+		is_session_dirty       = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
 	if Session["CurrentGoal"]  > Settings["GoalMax"]:
 		Session["CurrentGoal"] = Settings["GoalMax"]
-		is_session_dirty = True
+		is_session_dirty       = True
 
 	# Tier Validation
 	for tier in TierArray:
 		if tier < 1:
-			Settings[tier] = 1
+			Settings[tier]    = 1
 			is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
-	if Settings["GoalIncrement"] < 0:
+	if Settings["GoalIncrement"]  < 0:
 		Settings["GoalIncrement"] = 0
-		is_settings_dirty = True
+		is_settings_dirty         = True
 
 	# Save Session/Settings if dirty
 	if is_session_dirty:
@@ -616,20 +616,22 @@ def LoadSettings():
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
-			Settings = json.load(f, encoding="utf-8-sig")
+			newSettings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except:
 		SaveSettings()
 
 	# Cleanup
 	dirty = False
-	for v in ["Tier1", "Tier2", "Tier3", "Resub1", "Resub2", "Resub3", "CountResubs", "CountFollows"]:
-		if Settings.has_key(v):
-			del Settings[v]
-			dirty = True
+	diff = set(newSettings) ^ set(Settings)
+	if len(diff) > 0:
+		for k in diff:
+			if k in newSettings:
+				del newSettings[k]
+				dirty = True
+	Settings = newSettings
 
 	if dirty: SaveSettings()
-
 
 
 def SaveSettings():
@@ -736,6 +738,7 @@ def Unload():
 # -------
 def Execute(data):
 	return
+
 
 # -----------
 # Log Wrapper

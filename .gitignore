@@ -2,6 +2,7 @@
 .vscode/
 .notes/
 .idea/
+venv/
 
 # Exclude Folder
 Text/
