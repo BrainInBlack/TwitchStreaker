@@ -518,10 +518,10 @@ def SanityCheck():
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
+	if Settings is None:  # * Has to be loaded first
+		LoadSettings()
 	if Session is None:
 		LoadSession()
-	if Settings is None:
-		LoadSettings()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
