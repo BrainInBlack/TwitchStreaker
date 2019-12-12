@@ -1,7 +1,7 @@
 # -------
 # Imports
 # -------
-import codecs, json, math, os, sys, time
+import codecs, json, math, os, time
 
 # -----
 # Paths
@@ -32,7 +32,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.5"
+Version     = "2.5.6"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 # ----------------
@@ -616,20 +616,20 @@ def LoadSettings():
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
-			newSettings = json.load(f, encoding="utf-8-sig")
+			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except:
 		SaveSettings()
 
 	# Cleanup
 	dirty = False
-	diff = set(newSettings) ^ set(Settings)
+	diff = set(new_settings) ^ set(Settings)
 	if len(diff) > 0:
 		for k in diff:
-			if k in newSettings:
-				del newSettings[k]
+			if k in new_settings:
+				del new_settings[k]
 				dirty = True
-	Settings = newSettings
+	Settings = new_settings
 
 	if dirty: SaveSettings()
 
