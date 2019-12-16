@@ -4,7 +4,8 @@
 
 * Variable cleanup
 * Removed unused import
-* Fixed loadorder
+* Fixed load order
+* Cleanup
 
 ## 2.5.5 - Improvements
 

@@ -109,7 +109,8 @@ def ReInit():
 	global ChannelName, EventReceiver, Settings
 
 	ChannelName = Parent.GetChannelName()
-	if ChannelName is None: return
+	if ChannelName is None:
+		return
 	ChannelName = ChannelName.lower()
 
 	EventReceiver = StreamlabsEventClient()
@@ -379,8 +380,9 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					if Settings["CountDonationsOnce"]: res = 1
-					else: res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+					res = 1
+					if not Settings["CountDonationsOnce"]:
+						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
@@ -497,7 +499,8 @@ def Tick():
 		# ReInit
 		if ChannelName is None:
 			ReInit()
-			if ChannelName is None: return
+			if ChannelName is None:
+				return
 
 		UpdateOverlay()  # ! Needs to be before SaveText, unless we split the update further apart
 		SaveText()
@@ -518,7 +521,7 @@ def SanityCheck():
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
-	if Settings is None:  # * Has to be loaded first
+	if Settings is None:  # ! Has to be loaded first
 		LoadSettings()
 	if Session is None:
 		LoadSession()
@@ -631,7 +634,8 @@ def LoadSettings():
 				dirty = True
 	Settings = new_settings
 
-	if dirty: SaveSettings()
+	if dirty:
+		SaveSettings()
 
 
 def SaveSettings():
