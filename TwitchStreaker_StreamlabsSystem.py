@@ -67,6 +67,10 @@ RefreshStamp = None
 SaveDelay    = 300
 SaveStamp    = None
 
+# ------------------
+# Internal Variables
+# ------------------
+ScriptReady = False
 TierArray = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
@@ -79,39 +83,42 @@ TierArray = [
 # Initiation
 # ----------
 def Init():
-	global ChannelName, EventReceiver, Settings, RefreshStamp, SaveStamp
+	global RefreshStamp, SaveStamp
 
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
 
-	ChannelName  = Parent.GetChannelName()
 	RefreshStamp = time.time()
 	SaveStamp    = time.time()
 
-	if Settings["SocketToken"] == "":
-		Log("No SocketToken found! Please follow the instructions in the README.md and reload the script!")
+	StartUp()
+
+
+def ReadyCheck():
+	global ChannelName, ScriptReady, Settings
+
+	if len(Settings["SocketToken"]) <= 5:
+		Log("Socket Token is missing. Please read the README.md for further instructions.")
+		ScriptReady = False
 		return
-
-	if ChannelName is None:
-		Log("Bot or Streamer Account are not connected, please check your connections!")
-		return
-	ChannelName = ChannelName.lower()
-
-	EventReceiver                               = StreamlabsEventClient()
-	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
-	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
-	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
-	EventReceiver.Connect(Settings["SocketToken"])
-
-
-def ReInit():
-	global ChannelName, EventReceiver, Settings
 
 	ChannelName = Parent.GetChannelName()
 	if ChannelName is None:
+		Log("Streamer or Bot Account are not connected. Please check the Account connections in the Chatbot.")
+		ScriptReady = False
 		return
+
 	ChannelName = ChannelName.lower()
+	ScriptReady = True
+
+
+def StartUp():
+	global EventReceiver, ScriptReady, Settings
+
+	ReadyCheck()
+	if not ScriptReady:
+		return
 
 	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -491,16 +498,14 @@ def SaveText():
 # Tick
 # ----
 def Tick():
-	global ChannelName, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
 
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 
 		# ReInit
-		if ChannelName is None:
-			ReInit()
-			if ChannelName is None:
-				return
+		if not ScriptReady:
+			StartUp()
 
 		UpdateOverlay()  # ! Needs to be before SaveText, unless we split the update further apart
 		SaveText()
@@ -590,8 +595,8 @@ def LoadSession():
 def SaveSession():
 	global Session, SessionFile
 
-	with open(SessionFile, "w") as f:
-		json.dump(Session, f, sort_keys=True, indent=4)
+	with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
+		json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 		f.close()
 
 
@@ -641,8 +646,8 @@ def LoadSettings():
 def SaveSettings():
 	global Settings, SettingsFile
 
-	with codecs.open(SettingsFile, "w") as f:
-		json.dump(Settings, f, sort_keys=True, indent=4)
+	with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
+		json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 		f.close()
 
 

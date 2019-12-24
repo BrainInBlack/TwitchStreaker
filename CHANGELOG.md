@@ -2,7 +2,7 @@
 
 ## 2.5.6 - Improvements
 
-* Variable cleanup
+* Improved script start
 * Removed unused import
 * Fixed load order
 * Cleanup
