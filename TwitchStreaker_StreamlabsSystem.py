@@ -412,6 +412,30 @@ def EventReceiverDisconnected(sender, args):
 	Log("Disconnected")
 
 
+# ----
+# Tick
+# ----
+def Tick():
+	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
+
+	# Timed Overlay Update
+	if (time.time() - RefreshStamp) > RefreshDelay:
+
+		# ReInit
+		if not ScriptReady:
+			StartUp()
+
+		# Update Everything
+		CalculateStreak()
+		UpdateOverlay()
+		SaveText()
+
+	# Timed Session Save
+	if (time.time() - SaveStamp) > SaveDelay:
+		SaveSession()
+		SaveStamp = time.time()
+
+
 # ---------------
 # Parse Parameter
 # ---------------
@@ -440,11 +464,20 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
-	global Session, Settings, RefreshStamp
+	global Session, RefreshStamp
+
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	RefreshStamp = time.time() # Prevents needles updates while using the overwrite functions
+
+
+# ----------------
+# Calculate Streak
+# ----------------
+def CalculateStreak():
+	global Session, Settings
 
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
-	# Streak Calculations
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]   -= Session["CurrentGoal"]
 
@@ -458,10 +491,6 @@ def UpdateOverlay():
 
 		# Increment Streak
 		Session["CurrentStreak"] += 1
-
-	# Send Update and refresh Timestamp
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	RefreshStamp = time.time()
 
 
 # --------
@@ -492,28 +521,6 @@ def SaveText():
 	with open(TotalSubsFile, "w") as f:
 		f.write(str(Session["CurrentTotalSubs"]))
 		f.close()
-
-
-# ----
-# Tick
-# ----
-def Tick():
-	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
-
-	# Timed Overlay Update
-	if (time.time() - RefreshStamp) > RefreshDelay:
-
-		# ReInit
-		if not ScriptReady:
-			StartUp()
-
-		UpdateOverlay()  # ! Needs to be before SaveText, unless we split the update further apart
-		SaveText()
-
-	# Timed Session Save
-	if (time.time() - SaveStamp) > SaveDelay:
-		SaveSession()
-		SaveStamp = time.time()
 
 
 # ------------
@@ -662,6 +669,7 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
+	CalculateStreak()
 	UpdateOverlay()
 
 
@@ -669,6 +677,7 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -678,18 +687,21 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
+	CalculateStreak()
 	UpdateOverlay()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
+	CalculateStreak()
 	UpdateOverlay()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
+	CalculateStreak()
 	UpdateOverlay()
 
 
@@ -697,6 +709,7 @@ def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -704,6 +717,7 @@ def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -711,6 +725,7 @@ def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -721,6 +736,7 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -728,6 +744,7 @@ def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
