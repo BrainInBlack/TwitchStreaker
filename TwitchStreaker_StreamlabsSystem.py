@@ -3,6 +3,7 @@
 # -------
 import codecs, json, math, os, time
 
+
 # -----
 # Paths
 # -----
@@ -18,6 +19,7 @@ SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
 StreakFile    = os.path.join(TextFolder, "Streak.txt")
 TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
 
+
 # ----------
 # References
 # ----------
@@ -25,6 +27,7 @@ import clr
 clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
+
 
 # -----------
 # Script Info
@@ -34,6 +37,7 @@ Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
 Version     = "2.5.6"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
+
 
 # ----------------
 # Global Variables
@@ -66,6 +70,7 @@ RefreshDelay = 5
 RefreshStamp = None
 SaveDelay    = 300
 SaveStamp    = None
+
 
 # ------------------
 # Internal Variables
@@ -127,9 +132,9 @@ def StartUp():
 	EventReceiver.Connect(Settings["SocketToken"])
 
 
-# ----------
-# Event Main
-# ----------
+# ---------
+# Event Bus
+# ---------
 def EventReceiverEvent(sender, args):
 	global ChannelName, Session, Settings
 

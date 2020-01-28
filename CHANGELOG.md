@@ -3,6 +3,7 @@
 ## 2.5.6 - Improvements
 
 * Improved script start
+* Improved update functions
 * Removed unused import
 * Fixed load order
 * Cleanup
