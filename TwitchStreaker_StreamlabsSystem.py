@@ -1,7 +1,8 @@
 # -------
 # Imports
 # -------
-import codecs, json, math, os, sys, time
+import codecs, json, math, os, time
+
 
 # -----
 # Paths
@@ -18,6 +19,7 @@ SubsLeftFile  = os.path.join(TextFolder, "SubsLeft.txt")
 StreakFile    = os.path.join(TextFolder, "Streak.txt")
 TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
 
+
 # ----------
 # References
 # ----------
@@ -26,14 +28,16 @@ clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
+
 # -----------
 # Script Info
 # -----------
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.5"
+Version     = "2.5.6"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
+
 
 # ----------------
 # Global Variables
@@ -67,6 +71,11 @@ RefreshStamp = None
 SaveDelay    = 300
 SaveStamp    = None
 
+
+# ------------------
+# Internal Variables
+# ------------------
+ScriptReady = False
 TierArray = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
@@ -79,38 +88,42 @@ TierArray = [
 # Initiation
 # ----------
 def Init():
-	global ChannelName, EventReceiver, Settings, RefreshStamp, SaveStamp
+	global RefreshStamp, SaveStamp
 
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
 
-	ChannelName  = Parent.GetChannelName()
 	RefreshStamp = time.time()
 	SaveStamp    = time.time()
 
-	if Settings["SocketToken"] == "":
-		Log("No SocketToken found! Please follow the instructions in the README.md and reload the script!")
+	StartUp()
+
+
+def ReadyCheck():
+	global ChannelName, ScriptReady, Settings
+
+	if len(Settings["SocketToken"]) <= 5:
+		Log("Socket Token is missing. Please read the README.md for further instructions.")
+		ScriptReady = False
 		return
-
-	if ChannelName is None:
-		Log("Bot or Streamer Account are not connected, please check your connections!")
-		return
-	ChannelName = ChannelName.lower()
-
-	EventReceiver                               = StreamlabsEventClient()
-	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
-	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
-	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
-	EventReceiver.Connect(Settings["SocketToken"])
-
-
-def ReInit():
-	global ChannelName, EventReceiver, Settings
 
 	ChannelName = Parent.GetChannelName()
-	if ChannelName is None: return
+	if ChannelName is None:
+		Log("Streamer or Bot Account are not connected. Please check the Account connections in the Chatbot.")
+		ScriptReady = False
+		return
+
 	ChannelName = ChannelName.lower()
+	ScriptReady = True
+
+
+def StartUp():
+	global EventReceiver, ScriptReady, Settings
+
+	ReadyCheck()
+	if not ScriptReady:
+		return
 
 	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -119,9 +132,9 @@ def ReInit():
 	EventReceiver.Connect(Settings["SocketToken"])
 
 
-# ----------
-# Event Main
-# ----------
+# ---------
+# Event Bus
+# ---------
 def EventReceiverEvent(sender, args):
 	global ChannelName, Session, Settings
 
@@ -379,8 +392,9 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					if Settings["CountDonationsOnce"]: res = 1
-					else: res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+					res = 1
+					if not Settings["CountDonationsOnce"]:
+						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
@@ -401,6 +415,30 @@ def EventReceiverConnected(sender, args):
 # ------------------
 def EventReceiverDisconnected(sender, args):
 	Log("Disconnected")
+
+
+# ----
+# Tick
+# ----
+def Tick():
+	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
+
+	# Timed Overlay Update
+	if (time.time() - RefreshStamp) > RefreshDelay:
+
+		# ReInit
+		if not ScriptReady:
+			StartUp()
+
+		# Update Everything
+		CalculateStreak()
+		UpdateOverlay()
+		SaveText()
+
+	# Timed Session Save
+	if (time.time() - SaveStamp) > SaveDelay:
+		SaveSession()
+		SaveStamp = time.time()
 
 
 # ---------------
@@ -431,11 +469,20 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Update Overlay
 # --------------
 def UpdateOverlay():
-	global Session, Settings, RefreshStamp
+	global Session, RefreshStamp
+
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	RefreshStamp = time.time() # Prevents needles updates while using the overwrite functions
+
+
+# ----------------
+# Calculate Streak
+# ----------------
+def CalculateStreak():
+	global Session, Settings
 
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
-	# Streak Calculations
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
 		Session["CurrentSubs"]   -= Session["CurrentGoal"]
 
@@ -449,10 +496,6 @@ def UpdateOverlay():
 
 		# Increment Streak
 		Session["CurrentStreak"] += 1
-
-	# Send Update and refresh Timestamp
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	RefreshStamp = time.time()
 
 
 # --------
@@ -485,29 +528,6 @@ def SaveText():
 		f.close()
 
 
-# ----
-# Tick
-# ----
-def Tick():
-	global ChannelName, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
-
-	# Timed Overlay Update
-	if (time.time() - RefreshStamp) > RefreshDelay:
-
-		# ReInit
-		if ChannelName is None:
-			ReInit()
-			if ChannelName is None: return
-
-		UpdateOverlay()  # ! Needs to be before SaveText, unless we split the update further apart
-		SaveText()
-
-	# Timed Session Save
-	if (time.time() - SaveStamp) > SaveDelay:
-		SaveSession()
-		SaveStamp = time.time()
-
-
 # ------------
 # Sanity Check
 # ------------
@@ -518,10 +538,10 @@ def SanityCheck():
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
+	if Settings is None:  # ! Has to be loaded first
+		LoadSettings()
 	if Session is None:
 		LoadSession()
-	if Settings is None:
-		LoadSettings()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
@@ -587,8 +607,8 @@ def LoadSession():
 def SaveSession():
 	global Session, SessionFile
 
-	with open(SessionFile, "w") as f:
-		json.dump(Session, f, sort_keys=True, indent=4)
+	with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
+		json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 		f.close()
 
 
@@ -616,29 +636,30 @@ def LoadSettings():
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
-			newSettings = json.load(f, encoding="utf-8-sig")
+			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except:
 		SaveSettings()
 
 	# Cleanup
 	dirty = False
-	diff = set(newSettings) ^ set(Settings)
+	diff = set(new_settings) ^ set(Settings)
 	if len(diff) > 0:
 		for k in diff:
-			if k in newSettings:
-				del newSettings[k]
+			if k in new_settings:
+				del new_settings[k]
 				dirty = True
-	Settings = newSettings
+	Settings = new_settings
 
-	if dirty: SaveSettings()
+	if dirty:
+		SaveSettings()
 
 
 def SaveSettings():
 	global Settings, SettingsFile
 
-	with codecs.open(SettingsFile, "w") as f:
-		json.dump(Settings, f, sort_keys=True, indent=4)
+	with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
+		json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 		f.close()
 
 
@@ -653,6 +674,7 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
+	CalculateStreak()
 	UpdateOverlay()
 
 
@@ -660,6 +682,7 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -669,18 +692,21 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
+	CalculateStreak()
 	UpdateOverlay()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
+	CalculateStreak()
 	UpdateOverlay()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
+	CalculateStreak()
 	UpdateOverlay()
 
 
@@ -688,6 +714,7 @@ def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -695,6 +722,7 @@ def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -702,6 +730,7 @@ def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -712,6 +741,7 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
+		CalculateStreak()
 		UpdateOverlay()
 
 
@@ -719,6 +749,7 @@ def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
+		CalculateStreak()
 		UpdateOverlay()
 
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.5.6 - Improvements
+
+* Improved script start
+* Improved update functions
+* Removed unused import
+* Fixed load order
+* Cleanup
+
 ## 2.5.5 - Improvements
 
 * Fixed ReInit not setting the channel name
