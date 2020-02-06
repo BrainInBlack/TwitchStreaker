@@ -7,7 +7,7 @@ import codecs, json, math, os, time
 # -----
 # Paths
 # -----
-ScriptFolder  = os.path.dirname(__file__)
+ScriptFolder  = os.path.realpath(os.path.dirname(__file__))
 TextFolder    = os.path.join(ScriptFolder, "Text/")
 
 SessionFile   = os.path.join(ScriptFolder, "Session.json")
@@ -25,7 +25,7 @@ TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
 # ----------
 import clr
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
+clr.AddReferenceToFileAndPath(os.path.join(ScriptFolder, "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 
@@ -35,7 +35,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.6"
+Version     = "2.5.7"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 

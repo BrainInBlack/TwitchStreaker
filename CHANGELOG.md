@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.5.7 - Something Witty
+
+* Improved path definitions
+
 ## 2.5.6 - Improvements
 
 * Improved script start
