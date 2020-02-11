@@ -1,8 +1,9 @@
 # Changelog
 
-## 2.5.7 - Something Witty
+## 2.5.7 - Clean Up
 
 * Improved path definitions
+* Removed Library dependencies (see 2.5.2)
 
 ## 2.5.6 - Improvements
 
