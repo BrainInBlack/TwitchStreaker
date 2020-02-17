@@ -90,6 +90,7 @@ TierArray = [
 def Init():
 	global RefreshStamp, SaveStamp
 
+	# ! Preserve Order
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
@@ -103,15 +104,15 @@ def Init():
 def ReadyCheck():
 	global ChannelName, ScriptReady, Settings
 
-	if len(Settings["SocketToken"]) <= 5:
+	ScriptReady = False
+
+	if len(Settings["SocketToken"]) <= 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
-		ScriptReady = False
 		return
 
 	ChannelName = Parent.GetChannelName()
 	if ChannelName is None:
 		Log("Streamer or Bot Account are not connected. Please check the Account connections in the Chatbot.")
-		ScriptReady = False
 		return
 
 	ChannelName = ChannelName.lower()
@@ -421,12 +422,12 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
+	global RefreshDelay, RefreshStamp, ScriptReady, SaveDelay, SaveStamp
 
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 
-		# ReInit
+		# Attempt Startup
 		if not ScriptReady:
 			StartUp()
 
@@ -468,11 +469,11 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # --------------
 # Update Overlay
 # --------------
-def UpdateOverlay():
+def UpdateOverlay():  # ! Should be called only if a quick response is required
 	global Session, RefreshStamp
 
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	RefreshStamp = time.time() # Prevents needles updates while using the overwrite functions
+	RefreshStamp = time.time()  # * Delay the refresh in the Tick() function
 
 
 # ----------------
@@ -762,6 +763,7 @@ def Unload():
 		EventReceiver.Disconnect()
 	EventReceiver = None
 	SaveSession()
+	SaveText()
 
 
 # -------

@@ -3,6 +3,8 @@
 ## 2.5.7 - Clean Up
 
 * Improved path definitions
+* Added SaveText() to Unload()
+* Added comments to important procedures
 * Removed Library dependencies (see 2.5.2)
 
 ## 2.5.6 - Improvements
