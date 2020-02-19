@@ -644,16 +644,16 @@ def LoadSettings():
 		SaveSettings()
 
 	# Cleanup
-	dirty = False
+	is_dirty = False
 	diff = set(new_settings) ^ set(Settings)
 	if len(diff) > 0:
 		for k in diff:
 			if k in new_settings:
 				del new_settings[k]
-				dirty = True
+				is_dirty = True
 	Settings = new_settings
 
-	if dirty:
+	if is_dirty:
 		SaveSettings()
 
 
