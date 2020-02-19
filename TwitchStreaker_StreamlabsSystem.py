@@ -106,7 +106,7 @@ def ReadyCheck():
 
 	ScriptReady = False
 
-	if len(Settings["SocketToken"]) <= 100:
+	if len(Settings["SocketToken"]) < 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
 		return
 
@@ -485,18 +485,19 @@ def CalculateStreak():
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+
+		# Subtract Goal and Increment Streak
 		Session["CurrentSubs"]   -= Session["CurrentGoal"]
+		Session["CurrentStreak"] += 1
 
 		# Increment CurrentGoal
 		if Session["CurrentGoal"]   < Settings["GoalMax"]:
 			Session["CurrentGoal"] += Settings["GoalIncrement"]
 
-			# Goal Correction
+			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
 
-		# Increment Streak
-		Session["CurrentStreak"] += 1
 
 
 # --------
