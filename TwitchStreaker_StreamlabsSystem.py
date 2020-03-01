@@ -66,6 +66,7 @@ Settings = {
 	"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
 	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1
 }
+IsConnected  = False
 RefreshDelay = 5
 RefreshStamp = None
 SaveDelay    = 300
@@ -100,7 +101,9 @@ def Init():
 
 	StartUp()
 
-
+# ----------
+# ReadyCheck
+# ----------
 def ReadyCheck():
 	global ChannelName, ScriptReady, Settings
 
@@ -119,12 +122,24 @@ def ReadyCheck():
 	ScriptReady = True
 
 
+# -------
+# StartUp
+# -------
 def StartUp():
-	global EventReceiver, ScriptReady, Settings
+	global Settings
 
 	ReadyCheck()
 	if not ScriptReady:
 		return
+
+	Connect()
+
+
+# ---------------------
+# Connect EventReceiver
+# ---------------------
+def Connect():
+	global EventReceiver, Settings
 
 	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -408,6 +423,9 @@ def EventReceiverEvent(sender, args):
 # Event Connected
 # ---------------
 def EventReceiverConnected(sender, args):
+	global IsConnected
+
+	IsConnected = True
 	Log("Connected")
 
 
@@ -415,6 +433,9 @@ def EventReceiverConnected(sender, args):
 # Event Disconnected
 # ------------------
 def EventReceiverDisconnected(sender, args):
+	global IsConnected
+
+	IsConnected = False
 	Log("Disconnected")
 
 
@@ -422,7 +443,7 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global RefreshDelay, RefreshStamp, ScriptReady, SaveDelay, SaveStamp
+	global Connected, RefreshDelay, RefreshStamp, ScriptReady, SaveDelay, SaveStamp
 
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
@@ -430,6 +451,10 @@ def Tick():
 		# Attempt Startup
 		if not ScriptReady:
 			StartUp()
+
+		# Reconnect
+		if not IsConnected:
+			Connect()
 
 		# Update Everything
 		CalculateStreak()
