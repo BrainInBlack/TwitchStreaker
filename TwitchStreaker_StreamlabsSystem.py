@@ -42,7 +42,7 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 # ----------------
 # Global Variables
 # ----------------
-ChannelName = None
+ChannelName   = None
 EventReceiver = None
 Session = {
 	"CurrentGoal": 10,
@@ -66,18 +66,18 @@ Settings = {
 	"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
 	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1
 }
-IsConnected  = False
-RefreshDelay = 5
+RefreshDelay = 5    # InSeconds
 RefreshStamp = None
-SaveDelay    = 300
+SaveDelay    = 300  # InSeconds
 SaveStamp    = None
 
 
 # ------------------
 # Internal Variables
 # ------------------
-ScriptReady = False
-TierArray = [
+IsConnected   = False
+IsScriptReady = False
+Tiers = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
@@ -101,13 +101,27 @@ def Init():
 
 	StartUp()
 
+
+# -------
+# StartUp
+# -------
+def StartUp():
+	global IsScriptReady
+
+	ReadyCheck()
+	if not IsScriptReady:
+		return
+
+	Connect()
+
+
 # ----------
 # ReadyCheck
 # ----------
 def ReadyCheck():
-	global ChannelName, ScriptReady, Settings
+	global ChannelName, IsScriptReady, Settings
 
-	ScriptReady = False
+	IsScriptReady = False
 
 	if len(Settings["SocketToken"]) < 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
@@ -119,20 +133,7 @@ def ReadyCheck():
 		return
 
 	ChannelName = ChannelName.lower()
-	ScriptReady = True
-
-
-# -------
-# StartUp
-# -------
-def StartUp():
-	global Settings
-
-	ReadyCheck()
-	if not ScriptReady:
-		return
-
-	Connect()
+	IsScriptReady = True
 
 
 # ---------------------
@@ -443,13 +444,13 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global Connected, RefreshDelay, RefreshStamp, ScriptReady, SaveDelay, SaveStamp
+	global IsConnected, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
 	# Timed Overlay Update
 	if (time.time() - RefreshStamp) > RefreshDelay:
 
 		# Attempt Startup
-		if not ScriptReady:
+		if not IsScriptReady:
 			StartUp()
 
 		# Reconnect
@@ -559,7 +560,7 @@ def SaveText():
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings, TierArray
+	global Session, Settings, Tiers
 
 	is_session_dirty = False
 	is_settings_dirty = False
@@ -596,7 +597,7 @@ def SanityCheck():
 		is_session_dirty       = True
 
 	# Tier Validation
-	for tier in TierArray:
+	for tier in Tiers:
 		if tier < 1:
 			Settings[tier]    = 1
 			is_settings_dirty = True
@@ -659,7 +660,9 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global Settings, SettingsFile
+	global EventReceiver, IsConnected, Settings, SettingsFile
+
+	old_token = Settings["SocketToken"]
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
@@ -667,6 +670,13 @@ def LoadSettings():
 			f.close()
 	except:
 		SaveSettings()
+
+	# Reconnect if Token changed
+	if Settings["SocketToken"] != old_token:
+		if EventReceiver and EventReceiver.IsConnected:
+			EventReceiver.Disconnect()
+		EventReceiver = None
+		Connect()
 
 	# Cleanup
 	is_dirty = False
