@@ -8,6 +8,7 @@
 * Added comments to important procedures
 * Added automatic reconnect
 * Added automatic reconnect in case the Token changes in the Settings
+* Consolidated the Update functions into UpdateTracker()
 * Renamed some variables for more clarity
 * Removed Library dependencies (see 2.5.2)
 

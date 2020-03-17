@@ -446,7 +446,7 @@ def EventReceiverDisconnected(sender, args):
 def Tick():
 	global IsConnected, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
-	# Timed Overlay Update
+	# Fast Timer
 	if (time.time() - RefreshStamp) > RefreshDelay:
 
 		# Attempt Startup
@@ -458,11 +458,9 @@ def Tick():
 			Connect()
 
 		# Update Everything
-		CalculateStreak()
-		UpdateOverlay()
-		SaveText()
+		UpdateTracker()
 
-	# Timed Session Save
+	# Slow Timer
 	if (time.time() - SaveStamp) > SaveDelay:
 		SaveSession()
 		SaveStamp = time.time()
@@ -493,21 +491,14 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 
 
 # --------------
-# Update Overlay
+# Update Tracker
 # --------------
-def UpdateOverlay():  # ! Should be called only if a quick response is required
-	global Session, RefreshStamp
+def UpdateTracker():  # ! Should be called only if a quick response is required
+	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, StreakFile, TotalSubsFile
 
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	RefreshStamp = time.time()  # * Delay the refresh in the Tick() function
-
-
-# ----------------
-# Calculate Streak
-# ----------------
-def CalculateStreak():
-	global Session, Settings
-
+	# ----------------
+	# Calculate Streak
+	# ----------------
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
@@ -524,14 +515,14 @@ def CalculateStreak():
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
 
+	# --------------
+	# Update Overlay
+	# --------------
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
-
-# --------
-# SaveText
-# --------
-def SaveText():
-	global Session, GoalFile, SubsFile, SubsLeftFile, StreakFile, TotalSubsFile, TextFolder
-
+	# -----------------
+	# Update Text Files
+	# -----------------
 	if not os.path.isdir(TextFolder):
 		os.mkdir(TextFolder)
 
@@ -554,6 +545,11 @@ def SaveText():
 	with open(TotalSubsFile, "w") as f:
 		f.write(str(Session["CurrentTotalSubs"]))
 		f.close()
+
+	# --------------------
+	# Update Refresh Stamp
+	# --------------------
+	RefreshStamp = time.time()  # * Delay the refresh in the Tick() function
 
 
 # ------------
@@ -652,7 +648,7 @@ def ResetSession():
 	Session["CurrentStreak"]    = 1
 	Session["CurrentTotalSubs"] = 0
 	SaveSession()
-	UpdateOverlay()
+	UpdateTracker()
 	Log("Session Reset!")
 
 
@@ -712,7 +708,7 @@ def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
 	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def SubtractSub():
@@ -720,7 +716,7 @@ def SubtractSub():
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # ----------------
@@ -730,21 +726,21 @@ def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
 	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
 	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
 	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def SubtractStreak():
@@ -752,7 +748,7 @@ def SubtractStreak():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractStreak5():
@@ -760,7 +756,7 @@ def SubtractStreak5():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractStreak10():
@@ -768,7 +764,7 @@ def SubtractStreak10():
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # --------------
@@ -779,7 +775,7 @@ def AddToGoal():
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractFromGoal():
@@ -787,7 +783,7 @@ def SubtractFromGoal():
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
 		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # ------
