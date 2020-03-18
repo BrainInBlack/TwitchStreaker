@@ -487,9 +487,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 def UpdateTracker():  # ! Should be called only if a quick response is required
 	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, StreakFile, TotalSubsFile
 
-	# ----------------
 	# Calculate Streak
-	# ----------------
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
@@ -506,14 +504,10 @@ def UpdateTracker():  # ! Should be called only if a quick response is required
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
 
-	# --------------
 	# Update Overlay
-	# --------------
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
-	# -----------------
 	# Update Text Files
-	# -----------------
 	if not os.path.isdir(TextFolder):
 		os.mkdir(TextFolder)
 
@@ -537,10 +531,8 @@ def UpdateTracker():  # ! Should be called only if a quick response is required
 		f.write(str(Session["CurrentTotalSubs"]))
 		f.close()
 
-	# --------------------
 	# Update Refresh Stamp
-	# --------------------
-	RefreshStamp = time.time()  # * Delay the refresh in the Tick() function
+	RefreshStamp = time.time()
 
 
 # ------------
@@ -698,7 +690,6 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
-	CalculateStreak()
 	UpdateTracker()
 
 
@@ -706,7 +697,6 @@ def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -716,21 +706,18 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
-	CalculateStreak()
 	UpdateTracker()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
-	CalculateStreak()
 	UpdateTracker()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
-	CalculateStreak()
 	UpdateTracker()
 
 
@@ -738,7 +725,6 @@ def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -746,7 +732,6 @@ def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -754,7 +739,6 @@ def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -765,7 +749,6 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -773,7 +756,6 @@ def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
-		CalculateStreak()
 		UpdateTracker()
 
 
@@ -785,8 +767,8 @@ def Unload():
 	if EventReceiver and EventReceiver.IsConnected:
 		EventReceiver.Disconnect()
 	EventReceiver = None
+	UpdateTracker()
 	SaveSession()
-	SaveText()
 
 
 # -------
