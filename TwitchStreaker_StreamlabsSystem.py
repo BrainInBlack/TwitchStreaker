@@ -106,34 +106,25 @@ def Init():
 # StartUp
 # -------
 def StartUp():
-	global IsScriptReady
-
-	ReadyCheck()
-	if not IsScriptReady:
-		return
-
-	Connect()
-
-
-# ----------
-# ReadyCheck
-# ----------
-def ReadyCheck():
 	global ChannelName, IsScriptReady, Settings
 
 	IsScriptReady = False
 
+	# Check Token
 	if len(Settings["SocketToken"]) < 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
 		return
 
+	# Check Channel Name
 	ChannelName = Parent.GetChannelName()
 	if ChannelName is None:
 		Log("Streamer or Bot Account are not connected. Please check the Account connections in the Chatbot.")
 		return
 
+	# Finish and Connect
 	ChannelName = ChannelName.lower()
 	IsScriptReady = True
+	Connect()
 
 
 # ---------------------
