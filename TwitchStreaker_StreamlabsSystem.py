@@ -75,7 +75,6 @@ SaveStamp    = None
 # ------------------
 # Internal Variables
 # ------------------
-IsConnected   = False
 IsScriptReady = False
 Tiers = [
 	"Sub1", "Sub2", "Sub3",
@@ -415,9 +414,6 @@ def EventReceiverEvent(sender, args):
 # Event Connected
 # ---------------
 def EventReceiverConnected(sender, args):
-	global IsConnected
-
-	IsConnected = True
 	Log("Connected")
 
 
@@ -425,9 +421,6 @@ def EventReceiverConnected(sender, args):
 # Event Disconnected
 # ------------------
 def EventReceiverDisconnected(sender, args):
-	global IsConnected
-
-	IsConnected = False
 	Log("Disconnected")
 
 
@@ -435,7 +428,7 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global IsConnected, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global EventReceiver, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
 	# Fast Timer
 	if (time.time() - RefreshStamp) > RefreshDelay:
@@ -445,7 +438,7 @@ def Tick():
 			StartUp()
 
 		# Reconnect
-		if not IsConnected:
+		if EventReceiver and not EventReceiver.IsConnected:
 			Connect()
 
 		# Update Everything
@@ -464,13 +457,13 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
 
 	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+		parse_string = parse_string.replace("$tsGoal",     str(Session["CurrentGoal"]))
 
 	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+		parse_string = parse_string.replace("$tsStreak",   str(Session["CurrentStreak"]))
 
 	if "$tsSubs" in parse_string:
-		parse_string = parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
+		parse_string = parse_string.replace("$tsSubs",     str(Session["CurrentSubs"]))
 
 	if "$tsSubsLeft" in parse_string:
 		parse_string = parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
@@ -639,7 +632,7 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global EventReceiver, IsConnected, Settings, SettingsFile
+	global EventReceiver, Settings, SettingsFile
 
 	old_token = Settings["SocketToken"]
 
