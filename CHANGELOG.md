@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.5.7 - Clean Up
+## 2.6.0b - Final Update for Python (Beta)
+
+This is the beta release for the final version of the Python version that relies upon the Streamlabs Chatbot to function. As soon as this version is considered stable, development on the standalone version will be prioritized and this version will only get critical updates, in case something breaks.
 
 * Improved path definitions
 * Improved variable names

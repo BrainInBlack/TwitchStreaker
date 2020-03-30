@@ -35,7 +35,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.7"
+Version     = "2.6.0b"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -419,7 +419,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # --------------
 # Update Tracker
 # --------------
-def UpdateTracker():  # ! Should be called only if a quick response is required
+def UpdateTracker():  # ! Only call if a quick response is required
 	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, TotalSubsFile
 
 	# Calculate Streak
