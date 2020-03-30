@@ -7,7 +7,7 @@ import codecs, json, math, os, time
 # -----
 # Paths
 # -----
-ScriptFolder  = os.path.dirname(__file__)
+ScriptFolder  = os.path.realpath(os.path.dirname(__file__))
 TextFolder    = os.path.join(ScriptFolder, "Text/")
 
 SessionFile   = os.path.join(ScriptFolder, "Session.json")
@@ -25,7 +25,7 @@ TotalSubsFile = os.path.join(TextFolder, "TotalSubs.txt")
 # ----------
 import clr
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReferenceToFileAndPath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "Lib/StreamlabsEventReceiver.dll"))
+clr.AddReferenceToFileAndPath(os.path.join(ScriptFolder, "Lib/StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 
@@ -35,14 +35,14 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.5.6"
+Version     = "2.6.0b"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
 # ----------------
 # Global Variables
 # ----------------
-ChannelName = None
+ChannelName   = None
 EventReceiver = None
 Session = {
 	"CurrentGoal": 10,
@@ -66,17 +66,17 @@ Settings = {
 	"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
 	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1
 }
-RefreshDelay = 5
-RefreshStamp = None
-SaveDelay    = 300
-SaveStamp    = None
+RefreshDelay = 5    # InSeconds
+RefreshStamp = time.time()
+SaveDelay    = 300  # InSeconds
+SaveStamp    = time.time()
 
 
 # ------------------
 # Internal Variables
 # ------------------
-ScriptReady = False
-TierArray = [
+IsScriptReady = False
+Tiers = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
@@ -90,40 +90,44 @@ TierArray = [
 def Init():
 	global RefreshStamp, SaveStamp
 
+	# ! Preserve Order
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
 
-	RefreshStamp = time.time()
-	SaveStamp    = time.time()
-
 	StartUp()
 
 
-def ReadyCheck():
-	global ChannelName, ScriptReady, Settings
+# -------
+# StartUp
+# -------
+def StartUp():
+	global ChannelName, IsScriptReady, Settings
 
-	if len(Settings["SocketToken"]) <= 5:
+	IsScriptReady = False
+
+	# Check Token
+	if len(Settings["SocketToken"]) < 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
-		ScriptReady = False
 		return
 
+	# Check Channel Name
 	ChannelName = Parent.GetChannelName()
 	if ChannelName is None:
 		Log("Streamer or Bot Account are not connected. Please check the Account connections in the Chatbot.")
-		ScriptReady = False
 		return
 
+	# Finish and Connect
 	ChannelName = ChannelName.lower()
-	ScriptReady = True
+	IsScriptReady = True
+	Connect()
 
 
-def StartUp():
-	global EventReceiver, ScriptReady, Settings
-
-	ReadyCheck()
-	if not ScriptReady:
-		return
+# ---------------------
+# Connect EventReceiver
+# ---------------------
+def Connect():
+	global EventReceiver, Settings
 
 	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
@@ -146,7 +150,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
-				# Live Check
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Subscription, Stream is not Live")
 					continue
@@ -164,13 +168,13 @@ def EventReceiverEvent(sender, args):
 						Log("Ignored SelfGift from {}".format(message.Gifter))
 						continue
 
-				# ReSub Check
+				# ReSub Check, skip resubs if option is disabled
 				if message.SubType == "resub" and not Settings["CountReSubs"] and not message.IsTest:
 					Log("Ignored Resub by {}".format(message.Name))
 					continue
 
-				# Gifted Subs
-				if message.SubType == "subgift":
+				# Gifted Subs (includes anonymous subs)
+				if message.SubType == "subgift" or message.SubType == "anonsubgift":
 
 					# GiftedSubs (resubs)
 					if message.Months is not None:
@@ -226,64 +230,6 @@ def EventReceiverEvent(sender, args):
 						continue
 					# /GiftedSubs (normal)
 				# GiftedSubs - END
-
-				# AnonGiftedSubs
-				elif message.SubType == "anonsubgift":
-
-					# AnonGiftedSubs (resubs)
-					if message.Months is not None:
-
-						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftReSub2"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftReSub3"]
-							Session["CurrentTotalSubs"] += 1
-
-						else:  # Skip if invalid plan
-							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
-							continue
-
-						Log("Counted {} for {}".format(message.SubType, message.Name))
-						continue
-					# /AnonGiftedSubs (resubs)
-
-					# AnonGiftedSubs (normal)
-					else:
-
-						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftSub2"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftSub3"]
-							Session["CurrentTotalSubs"] += 1
-
-						else:  # Skip if invalid plan
-							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
-							continue
-
-						Log("Counted {} for {}".format(message.SubType, message.Name))
-						continue
-					# /AnonGiftedSubs (normal)
-				# AnonGiftedSubs - END
 
 				# ReSubs
 				elif message.SubType == "resub":
@@ -347,6 +293,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Subscription, Stream is not Live")
 					continue
@@ -367,6 +314,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Sponsor, Stream is not Live. (YT)")
 					continue
@@ -387,12 +335,13 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "donation" and Settings["CountDonations"]:
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Donation, Stream is not Live.")
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					res = 1
+					res = 1  # Minimum amount of subs
 					if not Settings["CountDonationsOnce"]:
 						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
@@ -421,21 +370,23 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global RefreshDelay, RefreshStamp, SaveDelay, SaveStamp, ScriptReady
+	global EventReceiver, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
-	# Timed Overlay Update
+	# Fast Timer
 	if (time.time() - RefreshStamp) > RefreshDelay:
 
-		# ReInit
-		if not ScriptReady:
+		# Attempt Startup
+		if not IsScriptReady:
 			StartUp()
 
-		# Update Everything
-		CalculateStreak()
-		UpdateOverlay()
-		SaveText()
+		# Reconnect
+		if EventReceiver and not EventReceiver.IsConnected:
+			Connect()
 
-	# Timed Session Save
+		# Update Everything
+		UpdateTracker()
+
+	# Slow Timer
 	if (time.time() - SaveStamp) > SaveDelay:
 		SaveSession()
 		SaveStamp = time.time()
@@ -448,13 +399,13 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
 
 	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+		parse_string = parse_string.replace("$tsGoal",     str(Session["CurrentGoal"]))
 
 	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+		parse_string = parse_string.replace("$tsStreak",   str(Session["CurrentStreak"]))
 
 	if "$tsSubs" in parse_string:
-		parse_string = parse_string.replace("$tsSubs", str(Session["CurrentSubs"]))
+		parse_string = parse_string.replace("$tsSubs",     str(Session["CurrentSubs"]))
 
 	if "$tsSubsLeft" in parse_string:
 		parse_string = parse_string.replace("$tsSubsLeft", str(Session["CurrentSubsLeft"]))
@@ -466,73 +417,67 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 
 
 # --------------
-# Update Overlay
+# Update Tracker
 # --------------
-def UpdateOverlay():
-	global Session, RefreshStamp
+def UpdateTracker():  # ! Only call if a quick response is required
+	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, TotalSubsFile
 
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
-	RefreshStamp = time.time() # Prevents needles updates while using the overwrite functions
-
-
-# ----------------
-# Calculate Streak
-# ----------------
-def CalculateStreak():
-	global Session, Settings
-
+	# Calculate Streak
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
 
 	while Session["CurrentSubs"] >= Session["CurrentGoal"]:
+
+		# Subtract Goal and Increment Streak
 		Session["CurrentSubs"]   -= Session["CurrentGoal"]
+		Session["CurrentStreak"] += 1
 
 		# Increment CurrentGoal
 		if Session["CurrentGoal"]   < Settings["GoalMax"]:
 			Session["CurrentGoal"] += Settings["GoalIncrement"]
 
-			# Goal Correction
+			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
 
-		# Increment Streak
-		Session["CurrentStreak"] += 1
+	# Update Overlay
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
-
-# --------
-# SaveText
-# --------
-def SaveText():
-	global Session, GoalFile, SubsFile, SubsLeftFile, StreakFile, TotalSubsFile, TextFolder
-
+	# Update Text Files
 	if not os.path.isdir(TextFolder):
 		os.mkdir(TextFolder)
 
-	with open(GoalFile, "w") as f:
-		f.write(str(Session["CurrentGoal"]))
-		f.close()
+	try:
+		with open(GoalFile, "w") as f:
+			f.write(str(Session["CurrentGoal"]))
+			f.close()
 
-	with open(SubsFile, "w") as f:
-		f.write(str(Session["CurrentSubs"]))
-		f.close()
+		with open(SubsFile, "w") as f:
+			f.write(str(Session["CurrentSubs"]))
+			f.close()
 
-	with open(SubsLeftFile, "w") as f:
-		f.write(str(Session["CurrentSubsLeft"]))
-		f.close()
+		with open(SubsLeftFile, "w") as f:
+			f.write(str(Session["CurrentSubsLeft"]))
+			f.close()
 
-	with open(StreakFile, "w") as f:
-		f.write(str(Session["CurrentStreak"]))
-		f.close()
+		with open(StreakFile, "w") as f:
+			f.write(str(Session["CurrentStreak"]))
+			f.close()
 
-	with open(TotalSubsFile, "w") as f:
-		f.write(str(Session["CurrentTotalSubs"]))
-		f.close()
+		with open(TotalSubsFile, "w") as f:
+			f.write(str(Session["CurrentTotalSubs"]))
+			f.close()
+	except:
+		Log("Unable to update Text Files!")
+
+	# Update Refresh Stamp
+	RefreshStamp = time.time()
 
 
 # ------------
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings, TierArray
+	global Session, Settings, Tiers
 
 	is_session_dirty = False
 	is_settings_dirty = False
@@ -569,7 +514,7 @@ def SanityCheck():
 		is_session_dirty       = True
 
 	# Tier Validation
-	for tier in TierArray:
+	for tier in Tiers:
 		if tier < 1:
 			Settings[tier]    = 1
 			is_settings_dirty = True
@@ -592,8 +537,10 @@ def SanityCheck():
 def LoadSession():
 	global Session, SessionFile, Settings
 
+	# Make sure Settings are loaded
 	if Settings is None:
 		LoadSettings()
+		SanityCheck()
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
@@ -601,15 +548,19 @@ def LoadSession():
 			Session["CurrentGoal"] = Settings["Goal"]
 			f.close()
 	except:
+		# Save default Session
 		SaveSession()
 
 
 def SaveSession():
 	global Session, SessionFile
 
-	with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
-		json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-		f.close()
+	try:
+		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
+			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+			f.close()
+	except:
+		Log("Unable to save Session!")
 
 
 def ResetSession():
@@ -617,6 +568,7 @@ def ResetSession():
 
 	if Settings is None:
 		LoadSettings()
+		SanityCheck()
 
 	Session["CurrentGoal"]      = Settings["Goal"]
 	Session["CurrentSubs"]      = 0
@@ -624,7 +576,7 @@ def ResetSession():
 	Session["CurrentStreak"]    = 1
 	Session["CurrentTotalSubs"] = 0
 	SaveSession()
-	UpdateOverlay()
+	UpdateTracker()
 	Log("Session Reset!")
 
 
@@ -632,7 +584,10 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global Settings, SettingsFile
+	global EventReceiver, Settings, SettingsFile
+
+	# Backup old token for comparison
+	old_token = Settings["SocketToken"]
 
 	try:
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
@@ -641,26 +596,36 @@ def LoadSettings():
 	except:
 		SaveSettings()
 
-	# Cleanup
-	dirty = False
-	diff = set(new_settings) ^ set(Settings)
+	# Reconnect if Token changed
+	if Settings["SocketToken"] != old_token:
+		if EventReceiver and EventReceiver.IsConnected:
+			EventReceiver.Disconnect()
+		EventReceiver = None
+		Connect()
+
+	# Cleanup old options
+	is_dirty = False
+	diff = set(new_settings) ^ set(Settings)  # List options no longer present in the default settings
 	if len(diff) > 0:
 		for k in diff:
 			if k in new_settings:
 				del new_settings[k]
-				dirty = True
+				is_dirty = True
 	Settings = new_settings
 
-	if dirty:
+	if is_dirty:
 		SaveSettings()
 
 
 def SaveSettings():
 	global Settings, SettingsFile
 
-	with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
-		json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-		f.close()
+	try:
+		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
+			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+			f.close()
+	except:
+		Log("Unable to save Settings!")
 
 
 def ReloadSettings(json_data):
@@ -674,16 +639,14 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
-	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # ----------------
@@ -692,46 +655,40 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
-	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
-	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
-	CalculateStreak()
-	UpdateOverlay()
+	UpdateTracker()
 
 
 def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # --------------
@@ -741,16 +698,14 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
-		CalculateStreak()
-		UpdateOverlay()
+		UpdateTracker()
 
 
 # ------
@@ -761,6 +716,7 @@ def Unload():
 	if EventReceiver and EventReceiver.IsConnected:
 		EventReceiver.Disconnect()
 	EventReceiver = None
+	UpdateTracker()
 	SaveSession()
 
 

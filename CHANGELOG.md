@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.6.0b - Final Update for Python (Beta)
+
+This is the beta release for the final version of the Python version that relies upon the Streamlabs Chatbot to function. As soon as this version is considered stable, development on the standalone version will be prioritized and this version will only get critical updates, in case something breaks.
+
+* Improved path definitions
+* Improved variable names
+* Improved error handling
+* Added SaveText() to Unload()
+* Added comments to important procedures
+* Added automatic reconnect
+* Added automatic reconnect in case the Token changes in the Settings
+* Consolidated the Update functions into UpdateTracker()
+* Consolidated the StartUp functions into StartUp()
+* Consolidated GiftSubs and AnonGiftSubs
+* Renamed some variables for more clarity
+* Removed Library dependencies (see 2.5.2)
+
 ## 2.5.6 - Improvements
 
 * Improved script start
