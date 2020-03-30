@@ -4,6 +4,7 @@
 
 * Improved path definitions
 * Improved variable names
+* Improved error handling
 * Added SaveText() to Unload()
 * Added comments to important procedures
 * Added automatic reconnect

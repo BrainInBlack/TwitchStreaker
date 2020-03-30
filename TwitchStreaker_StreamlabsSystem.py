@@ -478,7 +478,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Update Tracker
 # --------------
 def UpdateTracker():  # ! Should be called only if a quick response is required
-	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, StreakFile, TotalSubsFile
+	global Session, Settings, RefreshStamp, TextFolder, GoalFile, SubsFile, StreakFile, SubsLeftFile, TotalSubsFile
 
 	# Calculate Streak
 	Session["CurrentSubsLeft"] = Session["CurrentGoal"] - Session["CurrentSubs"]
@@ -504,25 +504,28 @@ def UpdateTracker():  # ! Should be called only if a quick response is required
 	if not os.path.isdir(TextFolder):
 		os.mkdir(TextFolder)
 
-	with open(GoalFile, "w") as f:
-		f.write(str(Session["CurrentGoal"]))
-		f.close()
+	try:
+		with open(GoalFile, "w") as f:
+			f.write(str(Session["CurrentGoal"]))
+			f.close()
 
-	with open(SubsFile, "w") as f:
-		f.write(str(Session["CurrentSubs"]))
-		f.close()
+		with open(SubsFile, "w") as f:
+			f.write(str(Session["CurrentSubs"]))
+			f.close()
 
-	with open(SubsLeftFile, "w") as f:
-		f.write(str(Session["CurrentSubsLeft"]))
-		f.close()
+		with open(SubsLeftFile, "w") as f:
+			f.write(str(Session["CurrentSubsLeft"]))
+			f.close()
 
-	with open(StreakFile, "w") as f:
-		f.write(str(Session["CurrentStreak"]))
-		f.close()
+		with open(StreakFile, "w") as f:
+			f.write(str(Session["CurrentStreak"]))
+			f.close()
 
-	with open(TotalSubsFile, "w") as f:
-		f.write(str(Session["CurrentTotalSubs"]))
-		f.close()
+		with open(TotalSubsFile, "w") as f:
+			f.write(str(Session["CurrentTotalSubs"]))
+			f.close()
+	except:
+		Log("Unable to update Text Files!")
 
 	# Update Refresh Stamp
 	RefreshStamp = time.time()
@@ -607,9 +610,12 @@ def LoadSession():
 def SaveSession():
 	global Session, SessionFile
 
-	with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
-		json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-		f.close()
+	try:
+		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
+			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+			f.close()
+	except:
+		Log("Unable to save Session!")
 
 
 def ResetSession():
@@ -667,9 +673,12 @@ def LoadSettings():
 def SaveSettings():
 	global Settings, SettingsFile
 
-	with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
-		json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-		f.close()
+	try:
+		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
+			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+			f.close()
+	except:
+		Log("Unable to save Settings!")
 
 
 def ReloadSettings(json_data):
