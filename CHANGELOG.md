@@ -11,6 +11,7 @@
 * Added automatic reconnect in case the Token changes in the Settings
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
+* Consolidated GiftSubs and AnonGiftSubs
 * Renamed some variables for more clarity
 * Removed Library dependencies (see 2.5.2)
 

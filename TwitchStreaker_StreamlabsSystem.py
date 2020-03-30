@@ -67,9 +67,9 @@ Settings = {
 	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1
 }
 RefreshDelay = 5    # InSeconds
-RefreshStamp = None
+RefreshStamp = time.time()
 SaveDelay    = 300  # InSeconds
-SaveStamp    = None
+SaveStamp    = time.time()
 
 
 # ------------------
@@ -94,9 +94,6 @@ def Init():
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
-
-	RefreshStamp = time.time()
-	SaveStamp    = time.time()
 
 	StartUp()
 
@@ -153,7 +150,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
-				# Live Check
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Subscription, Stream is not Live")
 					continue
@@ -171,13 +168,13 @@ def EventReceiverEvent(sender, args):
 						Log("Ignored SelfGift from {}".format(message.Gifter))
 						continue
 
-				# ReSub Check
+				# ReSub Check, skip resubs if option is disabled
 				if message.SubType == "resub" and not Settings["CountReSubs"] and not message.IsTest:
 					Log("Ignored Resub by {}".format(message.Name))
 					continue
 
-				# Gifted Subs
-				if message.SubType == "subgift":
+				# Gifted Subs (includes anonymous subs)
+				if message.SubType == "subgift" or message.SubType == "anonsubgift":
 
 					# GiftedSubs (resubs)
 					if message.Months is not None:
@@ -233,64 +230,6 @@ def EventReceiverEvent(sender, args):
 						continue
 					# /GiftedSubs (normal)
 				# GiftedSubs - END
-
-				# AnonGiftedSubs
-				elif message.SubType == "anonsubgift":
-
-					# AnonGiftedSubs (resubs)
-					if message.Months is not None:
-
-						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftReSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftReSub2"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftReSub3"]
-							Session["CurrentTotalSubs"] += 1
-
-						else:  # Skip if invalid plan
-							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
-							continue
-
-						Log("Counted {} for {}".format(message.SubType, message.Name))
-						continue
-					# /AnonGiftedSubs (resubs)
-
-					# AnonGiftedSubs (normal)
-					else:
-
-						if message.SubPlan == "Prime":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "1000":
-							Session["CurrentSubs"]      += Settings["GiftSub1"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "2000":
-							Session["CurrentSubs"]      += Settings["GiftSub2"]
-							Session["CurrentTotalSubs"] += 1
-
-						elif message.SubPlan == "3000":
-							Session["CurrentSubs"]      += Settings["GiftSub3"]
-							Session["CurrentTotalSubs"] += 1
-
-						else:  # Skip if invalid plan
-							Log("Invalid or Unknown SubPlan {}".format(message.SubPlan))
-							continue
-
-						Log("Counted {} for {}".format(message.SubType, message.Name))
-						continue
-					# /AnonGiftedSubs (normal)
-				# AnonGiftedSubs - END
 
 				# ReSubs
 				elif message.SubType == "resub":
@@ -354,6 +293,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Subscription, Stream is not Live")
 					continue
@@ -374,6 +314,7 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "subscription":
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Sponsor, Stream is not Live. (YT)")
 					continue
@@ -394,12 +335,13 @@ def EventReceiverEvent(sender, args):
 		if data.Type == "donation" and Settings["CountDonations"]:
 			for message in data.Message:
 
+				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
 				if not message.IsLive and not message.IsTest:
 					Log("Ignored Donation, Stream is not Live.")
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					res = 1
+					res = 1  # Minimum amount of subs
 					if not Settings["CountDonationsOnce"]:
 						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
@@ -595,8 +537,10 @@ def SanityCheck():
 def LoadSession():
 	global Session, SessionFile, Settings
 
+	# Make sure Settings are loaded
 	if Settings is None:
 		LoadSettings()
+		SanityCheck()
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
@@ -604,6 +548,7 @@ def LoadSession():
 			Session["CurrentGoal"] = Settings["Goal"]
 			f.close()
 	except:
+		# Save default Session
 		SaveSession()
 
 
@@ -623,6 +568,7 @@ def ResetSession():
 
 	if Settings is None:
 		LoadSettings()
+		SanityCheck()
 
 	Session["CurrentGoal"]      = Settings["Goal"]
 	Session["CurrentSubs"]      = 0
@@ -640,6 +586,7 @@ def ResetSession():
 def LoadSettings():
 	global EventReceiver, Settings, SettingsFile
 
+	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
 	try:
@@ -656,9 +603,9 @@ def LoadSettings():
 		EventReceiver = None
 		Connect()
 
-	# Cleanup
+	# Cleanup old options
 	is_dirty = False
-	diff = set(new_settings) ^ set(Settings)
+	diff = set(new_settings) ^ set(Settings)  # List options no longer present in the default settings
 	if len(diff) > 0:
 		for k in diff:
 			if k in new_settings:
