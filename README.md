@@ -159,6 +159,8 @@ Overlay.CurrentTotalSubs | Amount of Subs accumulated in the current Session
 
 If something can go wrong, it will most like go wrong at some point. That's why the script has some overwrite functions built in to account for missed subs, streaks, and outright crashes.
 
+Changes made will not display instantly, the update happens at the same interval as everything else (5 seconds by default).
+
 Button          | Functionality
 ----------------|--------------
 \+ Sub          | Adds a Sub, Streaks will increment if conditions are met.
