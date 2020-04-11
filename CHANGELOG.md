@@ -19,6 +19,7 @@ Until then, no new features will be implemented and updates will only contain bu
 * Consolidated GiftSubs and AnonGiftSubs
 * Renamed some variables for more clarity
 * Removed Library dependencies (see 2.5.2)
+* Removed instant update from the overwrite functions, to prevent ws-event throttling
 
 ## 2.6.0b - Final Update for Python (Beta)
 
