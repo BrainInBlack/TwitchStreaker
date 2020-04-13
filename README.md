@@ -16,7 +16,7 @@ TwitchStreaker is compatible with Twitch, Mixer and YouTube. For Mixer and YouTu
     - [Script not showing up after Installation/Update](#script-not-showing-up-after-installationupdate)
   - [Chatbot Command Parameters](#chatbot-command-parameters)
   - [Customization](#customization)
-  - [JavaScript Variables](#javascript-variables)
+  - [JavaScript](#javascript)
   - [Manual Overwrites](#manual-overwrites)
   - [Support](#support)
   - [Streamers using TwitchStreaker](#streamers-using-twitchstreaker)
@@ -68,11 +68,12 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 
 ### Script not showing up after Installation/Update
 
-With version 2.x and onwards we're using an additional library that, depending on your system, needs additional libraries to work correctly. These libraries are usually downloaded as needed, but this process is blocked by the system for security reasons. The following steps will remedy this issue.
+1. Open `Streamlabs Chatbot.exe.config` in Chatbot main folder, with a Text Editor
+   - `Right click` > `Open file location` on the Chatbot shortcut brings you right to the Chatbot main folder
+2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`
+3. Save and Start/Restart the Chatbot
 
-1. Open `Streamlabs Chatbot.exe.config`, in Chatbot main folder, with a Text Editor
-2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`.
-3. Save and Restart the Chatbot
+Additional information available [here](https://github.com/BrainInBlack/TwitchStreaker/issues/38)
 
 ## Chatbot Command Parameters
 
@@ -88,8 +89,11 @@ $tsTotalSubs | Amount of Subs accumulated in the current Session
 
 ### Example
 
-- Command: `We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.`
-- Result: `We are currently working on Streak #5 and need 6 additional Subs.`
+```text
+We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.
+```
+
+> We are currently working on Streak #5 and need 6 additional Subs.
 
 ## Customization
 
@@ -123,9 +127,11 @@ SubsLeft  | Amount of Subs needed to complete the current Streak
 Streak    | Current Streaks
 TotalSubs | Amount of Subs accumulated in the current Session
 
-None of those ID's are required and can be placed anywhere in the document, in case of the default design we're only using `Subs`, `Streak` and `Goal`. Here a few examples:
+None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Subs`, `Streak` and `Goal`. Here a few examples:
 
-### "X Subs left until Wheel #1"
+### Examples
+
+#### "X Subs left until Wheel #X"
 
 ```HTML
 <div>
@@ -133,7 +139,7 @@ None of those ID's are required and can be placed anywhere in the document, in c
 </div>
 ```
 
-### "X of X Subs, then we spin Wheel #1"
+#### "X of X Subs, then we spin Wheel #X"
 
 ```HTML
 <div>
@@ -141,11 +147,27 @@ None of those ID's are required and can be placed anywhere in the document, in c
 </div>
 ```
 
-The rest is just CSS and your own creativity.
+## JavaScript
 
-## JavaScript Variables
+Though you could just modify the [main.js](Overlay/main.js) in the `Overlay` folder. There is a more elegant way that keeps things simple and clean.
 
-The following variables are available for your custom scripts. These values will be updated around every 5 seconds, please account for this in your script to prevent issues.
+The Overlay object has an additional field with an anonymous function that is called on every refresh of the overlay and can be used for your custom code to be triggered at the same time with the most recent values.
+
+### Setup
+
+```javascript
+Overlay.UserRefresh = function() {
+
+  // Your stuff here
+
+}
+```
+
+It is important that this always evaluates as a function, since it is called from within the EventBus in [main.js](Overlay/main.js). Anything else will result in a bunch of error and probably unwanted side-effects.
+
+### Variables
+
+The following variables are available for your custom script.
 
 Variable                 | Description
 -------------------------|------------
@@ -159,7 +181,7 @@ Overlay.CurrentTotalSubs | Amount of Subs accumulated in the current Session
 
 If something can go wrong, it will most like go wrong at some point. That's why the script has some overwrite functions built in to account for missed subs, streaks, and outright crashes.
 
-Changes made will not display instantly, the update happens at the same interval as everything else (5 seconds by default).
+Changes made will not display instantly, the update happens on a 5 second interval.
 
 Button          | Functionality
 ----------------|--------------
