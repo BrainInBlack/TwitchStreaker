@@ -2,7 +2,7 @@
 
 ## 2.6.0 - Final Update for Python
 
-This is the final update for the Python version of TwitchStreaker. In the Future there will be a standalone version that does not rely on the Streamlabs Chatbot.
+This is the final update for the Python version of TwitchStreaker. In the Future there will be a standalone version that does not rely on the Streamlabs Chatbot. *(Probably wont be the last update since we made a lot of changes)*
 
 Until then, no new features will be implemented and updates will only contain bug-fixes.
 
@@ -14,11 +14,13 @@ Until then, no new features will be implemented and updates will only contain bu
 * Added comments to important procedures
 * Added automatic reconnect
 * Added automatic reconnect in case the Token changes in the Settings
+* Added UserRefresh to [main.js](Overlay/main.js)
+  * This can be used in custom scripts as a trigger if the most recent are required for the script to function correctly. (See [README.md](README.md))
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
 * Renamed some variables for more clarity
-* Removed Library dependencies (see 2.5.2)
+* Removed Library dependencies (see [2.5.2](https://github.com/BrainInBlack/TwitchStreaker/releases/tag/2.5.2))
 * Removed instant update from the overwrite functions, to prevent ws-event throttling
 
 ## 2.6.0b - Final Update for Python (Beta)

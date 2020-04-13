@@ -3,9 +3,9 @@
  *****************/
 var Overlay = {
 
-	'CurrentGoal': 10,
-	'CurrentStreak': 1,
-	'CurrentSubs': 0,
+	'CurrentGoal':     10,
+	'CurrentStreak':    1,
+	'CurrentSubs':      0,
 	'CurrentSubsLeft': 10,
 	'CurrentTotalSubs': 0,
 
@@ -19,13 +19,17 @@ var Overlay = {
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		if(this.Goal)      this.Goal.innerText      = this.CurrentGoal;
-		if(this.Subs)      this.Subs.innerText      = this.CurrentSubs;
-		if(this.SubsLeft)  this.SubsLeft.innerText  = this.CurrentSubsLeft;
-		if(this.Streak)    this.Streak.innerText    = this.CurrentStreak;
-		if(this.TotalSubs) this.TotalSubs.innerText = this.CurrentTotalSubs;
-		if(this.Tracker)   this.Tracker.title       = this.Tracker.innerText;   // ! Outline Hack!
-	}
+		if (this.Goal)      this.Goal.innerText      = this.CurrentGoal;
+		if (this.Subs)      this.Subs.innerText      = this.CurrentSubs;
+		if (this.SubsLeft)  this.SubsLeft.innerText  = this.CurrentSubsLeft;
+		if (this.Streak)    this.Streak.innerText    = this.CurrentStreak;
+		if (this.TotalSubs) this.TotalSubs.innerText = this.CurrentTotalSubs;
+		if (this.Tracker)   this.Tracker.title       = this.Tracker.innerText;   // ! Outline Hack!
+	},
+
+	// User Refresh is triggered every refresh
+	'onrefresh': function() {}
+
 }
 
 /**********************
@@ -77,6 +81,7 @@ function connectWebsocket() {
 				return;
 		}
 		Overlay.refresh();
+		Overlay.onrefresh();
 	}
 };
 
