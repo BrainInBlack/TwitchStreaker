@@ -87,13 +87,19 @@ $tsSubsLeft  | Amount of Subs needed to complete the current Streak
 $tsStreak    | Current Streak
 $tsTotalSubs | Amount of Subs accumulated in the current Session
 
-### Example
+### Command Example
 
 ```text
 We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.
 ```
 
 > We are currently working on Streak #5 and need 6 additional Subs.
+
+```text
+We reached $tsTotalSubs subs so far!
+```
+
+> We reached X Subs so far!
 
 ## Customization
 
@@ -129,7 +135,7 @@ TotalSubs | Amount of Subs accumulated in the current Session
 
 None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Subs`, `Streak` and `Goal`. Here a few examples:
 
-### Examples
+### HTML Examples
 
 #### "X Subs left until Wheel #X"
 
