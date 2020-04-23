@@ -4,9 +4,12 @@
 
 This is the final update for the Python version of TwitchStreaker. In the Future there will be a standalone version that does not rely on the Streamlabs Chatbot. *(Probably wont be the last update since we made a lot of changes)*
 
-Until then, no new features will be implemented and updates will only contain bug-fixes.
+### Donation Changes
+
+Donations now use the `Tier 1 Sub` point value for it's calculation. For example if you have a `Donation Amount` of 5 (your currency options on Streamlabs apply) and somebody donates 12, the script would count the Donation as 2 `Tier 1 Subs`, or as a single `Tier 1 Sub` if you have the `Only Count Once` option enabled.
 
 * Updated README.md
+* Updated Settings UI
 * Improved path definitions
 * Improved variable names
 * Improved error handling
@@ -19,7 +22,6 @@ Until then, no new features will be implemented and updates will only contain bu
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
-* Grouped Donation Settings
 * Renamed some variables for more clarity
 * Removed Library dependencies (see [2.5.2](https://github.com/BrainInBlack/TwitchStreaker/releases/tag/2.5.2))
 * Removed instant update from the overwrite functions, to prevent ws-event throttling

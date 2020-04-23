@@ -341,9 +341,9 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					res = 1  # Minimum amount of subs
+					res = Settings["Sub1"]
 					if not Settings["CountDonationsOnce"]:
-						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+						res = res * math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
