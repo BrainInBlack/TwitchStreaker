@@ -22,6 +22,7 @@ Until then, no new features will be implemented and updates will only contain bu
 * Renamed some variables for more clarity
 * Removed Library dependencies (see [2.5.2](https://github.com/BrainInBlack/TwitchStreaker/releases/tag/2.5.2))
 * Removed instant update from the overwrite functions, to prevent ws-event throttling
+* Removed unused Option from the script settings
 
 ## 2.6.0b - Final Update for Python (Beta)
 

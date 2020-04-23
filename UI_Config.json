@@ -30,12 +30,6 @@
 		"label": "Allow Resubs",
 		"tooltip": "Enables ReSubs to be counted as well.\n\n(Gifted-Sub will always be counted.)"
 	},
-	"CountSubsSeparate": {
-		"type": "checkbox",
-		"value": false,
-		"label": "Count Subs Separately",
-		"tooltip": "Separates Self and Gifted Subs, allowing for each Category to have their own values."
-	},
 	"DonationMinAmount": {
 		"type": "numberbox",
 		"value": 5.00,
