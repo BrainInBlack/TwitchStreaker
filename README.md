@@ -14,6 +14,7 @@ TwitchStreaker is compatible with Twitch, Mixer and YouTube. For Mixer and YouTu
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
   - [Known Issues](#known-issues)
     - [Script not showing up after Installation/Update](#script-not-showing-up-after-installationupdate)
+  - [Settings](#settings)
   - [Chatbot Command Parameters](#chatbot-command-parameters)
   - [Customization](#customization)
   - [JavaScript](#javascript)
@@ -74,6 +75,47 @@ With version 2.0.0 and onwards the Tracking is done in a different part of the S
 3. Save and Start/Restart the Chatbot
 
 Additional information available [here](https://github.com/BrainInBlack/TwitchStreaker/issues/38)
+
+## Settings
+
+TwitchStreaker has a lot of Options to give you as much control as possible on how the script works for you. For example you can make your `Goal` increase over time, or allow Donations to be counted as Subs when they exceed a specified amount.
+
+### General
+
+Option | Description
+-------|------------
+Goal | The amount of "points" required for the next "Streak"
+Goal Min | Minimum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Goal Max | Maximum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Increment Goal By | Value by which the `Goal` will be increased when completing a Streak (Leave at `0` to disable this mechanic)
+Allow Resubs | Allows Resubs to be counted as well as regular Subs.
+
+### Donation
+
+Donations use the `Tier 1 Sub` point value for it's calculation. For example if you have a `Donation Amount` of 5 (your currency options on Streamlabs apply) and somebody donates 12, the script would count the Donation as 2 `Tier 1 Subs`, or as a single `Tier 1 Sub` if you have the `Only Count Once` option enabled.
+
+Option | Description
+-------|------------
+Donation Amount | Minimum Donation required for it to be counted as a Subscription (Only whole numbers are allowed by the bot, sorry.)
+Allow Donations | Enables Donations to be counted as Subscription if they exceed the `Donation Amount` value.
+Only Count Once | Counts a Donation only once, if it exceeds the `Donation Amount`
+
+### Subscription Values
+
+Under each Tier, you'll find the following options. Prime Subscriptions (Twitch) have the same value as Tier 1 Subscriptions and will be handled as such by the Script.
+
+Option | Description
+-------|------------
+Sub | Points rewarded for a Subs
+Resub | Points rewarded for a Resubs
+Gifted Sub | Points rewarded for a gifted Sub
+Gifted Resub | Points awarded for a gifted Resub
+
+### Streamlabs
+
+Option | Description
+-------|------------
+Socket Token | Token required for the script to function. [See here](#streamlabs-sockettoken)
 
 ## Chatbot Command Parameters
 
