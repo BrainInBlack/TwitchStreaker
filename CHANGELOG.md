@@ -19,6 +19,7 @@ Until then, no new features will be implemented and updates will only contain bu
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
+* Grouped Donation Settings
 * Renamed some variables for more clarity
 * Removed Library dependencies (see [2.5.2](https://github.com/BrainInBlack/TwitchStreaker/releases/tag/2.5.2))
 * Removed instant update from the overwrite functions, to prevent ws-event throttling
