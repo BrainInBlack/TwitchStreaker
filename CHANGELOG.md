@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.0 - Final Update for Python
+## 2.6.0-b2 - Final Update for Python (Beta 2)
 
 This is the final update for the Python version of TwitchStreaker. In the Future there will be a standalone version that does not rely on the Streamlabs Chatbot. *(Probably wont be the last update since we made a lot of changes)*
 
