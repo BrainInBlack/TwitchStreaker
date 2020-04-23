@@ -30,12 +30,12 @@
 		"label": "Allow Resubs",
 		"tooltip": "Enables ReSubs to be counted as well.\n\n(Gifted-Sub will always be counted.)"
 	},
-	"SocketToken": {
-		"type": "textbox",
-		"value": "SocketToken",
-		"label": "Socket Token",
-		"tooltip": "Insert your Streamlabs Socket Token.\n\n(You can find your Token under Settings > API Settings > API Tokens, on the Streamlabs Website.)",
-		"group": "Streamlabs"
+	"DonationMinAmount": {
+		"type": "numberbox",
+		"value": 5.00,
+		"label": "Donation Amount",
+		"tooltip": "Minimum amount that needs to be donated for the Donation to be counted as a Subscription.\n\n(Donations that exceed a multiple of the specified amount will be counted as multiple Subs, i.e. a Donation of 12.00 with a Minimum of 5.00 will be counted as 2 Subs)",
+		"group": "Donations"
 	},
 	"CountDonations": {
 		"type": "checkbox",
@@ -47,99 +47,92 @@
 	"CountDonationsOnce": {
 		"type": "checkbox",
 		"value": false,
-		"label": "Only Count Donations Once",
+		"label": "Only Count Once",
 		"tooltip": "Only counts Donations that exceed the specified amount once, even if they're a multiple of the minimum Donation amount.",
-		"group": "Donations"
-	},
-	"DonationMinAmount": {
-		"type": "numberbox",
-		"value": 5.00,
-		"label": "Donation Amount",
-		"tooltip": "Minimum amount that needs to be donated for the Donation to be counted as a Subscription.\n\n(Donations that exceed a multiple of the specified amount will be counted as multiple Subs, i.e. a Donation of 12.00 with a Minimum of 5.00 will be counted as 2 Subs)",
 		"group": "Donations"
 	},
 	"Sub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-Sub Tier 1",
-		"tooltip": "Value for s Tier 1 Self-Sub.",
+		"label": "Sub",
+		"tooltip": "Value for a Tier 1 Sub.",
 		"group": "Tier 1 Values"
 	},
 	"ReSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Self-ReSub.",
+		"label": "Resub",
+		"tooltip": "Value for a Tier 1 Resub.",
 		"group": "Tier 1 Values"
 	},
 	"GiftSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gift-Sub Tier 1",
+		"label": "Gift-Sub",
 		"tooltip": "Value for a Tier 1 Gifted-Sub.",
 		"group": "Tier 1 Values"
 	},
 	"GiftReSub1": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gifted-ReSub Tier 1",
-		"tooltip": "Value for a Tier 1 Gifted-ReSub.",
+		"label": "Gifted-Resub",
+		"tooltip": "Value for a Tier 1 Gifted-Resub.",
 		"group": "Tier 1 Values"
 	},
 	"Sub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-Sub Tier 2",
-		"tooltip": "Value for s Tier 2 Self-Sub.",
+		"label": "Sub",
+		"tooltip": "Value for a Tier 2 Sub.",
 		"group": "Tier 2 Values"
 	},
 	"ReSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-ReSub Tier 2",
-		"tooltip": "Value for a Tier 2 Self-ReSub.",
+		"label": "Resub",
+		"tooltip": "Value for a Tier 2 Resub.",
 		"group": "Tier 2 Values"
 	},
 	"GiftSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gift-Sub Tier 2",
+		"label": "Gift-Sub",
 		"tooltip": "Value for a Tier 2 Gifted-Sub.",
 		"group": "Tier 2 Values"
 	},
 	"GiftReSub2": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gifted-ReSub Tier 2",
-		"tooltip": "Value for a Tier 2 Gifted-ReSub.",
+		"label": "Gifted-Resub",
+		"tooltip": "Value for a Tier 2 Gifted-Resub.",
 		"group": "Tier 2 Values"
 	},
 	"Sub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-Sub Tier 3",
-		"tooltip": "Value for s Tier 3 Self-Sub.",
+		"label": "Sub",
+		"tooltip": "Value for a Tier 3 Sub.",
 		"group": "Tier 3 Values"
 	},
 	"ReSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Self-ReSub Tier 3",
-		"tooltip": "Value for a Tier 3 Self-ReSub.",
+		"label": "Resub Tier 3",
+		"tooltip": "Value for a Tier 3 Resub.",
 		"group": "Tier 3 Values"
 	},
 	"GiftSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gift-Sub Tier 3",
+		"label": "Gift-Sub",
 		"tooltip": "Value for a Tier 3 Gifted-Sub.",
 		"group": "Tier 3 Values"
 	},
 	"GiftReSub3": {
 		"type": "numberbox",
 		"value": 1,
-		"label": "Gifted-ReSub Tier 3",
-		"tooltip": "Value for a Tier 3 Gifted-ReSub.",
+		"label": "Gifted-Resub",
+		"tooltip": "Value for a Tier 3 Gifted-Resub.",
 		"group": "Tier 3 Values"
 	},
 	"AddSub": {
@@ -228,6 +221,13 @@
 		"tooltip": "Forces a refresh on the Overlay.",
 		"function": "UpdateOverlay",
 		"wsevent": ""
+	},
+	"SocketToken": {
+		"type": "textbox",
+		"value": "SocketToken",
+		"label": "Socket Token",
+		"tooltip": "Insert your Streamlabs Socket Token.\n\n(You can find your Token under Settings > API Settings > API Tokens, on the Streamlabs Website.)",
+		"group": "Streamlabs"
 	},
 	"ResetTracker": {
 		"type": "button",
