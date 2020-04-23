@@ -35,7 +35,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.6.0b"
+Version     = "2.6.0-b2"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -341,9 +341,9 @@ def EventReceiverEvent(sender, args):
 					continue
 
 				if message.Amount > Settings["DonationMinAmount"]:
-					res = 1  # Minimum amount of subs
+					res = Settings["Sub1"]
 					if not Settings["CountDonationsOnce"]:
-						res = math.trunc(message.Amount / Settings["DonationMinAmount"])
+						res = res * math.trunc(message.Amount / Settings["DonationMinAmount"])
 					Session["CurrentSubs"] += res
 					Log("Added {} Sub(s) for a {} Donation by {}.".format(res, message.FormatedAmount, message.Name))
 
@@ -639,14 +639,12 @@ def ReloadSettings(json_data):
 def AddSub():
 	global Session
 	Session["CurrentSubs"] += 1
-	UpdateTracker()
 
 
 def SubtractSub():
 	global Session
 	if Session["CurrentSubs"] > 0:
 		Session["CurrentSubs"] -= 1
-		UpdateTracker()
 
 
 # ----------------
@@ -655,40 +653,34 @@ def SubtractSub():
 def AddStreak():
 	global Session
 	Session["CurrentStreak"] += 1
-	UpdateTracker()
 
 
 def AddStreak5():
 	global Session
 	Session["CurrentStreak"] += 5
-	UpdateTracker()
 
 
 def AddStreak10():
 	global Session
 	Session["CurrentStreak"] += 10
-	UpdateTracker()
 
 
 def SubtractStreak():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 1
-		UpdateTracker()
 
 
 def SubtractStreak5():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 5
-		UpdateTracker()
 
 
 def SubtractStreak10():
 	global Session
 	if Session["CurrentStreak"] > 1:
 		Session["CurrentStreak"] -= 10
-		UpdateTracker()
 
 
 # --------------
@@ -698,14 +690,12 @@ def AddToGoal():
 	global Session
 	if Session["CurrentGoal"] < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
-		UpdateTracker()
 
 
 def SubtractFromGoal():
 	global Session
 	if Session["CurrentGoal"] > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
-		UpdateTracker()
 
 
 # ------
