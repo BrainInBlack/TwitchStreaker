@@ -662,10 +662,23 @@ def LoadSession():
 
 	try:
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
-			Session = json.load(f, encoding="utf-8-sig")
+			new_session = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except:
 		# Save default Session
+		SaveSession()
+
+	# Cleanup old session
+	is_dirty = False
+	diff = set(new_session) ^ set(Session)  # List options no longer present in the session
+	if len(diff) > 0:
+		for k in diff:
+			if k in new_session:
+				del new_session[k]
+				is_dirty = True
+	Session = new_session
+
+	if is_dirty:
 		SaveSession()
 
 

@@ -34,6 +34,7 @@ All this means that you need to save the Settings at least once and you should d
   * This can be used in custom scripts as a trigger if the most recent are required for the script to function correctly. (See [README.md](README.md))
 * Added skip for repeated alerts
 * Added "below 0" checks for various variables
+* Added Session cleanup
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
