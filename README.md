@@ -78,61 +78,70 @@ Additional information available [here](https://github.com/BrainInBlack/TwitchSt
 
 ## Settings
 
-TwitchStreaker has a lot of Options to give you as much control as possible on how the script works for you. For example you can make your `Goal` increase over time, or allow Donations to be counted as Subs when they exceed a specified amount.
+TwitchStreaker has a lot of Options to give you as much control as possible on how the script works for you. For example you can make your `Goal` increase over time, or allow Donations to be counted as `Points` when they exceed a specified amount.
 
 ### General
 
-Option | Description
--------|------------
-Goal | The amount of "points" required for the next "Streak"
-Goal Min | Minimum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
-Goal Max | Maximum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Option            | Description
+------------------|------------
+Goal              | The amount of `Points` required for the next Streak.
+Goal Min          | Minimum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Goal Max          | Maximum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
 Increment Goal By | Value by which the `Goal` will be increased when completing a Streak (Leave at `0` to disable this mechanic)
-Allow Resubs | Allows Resubs to be counted as well as regular Subs.
+Allow Resubs      | Allows Resubs to be counted as well as regular Subs.
 
-### Donation
-
-Donations use the `Tier 1 Sub` point value for it's calculation. For example if you have a `Donation Amount` of 5 (your currency options on Streamlabs apply) and somebody donates 12, the script would count the Donation as 2 `Tier 1 Subs`, or as a single `Tier 1 Sub` if you have the `Only Count Once` option enabled.
+### Bits
 
 Option | Description
--------|------------
-Donation Amount | Minimum Donation required for it to be counted as a Subscription (Only whole numbers are allowed by the bot, sorry.)
-Allow Donations | Enables Donations to be counted as Subscription if they exceed the `Donation Amount` value.
-Only Count Once | Counts a Donation only once, if it exceeds the `Donation Amount`
+
+
+### Donations
+
+Option               | Description
+---------------------|------------
+Donation Amount      | Minimum Donation required for it to be counted.
+Donation Point Value | Amount of `SubPoints` awarded.
+Allow Donations      | Enables Donations to be counted for `SubPoints` if they exceed the `Donation Amount` value.
+Only Count Once      | Counts a Donation only once, if it exceeds the `Donation Amount`
+Cumulative Donations | Allows for Donations below the `Donation Amount` to pile up and add `SubPoints` if they exceed the minimum amount.
 
 ### Subscription Values
 
 Under each Tier, you'll find the following options. Prime Subscriptions (Twitch) have the same value as Tier 1 Subscriptions and will be handled as such by the Script.
 
-Option | Description
--------|------------
-Sub | Points rewarded for a Subs
-Resub | Points rewarded for a Resubs
-Gifted Sub | Points rewarded for a gifted Sub
+Option       | Description
+-------------|------------
+Sub          | Points rewarded for a Subs
+Resub        | Points rewarded for a Resubs
+Gifted Sub   | Points rewarded for a gifted Sub
 Gifted Resub | Points awarded for a gifted Resub
 
 ### Streamlabs
 
-Option | Description
--------|------------
+Option       | Description
+-------------|------------
 Socket Token | Token required for the script to function. [See here](#streamlabs-sockettoken)
 
 ## Chatbot Command Parameters
 
 You can use the following Parameters in your Commands and Timers:
 
-Parameter    | Description
--------------|------------
-$tsGoal      | Amount of Subs needed per Streak
-$tsSubs      | Current amount of Subs in the current Streak
-$tsSubsLeft  | Amount of Subs needed to complete the current Streak
-$tsStreak    | Current Streak
-$tsTotalSubs | Amount of Subs accumulated in the current Session
+Parameter         | Description
+------------------|------------
+$tsGoal           | Amount of `Points` needed per Streak
+$tsPoints         | Current amount of `Points` in the current Streak
+$tsPointsLeft     | Amount of `Points` needed to complete the current Streak
+$tsStreak         | Current Streak
+$tsTotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+$tsTotalBits      | Amount of Bits accumulated in the current Session
+$tsTotalDonations | Donation amount accumulated in the current Session
 
 ### Command Example
 
+All these examples assume that a Subscription is worth one Point!
+
 ```text
-We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Subs.
+We are currently working on Streak #$tsStreak and need $tsPointsLeft additional Subs.
 ```
 
 > We are currently working on Streak #5 and need 6 additional Subs.
@@ -141,7 +150,7 @@ We are currently working on Streak #$tsStreak and need $tsSubsLeft additional Su
 We reached $tsTotalSubs subs so far!
 ```
 
-> We reached X Subs so far!
+> We reached 42 Subs so far!
 
 ## Customization
 
@@ -167,15 +176,17 @@ In case you're using a custom script, it has to be loaded after the `main.js` an
 
 The following element ID's are available for use in your design:
 
-ID        | Description
-----------|------------
-Goal      | Amount of Subs needed per Streak
-Subs      | Current amount of Subs in the current Streak
-SubsLeft  | Amount of Subs needed to complete the current Streak
-Streak    | Current Streaks
-TotalSubs | Amount of Subs accumulated in the current Session
+ID             | Description
+---------------|------------
+Goal           | Amount of `Points` needed per Streak
+Points         | Current amount of `Points` in the current Streak
+PointsLeft     | Amount of `Points` needed to complete the current Streak
+Streak         | Current Streaks
+TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+TotalBits      | Amount of `Bits` accumulated in the current Session
+TotalDonations | Donation amount accumulated in the current Session
 
-None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Subs`, `Streak` and `Goal`. Here a few examples:
+None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Points`, `Streak` and `Goal`. Here a few examples:
 
 ### HTML Examples
 
@@ -183,7 +194,7 @@ None of those ID's are actually required and can be placed anywhere in the docum
 
 ```HTML
 <div>
-  <span id="SubsLeft">2</span> Subs left until Wheel #<span id="Streak">1</span>
+  <span id="PointsLeft">2</span> Subs left until Wheel #<span id="Streak">1</span>
 </div>
 ```
 
@@ -191,7 +202,7 @@ None of those ID's are actually required and can be placed anywhere in the docum
 
 ```HTML
 <div>
-  <span id="Subs">2</span> of <span id="Goal">7</span> Subs, then we spin Wheel #<span id="Streak">1</span>
+  <span id="Points">2</span> of <span id="Goal">7</span> Subs, then we spin Wheel #<span id="Streak">1</span>
 </div>
 ```
 
@@ -217,13 +228,15 @@ It is important that this always evaluates as a function, since it is called fro
 
 The following variables are available for your custom script.
 
-Variable                 | Description
--------------------------|------------
-Overlay.CurrentGoal      | Amount of Subs needed to complete a Streak (min: 1)
-Overlay.CurrentStreak    | Current amount Streaks (min: 1)
-Overlay.CurrentSubs      | Current amount of Subs in the Streak (min: 0)
-Overlay.CurrentSubsLeft  | Amount of subs left to the next Streak
-Overlay.CurrentTotalSubs | Amount of Subs accumulated in the current Session
+Variable                      | Description
+------------------------------|------------
+Overlay.CurrentGoal           | Amount of `Points` needed to complete a Streak (min: 1)
+Overlay.CurrentStreak         | Current amount Streaks (min: 1)
+Overlay.CurrentPoints         | Current amount of `Points` in the Streak (min: 0)
+Overlay.CurrentPointsLeft     | Amount of `Points` left to the next Streak
+Overlay.CurrentTotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+Overlay.CurrentTotalBits      | Amount of total Bits accumulated in the current Session
+Overlay.CurrentTotalDonations | Donation amount accumulated in the current Session
 
 ## Manual Overwrites
 

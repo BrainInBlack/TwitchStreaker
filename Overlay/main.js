@@ -3,28 +3,34 @@
  *****************/
 var Overlay = {
 
-	'CurrentGoal':     10,
-	'CurrentStreak':    1,
-	'CurrentSubs':      0,
-	'CurrentSubsLeft': 10,
-	'CurrentTotalSubs': 0,
+	'CurrentGoal':          10,
+	'CurrentStreak':         1,
+	'CurrentPoints':         0,
+	'CurrentPointsLeft':    10,
+	'CurrentTotalSubs':      0,
+	'CurrentTotalBits':      0,
+	'CurrentTotalDonations': 0,
 
 	// Elements
-	'Goal':      document.getElementById('Goal'),
-	'Subs':      document.getElementById('Subs'),
-	'SubsLeft':  document.getElementById('SubsLeft'),
-	'Streak':    document.getElementById('Streak'),
-	'TotalSubs': document.getElementById('TotalSubs'),
-	'Tracker':   document.getElementById('Tracker'),                            // ! Outline Hack!
+	'Goal':           document.getElementById('Goal'),
+	'Points':         document.getElementById('Points'),
+	'PointsLeft':     document.getElementById('PointsLeft'),
+	'Streak':         document.getElementById('Streak'),
+	'TotalSubs':      document.getElementById('TotalSubs'),
+	'TotalBits':      document.getElementById('TotalBits'),
+	'TotalDonations': document.getElementById('TotalDonations'),
+	'Tracker':        document.getElementById('Tracker'),                                    // ! Outline Hack!
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		if (this.Goal)      this.Goal.innerText      = this.CurrentGoal;
-		if (this.Subs)      this.Subs.innerText      = this.CurrentSubs;
-		if (this.SubsLeft)  this.SubsLeft.innerText  = this.CurrentSubsLeft;
-		if (this.Streak)    this.Streak.innerText    = this.CurrentStreak;
-		if (this.TotalSubs) this.TotalSubs.innerText = this.CurrentTotalSubs;
-		if (this.Tracker)   this.Tracker.title       = this.Tracker.innerText;   // ! Outline Hack!
+		if (this.Goal)           this.Goal.innerText           = this.CurrentGoal;
+		if (this.Points)         this.Points.innerText         = this.CurrentPoints;
+		if (this.PointsLeft)     this.PointsLeft.innerText     = this.CurrentPointsLeft;
+		if (this.Streak)         this.Streak.innerText         = this.CurrentStreak;
+		if (this.TotalSubs)      this.TotalSubs.innerText      = this.CurrentTotalSubs;
+		if (this.TotalBits)      this.TotalBits.innerText      = this.CurrentTotalBits;
+		if (this.TotalDonations) this.TotalDonations.innerText = this.CurrentTotalDonations;
+		if (this.Tracker)        this.Tracker.title            = this.Tracker.innerText;     // ! Outline Hack!
 	},
 
 	// User Refresh is triggered every refresh
@@ -68,11 +74,13 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
-				Overlay.CurrentGoal      = data.CurrentGoal;
-				Overlay.CurrentStreak    = data.CurrentStreak;
-				Overlay.CurrentSubs      = data.CurrentSubs;
-				Overlay.CurrentSubsLeft  = data.CurrentSubsLeft;
-				Overlay.CurrentTotalSubs = data.CurrentTotalSubs
+				Overlay.CurrentGoal           = data.CurrentGoal;
+				Overlay.CurrentStreak         = data.CurrentStreak;
+				Overlay.CurrentPoints         = data.CurrentPoints;
+				Overlay.CurrentPointsLeft     = data.CurrentPointsLeft;
+				Overlay.CurrentTotalSubs      = data.CurrentTotalSubs;
+				Overlay.CurrentTotalBits      = data.CurrentTotalBits;
+				Overlay.CurrentTotalDonations = data.CurrentTotalDonations;
 				break;
 
 			default:

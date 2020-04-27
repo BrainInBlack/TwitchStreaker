@@ -1,24 +1,38 @@
 # Changelog
 
-## 2.6.0-b2 - Final Update for Python (Beta 2)
+## 2.6.0-b3 - Bits and Donations (Beta 3)
 
-This is the final update for the Python version of TwitchStreaker. In the Future there will be a standalone version that does not rely on the Streamlabs Chatbot. *(Probably wont be the last update since we made a lot of changes)*
+**IMPORTANT CHANGES!** We went ahead and changed a bunch of variables and terminology to reflect the changes we made to the script. In particular, how the Point-System works. `Points` is now used instead of Subs for the value that used to refer to the amount of Subs in the current Streak.
+
+All this means that you need to save the Settings at least once and you should delete the `Session.json` file from the script folder. Changes you made to the Overlay have to be redone. And if you're using the text files, then you have to use `Points.txt` and `PointsLeft.txt` instead.
 
 ### Donation Changes
 
-Donations now use the `Tier 1 Sub` point value for it's calculation. For example if you have a `Donation Amount` of 5 (your currency options on Streamlabs apply) and somebody donates 12, the script would count the Donation as 2 `Tier 1 Subs`, or as a single `Tier 1 Sub` if you have the `Only Count Once` option enabled.
+* Donations now use their own point value
+* Introduced Cumulative Donations (Experimental)
+  * Donations that are below the minimum amount are able to add up to a full DonationPoint
+
+### Added Bits (Experimental)
+
+* Bits have their own point value
+* A minimum amount can be defined
+* Bits below the minimum amount can add up to a full BitPoint (Experimental)
+
+### Other Changes
 
 * Updated README.md
 * Updated Settings UI
 * Improved path definitions
 * Improved variable names
 * Improved error handling
+* Improved log messages
 * Added SaveText() to Unload()
 * Added comments to important procedures
 * Added automatic reconnect
 * Added automatic reconnect in case the Token changes in the Settings
 * Added UserRefresh to [main.js](Overlay/main.js)
   * This can be used in custom scripts as a trigger if the most recent are required for the script to function correctly. (See [README.md](README.md))
+* Added skip for repeated alerts
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
@@ -26,23 +40,10 @@ Donations now use the `Tier 1 Sub` point value for it's calculation. For example
 * Removed Library dependencies (see [2.5.2](https://github.com/BrainInBlack/TwitchStreaker/releases/tag/2.5.2))
 * Removed instant update from the overwrite functions, to prevent ws-event throttling
 * Removed unused Option from the script settings
-
-## 2.6.0b - Final Update for Python (Beta)
-
-This is the beta release for the final version of the Python version that relies upon the Streamlabs Chatbot to function. As soon as this version is considered stable, development on the standalone version will be prioritized and this version will only get critical updates, in case something breaks.
-
-* Improved path definitions
-* Improved variable names
-* Improved error handling
-* Added SaveText() to Unload()
-* Added comments to important procedures
-* Added automatic reconnect
-* Added automatic reconnect in case the Token changes in the Settings
-* Consolidated the Update functions into UpdateTracker()
-* Consolidated the StartUp functions into StartUp()
-* Consolidated GiftSubs and AnonGiftSubs
-* Renamed some variables for more clarity
-* Removed Library dependencies (see 2.5.2)
+* Fixed script not reconnecting when the token changed
+* Fixed total subs command variable
+* Fixed FileIO issues
+* Fixed an Issue when changing Settings
 
 ## 2.5.6 - Improvements
 
