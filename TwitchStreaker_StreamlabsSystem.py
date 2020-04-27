@@ -489,13 +489,13 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
 
 	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal",     str(Session["CurrentGoal"]))
+		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
 
 	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak",   str(Session["CurrentStreak"]))
+		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
 
 	if "$tsPoints" in parse_string:
-		parse_string = parse_string.replace("$tsPoints",     str(Session["CurrentPoints"]))
+		parse_string = parse_string.replace("$tsPoints", str(Session["CurrentPoints"]))
 
 	if "$tsPointsLeft" in parse_string:
 		parse_string = parse_string.replace("$tsPointsLeft", str(Session["CurrentPointsLeft"]))
@@ -628,6 +628,19 @@ def SanityCheck():
 	if Settings["GoalIncrement"]  < 0:
 		Settings["GoalIncrement"] = 0
 		is_settings_dirty         = True
+
+	# Prevent Totals from being less than 0
+	if Session["CurrentTotalSubs"]  < 0:
+		Session["CurrentTotalSubs"] = 0
+		is_session_dirty            = True
+
+	if Session["CurrentTotalBits"]  < 0:
+		Session["CurrentTotalBits"] = 0
+		is_session_dirty            = True
+
+	if Session["CurrentTotalDonations"]  < 0:
+		Session["CurrentTotalDonations"] = 0
+		is_session_dirty                 = True
 
 	# Save Session/Settings if dirty
 	if is_session_dirty:
