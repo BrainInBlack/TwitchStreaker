@@ -3,7 +3,6 @@
 # -------
 import codecs, json, math, os, time
 
-
 # -----
 # Paths
 # -----
@@ -26,7 +25,7 @@ TotalDonationsFile  = os.path.join(TextFolder, "TotalDonations.txt")
 # ----------
 import clr
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReferenceToFileAndPath(os.path.join(ScriptFolder, "Lib/StreamlabsEventReceiver.dll"))
+clr.AddReferenceToFileAndPath(os.path.join(ScriptFolder, "Lib\\StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 
@@ -36,7 +35,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.6.0-b3"
+Version     = "2.6.0-b4"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -98,11 +97,12 @@ RefreshDelay  = 5    # InSeconds
 RefreshStamp  = time.time()
 SaveDelay     = 300  # InSeconds
 SaveStamp     = time.time()
-Tiers = [
+PointVars = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
-	"GiftReSub1", "GiftReSub2", "GiftReSub3"
+	"GiftReSub1", "GiftReSub2", "GiftReSub3",
+	"BitsPointValue", "DonationsPointValue"
 ]
 
 
@@ -129,7 +129,7 @@ def StartUp():
 	IsScriptReady = False
 
 	# Check Token
-	if len(Settings["SocketToken"]) < 100:
+	if Settings["SocketToken"] is None or len(Settings["SocketToken"]) < 100:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
 		return
 
@@ -173,107 +173,109 @@ def EventReceiverEvent(sender, args):
 		# Bits
 		# ----
 		if data.Type == "bits" and Settings["CountBits"]:
-			for message in data.Message:
+			for msg in data.Message:
 
 				# Skip Repeat
-				if message.IsRepeat:
-					Log("Ignored Repeat Bits by {}".format(message.Name))
+				if msg.IsRepeat:
+					Log("Ignored Repeat Bits by {}".format(msg.Name))
 					continue
 
 				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-				if not message.IsLive and not message.IsTest:
+				if not msg.IsLive and not msg.IsTest:
 					Log("Ignored Bits, Stream is not Live")
 					continue
 
 				# Ignore TestBits
-				if not message.IsTest:
-					Session["CurrentTotalBits"] += message.Amount
+				if not msg.IsTest:
+					Session["CurrentTotalBits"] += msg.Amount
 
 				# Bits are above MinAmount
-				if message.Amount > Settings["BitsMinAmount"]:
+				if msg.Amount > Settings["BitsMinAmount"]:
 
 					if Settings["CountBitsOnce"]:
 						Session["CurrentPoints"] += Settings["BitsPointValue"]
-						Log("Added {} Points for {} Bits from {}".format(Settings["BitsPointValue"], message.Amount, message.Name))
+						Log("Added {} Point(s) for {} Bits from {}".format(Settings["BitsPointValue"], msg.Amount, msg.Name))
 						continue
 
-					res = Settings["BitsPointValue"] * math.trunc(message.Amount / Settings["BitsMinAmount"])
-					BitsTemp += message.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
+					res = Settings["BitsPointValue"] * math.trunc(msg.Amount / Settings["BitsMinAmount"])
+					BitsTemp += msg.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
 
 					if Settings["CountBitsCumulative"] and BitsTemp > Settings["BitsMinAmount"]:
 						res += Settings["BitsPointValue"]
 						BitsTemp -= Settings["BitsMinValue"]
 
 					Session["CurrentPoints"] += res
-					Log("Added {} Points for {} Bits from {}".format(res, message.Amount, message.Name))
+					Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
+					del res
 
 				# Cumulative Donation
 				elif Settings["CountBitsCumulative"]:
 
-					BitsTemp += message.Amount
-					Log("Added {} Bits from {} to the cumulative amount".format(message.Amount, message.Name))
+					BitsTemp += msg.Amount
+					Log("Added {} Bits from {} to the cumulative amount".format(msg.Amount, msg.Name))
 
 					if BitsTemp > Settings["BitsMinAmount"]:
 
 						Session["CurrentPoints"] += Settings["BitsPointValue"]
 						DonationTemp             -= Settings["BitsMinAmount"]
 
-						Log("Added {} Points, because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"]))
+						Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"]))
 
 				else:
-					Log("Ignored {} Bits from {}, not above the Bits minimum.".format(message.Amount, message.Name))
+					Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
 
 		# -------------
 		# Subscriptions
 		# -------------
 		if data.Type == "subscription":
-			for message in data.Message:
+			for msg in data.Message:
 
 				# Skip Repeat
-				if message.IsRepeat:
-					Log("Ignored Repeat Subscription from {}".format(message.Name))
+				if msg.IsRepeat:
+					Log("Ignored Repeat Subscription from {}".format(msg.Name))
 					continue
 
 				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-				if not message.IsLive and not message.IsTest:
-					Log("Ignored Subscription from {}, Stream is not Live".format(message.Name))
+				if not msg.IsLive and not msg.IsTest:
+					Log("Ignored Subscription from {}, Stream is not Live".format(msg.Name))
 					continue
 
 				# GiftSub Check
-				if message.SubType == "subgift":
+				if msg.SubType == "subgift":
 
 					# Ignore Gifted Subs by Streamer
-					if message.Gifter == ChannelName and not message.IsTest:
-						Log("Ignored StreamerGift from {}".format(message.Gifter))
+					if msg.Gifter == ChannelName and not msg.IsTest:
+						Log("Ignored StreamerGift from {}".format(msg.Gifter))
 						continue
 
 					# Ignore Self-Gifted Subs
-					if message.Name == message.Gifter and not message.IsTest:
-						Log("Ignored SelfGift from {}".format(message.Gifter))
+					if msg.Name == msg.Gifter and not msg.IsTest:
+						Log("Ignored SelfGift from {}".format(msg.Gifter))
 						continue
 
 				# ReSub Check, skip resubs if option is disabled
-				if message.SubType == "resub" and not Settings["CountReSubs"] and not message.IsTest:
-					Log("Ignored Resub by {}".format(message.Name))
+				if msg.SubType == "resub" and not Settings["CountReSubs"] and not msg.IsTest:
+					Log("Ignored Resub by {}".format(msg.Name))
 					continue
 
 				# Gifted Subs (includes anonymous subs)
-				if message.SubType == "subgift" or message.SubType == "anonsubgift":
+				if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
 
 					# GiftedSubs (resubs)
-					if message.Months is not None:
+					if msg.Months is not None:
 
 						res = Settings["GiftReSub1"]
 
-						if message.SubPlan == "2000":
+						if msg.SubPlan == "2000":
 							res = Settings["GiftReSub2"]
 
-						elif message.SubPlan == "3000":
+						elif msg.SubPlan == "3000":
 							res = Settings["GiftReSub3"]
 
 						Session["CurrentPoints"]    += res
 						Session["CurrentTotalSubs"] += 1
-						Log("Added {} Points for a {} Subscription from {}".format(res, message.SubType, message.Name))
+						Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
+						del res
 						continue
 					# /GiftedSubs (resubs)
 
@@ -282,33 +284,35 @@ def EventReceiverEvent(sender, args):
 
 						res = Settings["GiftSub1"]
 
-						if message.SubPlan == "2000":
+						if msg.SubPlan == "2000":
 							res = Settings["GiftSub2"]
 
-						elif message.SubPlan == "3000":
+						elif msg.SubPlan == "3000":
 							res = Settings["GiftSub3"]
 
 						Session["CurrentPoints"]    += res
 						Session["CurrentTotalSubs"] += 1
-						Log("Added {} Points for a {} Subscription from {}".format(res, message.SubType, message.Name))
+						Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
+						del res
 						continue
 					# /GiftedSubs (normal)
 				# GiftedSubs - END
 
 				# ReSubs
-				elif message.SubType == "resub":
+				elif msg.SubType == "resub":
 
 					res = Settings["ReSub1"]
 
-					if message.SubPlan == "2000":
+					if msg.SubPlan == "2000":
 						res = Settings["ReSub2"]
 
-					elif message.SubPlan == "3000":
+					elif msg.SubPlan == "3000":
 						res = Settings["ReSub3"]
 
 					Session["CurrentPoints"]    += res
 					Session["CurrentTotalSubs"] += 1
-					Log("Added {} Points for a {} Subscription from {}".format(res, message.SubType, message.Name))
+					Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
+					del res
 					continue
 				# Resubs - END
 
@@ -317,15 +321,16 @@ def EventReceiverEvent(sender, args):
 
 					res = Settings["Sub1"]
 
-					if message.SubPlan == "2000":
+					if msg.SubPlan == "2000":
 						res = Settings["Sub2"]
 
-					elif message.SubPlan == "3000":
+					elif msg.SubPlan == "3000":
 						res = Settings["Sub3"]
 
 					Session["CurrentPoints"]    += res
 					Session["CurrentTotalSubs"] += 1
-					Log("Added {} Points for a {} Subscription from {}".format(res, message.SubType, message.Name))
+					Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
+					del res
 					continue
 				# Subs - END
 
@@ -335,25 +340,25 @@ def EventReceiverEvent(sender, args):
 	if data.For == "mixer_account":
 
 		if data.Type == "subscription":
-			for message in data.Message:
+			for msg in data.Message:
 
 				# Skip Repeat
-				if message.IsRepeat:
-					Log("Ignored Repeat Subscription from {} (Mixer)".format(message.Name))
+				if msg.IsRepeat:
+					Log("Ignored Repeat Subscription from {} (Mixer)".format(msg.Name))
 					continue
 
 				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-				if not message.IsLive and not message.IsTest:
-					Log("Ignored Subscription from {} (Mixer), Stream is not Live".format(message.Name))
+				if not msg.IsLive and not msg.IsTest:
+					Log("Ignored Subscription from {} (Mixer), Stream is not Live".format(msg.Name))
 					continue
 
-				if message.Months > 1 and not Settings["CountResubs"]:
-					Log("Ignored Resub from {} (Mixer)".format(message.Name))
+				if msg.Months > 1 and not Settings["CountResubs"]:
+					Log("Ignored Resub from {} (Mixer)".format(msg.Name))
 					continue
 
 				Session["CurrentPoints"]    += Settings["Sub1"]
 				Session["CurrentTotalSubs"] += 1
-				Log("Added {} Points by {} (Mixer)".format(Settings["Sub1"], message.Name))
+				Log("Added {} Point(s) by {} (Mixer)".format(Settings["Sub1"], msg.Name))
 
 		return  # /Mixer
 
@@ -361,25 +366,25 @@ def EventReceiverEvent(sender, args):
 	if data.For == "youtube_account":
 
 		if data.Type == "subscription":
-			for message in data.Message:
+			for msg in data.Message:
 
 				# Skip Repeat
-				if message.IsRepeat:
-					Log("Ignored Repeat Sponsor from {} (YouTube)".format(message.Name))
+				if msg.IsRepeat:
+					Log("Ignored Repeat Sponsor from {} (YouTube)".format(msg.Name))
 					continue
 
 				# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-				if not message.IsLive and not message.IsTest:
-					Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(message.Name))
+				if not msg.IsLive and not msg.IsTest:
+					Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(msg.Name))
 					continue
 
-				if message.Months > 1 and not Settings["CountResubs"]:
-					Log("Ignored Re-Sponsor from {}. (YouTube)".format(message.Name))
+				if msg.Months > 1 and not Settings["CountResubs"]:
+					Log("Ignored Re-Sponsor from {}. (YouTube)".format(msg.Name))
 					continue
 
 				Session["CurrentPoints"]    += Settings["Sub1"]
 				Session["CurrentTotalSubs"] += 1
-				Log("Added {} Point for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], message.Name))
+				Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], msg.Name))
 
 		return  # /Youtube
 
@@ -387,55 +392,56 @@ def EventReceiverEvent(sender, args):
 	if data.For == "streamlabs":
 
 		if data.Type == "donation" and Settings["CountDonations"]:
-			for message in data.Message:
+			for msg in data.Message:
 
 				# Skip Repeat
-				if message.IsRepeat:
-					Log("Ignored Repeat Donation from {}".format(message.FromName))
+				if msg.IsRepeat:
+					Log("Ignored Repeat Donation from {}".format(msg.FromName))
 					continue
 
 				# Live Check, skip subs if streamer is not live (does not apply to test donations)
-				if not message.IsLive and not message.IsTest:
-					Log("Ignored Donation from {}, Stream is not Live.".format(message.Name))
+				if not msg.IsLive and not msg.IsTest:
+					Log("Ignored Donation from {}, Stream is not Live.".format(msg.Name))
 					continue
 
 				# Ignore test donations for the total amount
-				if not message.IsTest:
-					Session["CurrentTotalDonations"] += message.Amount
+				if not msg.IsTest:
+					Session["CurrentTotalDonations"] += msg.Amount
 
 				# Donation is above MinAmount
-				if message.Amount > Settings["DonationMinAmount"]:
+				if msg.Amount > Settings["DonationMinAmount"]:
 
 					if Settings["CountDonationsOnce"]:
 						Session["CurrentPoints"] += Settings["DonationsPointValue"]
-						Log("Added {} Points for a {} {} Donation from {}.".format(Settings["DonationsPointValue"], message.Amount, message.Currency, message.FromName))
+						Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings["DonationsPointValue"], msg.Amount, msg.Currency, msg.FromName))
 						continue
 
-					res = Settings["DonationPointValue"] * math.trunc(message.Amount / Settings["DonationMinAmount"])
-					DonationTemp += message.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+					res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
+					DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
 
 					if Settings["CountDonationsCumulative"] and DonationTemp > Settings["DonationMinAmount"]:
 						res += Settings["DonationPointValue"]
 						DonationTemp -= Settings["DonationMinAmount"]
 
 					Session["CurrentPoints"] += res
-					Log("Added {} Points for a {} {} Donation from {}.".format(res, message.Amount, message.Currency, message.FromName))
+					Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
+					del res
 
 				# Cumulative Donation
 				elif Settings["CountDonationsCumulative"]:
 
-					DonationTemp += message.Amount
-					Log("Added Donation of {} {} from {} to the cumulative amount.".format(message.Amount, message.Currency, message.FromName))
+					DonationTemp += msg.Amount
+					Log("Added Donation of {} {} from {} to the cumulative amount.".format(msg.Amount, msg.Currency, msg.FromName))
 
 					if DonationTemp > Settings["DonationMinAmount"]:
 
 						Session["CurrentPoints"] += Settings["DonationPointValue"]
 						DonationTemp             -= Settings["DonationMinAmount"]
 
-						Log("Added {} Points because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings["DonationPointValue"]))
+						Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings["DonationPointValue"]))
 
 				else:
-					Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(message.Amount, message.Currency, message.FromName))
+					Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))
 
 		return  # /Streamlabs
 
@@ -482,37 +488,6 @@ def Tick():
 		SaveStamp = time.time()
 
 
-# ---------------
-# Parse Parameter
-# ---------------
-def Parse(parse_string, user_id, username, target_id, target_name, message):
-	global Session
-
-	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
-
-	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
-
-	if "$tsPoints" in parse_string:
-		parse_string = parse_string.replace("$tsPoints", str(Session["CurrentPoints"]))
-
-	if "$tsPointsLeft" in parse_string:
-		parse_string = parse_string.replace("$tsPointsLeft", str(Session["CurrentPointsLeft"]))
-
-	if "$tsTotalSubs" in parse_string:
-		parse_string = parse_string.replace("$tsTotalSubs", str(Session["CurrentTotalSubs"]))
-
-	if "$tsTotalBits" in parse_string:
-		parse_string = parse_string.replace("$tsTotalBits", str(Session["CurrentTotalBits"]))
-
-	if "$tsTotalDonations" in parse_string:
-		parse_string = parse_string.replace("$tsTotalDonations", str(Session["CurrentTotalDonations"]))
-
-
-	return parse_string
-
-
 # --------------
 # Update Tracker
 # --------------
@@ -556,7 +531,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 		f.write(str(Session["CurrentPointsLeft"]))
 		f.close()
 
-		f= open(StreakFile, "w")
+		f = open(StreakFile, "w")
 		f.write(str(Session["CurrentStreak"]))
 		f.close()
 
@@ -571,8 +546,8 @@ def UpdateTracker():  # ! Only call if a quick response is required
 		f = open(TotalDonationsFile, "w")
 		f.write(str(Session["CurrentTotalDonations"]))
 		f.close()
-	except:
-		Log("Unable to update Text Files!")
+	except IOError as e:
+		Log("Unable to update Text Files! ({})".format(e.message))
 
 	# Update Refresh Stamp
 	RefreshStamp = time.time()
@@ -582,9 +557,9 @@ def UpdateTracker():  # ! Only call if a quick response is required
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings, Tiers
+	global Session, Settings, PointVars
 
-	is_session_dirty = False
+	is_session_dirty  = False
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
@@ -618,10 +593,10 @@ def SanityCheck():
 		Session["CurrentGoal"] = Settings["GoalMax"]
 		is_session_dirty       = True
 
-	# Tier Validation
-	for tier in Tiers:
-		if tier < 1:
-			Settings[tier]    = 1
+	# Prevent Points from being below 1
+	for var in PointVars:
+		if var < 1:
+			Settings[var]     = 1
 			is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
@@ -664,9 +639,9 @@ def LoadSession():
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			new_session = json.load(f, encoding="utf-8-sig")
 			f.close()
-	except:
-		# Save default Session
-		SaveSession()
+	except IOError:
+		SaveSession()  # Save default Session
+		return
 
 	# Cleanup old session
 	is_dirty = False
@@ -689,8 +664,8 @@ def SaveSession():
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
-	except:
-		Log("Unable to save Session!")
+	except IOError as e:
+		Log("Unable to save Session! ({})".format(e.message))
 
 
 def ResetSession():
@@ -700,13 +675,18 @@ def ResetSession():
 		LoadSettings()
 		SanityCheck()
 
-	Session["CurrentGoal"]           = Settings["Goal"]
-	Session["CurrentPoints"]         = 0
-	Session["CurrentPointsLeft"]     = Session["CurrentGoal"]
-	Session["CurrentStreak"]         = 1
-	Session["CurrentTotalSubs"]      = 0
-	Session["CurrentTotalBits"]      = 0
-	Session["CurrentTotalDonations"] = 0
+	# Hard reset of the session
+	del Session
+	Session = {
+		"CurrentGoal": Settings["Goal"],
+		"CurrentPoints": 0,
+		"CurrentPointsLeft": Settings["Goal"],
+		"CurrentStreak": 1,
+		"CurrentTotalSubs": 0,
+		"CurrentTotalBits": 0,
+		"CurrentTotalDonations": 0
+	}
+
 	SaveSession()
 	UpdateTracker()
 	Log("Session Reset!")
@@ -725,8 +705,9 @@ def LoadSettings():
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
-	except:
-		SaveSettings()
+	except IOError:
+		SaveSettings()  # Save default Settings
+		return
 
 	# Cleanup old options
 	is_dirty = False
@@ -756,8 +737,8 @@ def SaveSettings():
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
-	except:
-		Log("Unable to save Settings!")
+	except IOError as e:
+		Log("Unable to save Settings! ({})".format(e.message))
 
 
 def ReloadSettings(json_data):
@@ -770,8 +751,9 @@ def ReloadSettings(json_data):
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
 			f.close()
-	except:
-		SaveSettings()
+	except IOError:
+		SaveSettings()  # Save default Settings
+		return
 
 	# Reconnect if Token changed
 	if old_token is not None and Settings["SocketToken"] != old_token:
@@ -781,6 +763,7 @@ def ReloadSettings(json_data):
 		Connect()
 
 	SanityCheck()
+	Log("Settings saved!")
 
 
 # -------------
@@ -858,6 +841,36 @@ def Unload():
 	EventReceiver = None
 	UpdateTracker()
 	SaveSession()
+
+
+# ---------------
+# Parse Parameter
+# ---------------
+def Parse(parse_string, user_id, username, target_id, target_name, message):
+	global Session
+
+	if "$tsGoal" in parse_string:
+		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+
+	if "$tsStreak" in parse_string:
+		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+
+	if "$tsPoints" in parse_string:
+		parse_string = parse_string.replace("$tsPoints", str(Session["CurrentPoints"]))
+
+	if "$tsPointsLeft" in parse_string:
+		parse_string = parse_string.replace("$tsPointsLeft", str(Session["CurrentPointsLeft"]))
+
+	if "$tsTotalSubs" in parse_string:
+		parse_string = parse_string.replace("$tsTotalSubs", str(Session["CurrentTotalSubs"]))
+
+	if "$tsTotalBits" in parse_string:
+		parse_string = parse_string.replace("$tsTotalBits", str(Session["CurrentTotalBits"]))
+
+	if "$tsTotalDonations" in parse_string:
+		parse_string = parse_string.replace("$tsTotalDonations", str(Session["CurrentTotalDonations"]))
+
+	return parse_string
 
 
 # -------
