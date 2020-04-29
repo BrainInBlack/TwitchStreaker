@@ -45,6 +45,10 @@ TwitchStreaker is compatible with Twitch, Mixer and YouTube. For Mixer and YouTu
 3. Extract the downloaded archive and overwrite existing files.
 4. Reapply your customization's.
 5. Reload the script and overlay.
+   - Click the `Reload Script` button on the Chatbot.
+   - De-select and then re-select the script, to update the UI.
+   - Click the `Save Settings` and then the `Reset Session` button, to makes sure that the most recent changes are applied.
+   - Reload the Overlay within your Streaming software.
 
 ## Updating from 1.x to 2.x
 
