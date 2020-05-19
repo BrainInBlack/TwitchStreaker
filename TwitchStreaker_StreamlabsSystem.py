@@ -269,7 +269,7 @@ def EventReceiverEvent(sender, args):
 						if msg.SubPlan == "2000":
 							res = Settings["GiftReSub2"]
 
-						elif msg.SubPlan == "3000":
+						if msg.SubPlan == "3000":
 							res = Settings["GiftReSub3"]
 
 						Session["CurrentPoints"]    += res
@@ -287,7 +287,7 @@ def EventReceiverEvent(sender, args):
 						if msg.SubPlan == "2000":
 							res = Settings["GiftSub2"]
 
-						elif msg.SubPlan == "3000":
+						if msg.SubPlan == "3000":
 							res = Settings["GiftSub3"]
 
 						Session["CurrentPoints"]    += res
@@ -306,7 +306,7 @@ def EventReceiverEvent(sender, args):
 					if msg.SubPlan == "2000":
 						res = Settings["ReSub2"]
 
-					elif msg.SubPlan == "3000":
+					if msg.SubPlan == "3000":
 						res = Settings["ReSub3"]
 
 					Session["CurrentPoints"]    += res
@@ -324,7 +324,7 @@ def EventReceiverEvent(sender, args):
 					if msg.SubPlan == "2000":
 						res = Settings["Sub2"]
 
-					elif msg.SubPlan == "3000":
+					if msg.SubPlan == "3000":
 						res = Settings["Sub3"]
 
 					Session["CurrentPoints"]    += res
