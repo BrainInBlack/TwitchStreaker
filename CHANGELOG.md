@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.0-b4 - Bits and Donations (Beta 4)
+## 2.6.0 - Bits and Donations
 
 **IMPORTANT CHANGES!** We went ahead and changed a bunch of variables and terminology to reflect the changes we made to the script. In particular, how the Point-System works. `Points` is now used instead of Subs for the value that used to refer to the amount of Subs in the current Streak.
 
