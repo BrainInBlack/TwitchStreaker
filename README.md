@@ -45,6 +45,10 @@ TwitchStreaker is compatible with Twitch, Mixer and YouTube. For Mixer and YouTu
 3. Extract the downloaded archive and overwrite existing files.
 4. Reapply your customization's.
 5. Reload the script and overlay.
+   - Click the `Reload Script` button on the Chatbot.
+   - De-select and then re-select the script, to update the UI.
+   - Click the `Save Settings` and then the `Reset Session` button, to makes sure that the most recent changes are applied.
+   - Reload the Overlay within your Streaming software.
 
 ## Updating from 1.x to 2.x
 
@@ -92,18 +96,23 @@ Allow Resubs      | Allows Resubs to be counted as well as regular Subs.
 
 ### Bits
 
-Option | Description
-
+Option           | Description
+-----------------|------------
+Bits Amount      | Minimum amount of Bits required for it to be counted.
+Bits Point Value | Amount of `Points` awarded.
+Allow Bits       | Enables Bits to be counted as `Points` if they exceed the `Bits Amount`.
+Count Bits Once  | Counts Bits only once, even if they exceed the `Bits Amount`.
+Cumulative Bits  | Allows Bits below the `Bits Amount` to pile up and add `Points` if the exceed the `Bits Amount`.
 
 ### Donations
 
 Option               | Description
 ---------------------|------------
 Donation Amount      | Minimum Donation required for it to be counted.
-Donation Point Value | Amount of `SubPoints` awarded.
-Allow Donations      | Enables Donations to be counted for `SubPoints` if they exceed the `Donation Amount` value.
+Donation Point Value | Amount of `Points` awarded.
+Allow Donations      | Enables Donations to be counted as `Points` if they exceed the `Donation Amount` value.
 Only Count Once      | Counts a Donation only once, if it exceeds the `Donation Amount`
-Cumulative Donations | Allows for Donations below the `Donation Amount` to pile up and add `SubPoints` if they exceed the minimum amount.
+Cumulative Donations | Allows for Donations below the `Donation Amount` to pile up and add `Points` if they exceed the `Donation Amount`.
 
 ### Subscription Values
 

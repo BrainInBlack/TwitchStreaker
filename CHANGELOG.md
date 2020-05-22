@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.6.0-b3 - Bits and Donations (Beta 3)
+## 2.6.0 - Bits and Donations
 
 **IMPORTANT CHANGES!** We went ahead and changed a bunch of variables and terminology to reflect the changes we made to the script. In particular, how the Point-System works. `Points` is now used instead of Subs for the value that used to refer to the amount of Subs in the current Streak.
 
@@ -24,7 +24,7 @@ All this means that you need to save the Settings at least once and you should d
 * Updated Settings UI
 * Improved path definitions
 * Improved variable names
-* Improved error handling
+* Improved exception handling
 * Improved log messages
 * Added SaveText() to Unload()
 * Added comments to important procedures
@@ -33,6 +33,8 @@ All this means that you need to save the Settings at least once and you should d
 * Added UserRefresh to [main.js](Overlay/main.js)
   * This can be used in custom scripts as a trigger if the most recent are required for the script to function correctly. (See [README.md](README.md))
 * Added skip for repeated alerts
+* Added checks to keep point values above 0 (zero)
+* Added Session cleanup
 * Consolidated the Update functions into UpdateTracker()
 * Consolidated the StartUp functions into StartUp()
 * Consolidated GiftSubs and AnonGiftSubs
@@ -44,6 +46,8 @@ All this means that you need to save the Settings at least once and you should d
 * Fixed total subs command variable
 * Fixed FileIO issues
 * Fixed an Issue when changing Settings
+* Fixed a potential issue with variables keeping their old value (Chatbot issue?)
+* Fixed script error when SocketToken is not defined
 
 ## 2.5.6 - Improvements
 
