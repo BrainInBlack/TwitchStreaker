@@ -6,19 +6,19 @@ import codecs, json, math, os, time
 # -----
 # Paths
 # -----
-ScriptFolder        = os.path.realpath(os.path.dirname(__file__))
-TextFolder          = os.path.join(ScriptFolder, "Text\\")
+ScriptFolder       = os.path.realpath(os.path.dirname(__file__))
+TextFolder         = os.path.join(ScriptFolder, "Text\\")
 
-SessionFile         = os.path.join(ScriptFolder, "Session.json")
-SettingsFile        = os.path.join(ScriptFolder, "Settings.json")
+SessionFile        = os.path.join(ScriptFolder, "Session.json")
+SettingsFile       = os.path.join(ScriptFolder, "Settings.json")
 
-GoalFile            = os.path.join(TextFolder, "Goal.txt")
-PointsFile          = os.path.join(TextFolder, "Points.txt")
-PointsLeftFile      = os.path.join(TextFolder, "PointsLeft.txt")
-StreakFile          = os.path.join(TextFolder, "Streak.txt")
-TotalBitsFile       = os.path.join(TextFolder, "TotalBits.txt")
-TotalSubsFile       = os.path.join(TextFolder, "TotalSubs.txt")
-TotalDonationsFile  = os.path.join(TextFolder, "TotalDonations.txt")
+GoalFile           = os.path.join(TextFolder, "Goal.txt")
+PointsFile         = os.path.join(TextFolder, "Points.txt")
+PointsLeftFile     = os.path.join(TextFolder, "PointsLeft.txt")
+StreakFile         = os.path.join(TextFolder, "Streak.txt")
+TotalBitsFile      = os.path.join(TextFolder, "TotalBits.txt")
+TotalSubsFile      = os.path.join(TextFolder, "TotalSubs.txt")
+TotalDonationsFile = os.path.join(TextFolder, "TotalDonations.txt")
 
 # ----------
 # References
@@ -500,7 +500,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	while Session["CurrentPoints"] >= Session["CurrentGoal"]:
 
 		# Subtract Goal and Increment Streak
-		Session["CurrentPoints"]   -= Session["CurrentGoal"]
+		Session["CurrentPoints"] -= Session["CurrentGoal"]
 		Session["CurrentStreak"] += 1
 
 		# Increment CurrentGoal
@@ -776,7 +776,7 @@ def AddPoint():
 
 def SubtractPoint():
 	global Session
-	if Session["CurrentPoints"] > 0:
+	if Session["CurrentPoints"]   > 0:
 		Session["CurrentPoints"] -= 1
 
 
@@ -800,19 +800,19 @@ def AddStreak10():
 
 def SubtractStreak():
 	global Session
-	if Session["CurrentStreak"] > 1:
+	if Session["CurrentStreak"]   > 1:
 		Session["CurrentStreak"] -= 1
 
 
 def SubtractStreak5():
 	global Session
-	if Session["CurrentStreak"] > 1:
+	if Session["CurrentStreak"]   > 1:
 		Session["CurrentStreak"] -= 5
 
 
 def SubtractStreak10():
 	global Session
-	if Session["CurrentStreak"] > 1:
+	if Session["CurrentStreak"]   > 1:
 		Session["CurrentStreak"] -= 10
 
 
@@ -821,13 +821,13 @@ def SubtractStreak10():
 # --------------
 def AddToGoal():
 	global Session
-	if Session["CurrentGoal"] < Settings["GoalMax"]:
+	if Session["CurrentGoal"]   < Settings["GoalMax"]:
 		Session["CurrentGoal"] += 1
 
 
 def SubtractFromGoal():
 	global Session
-	if Session["CurrentGoal"] > Settings["GoalMin"]:
+	if Session["CurrentGoal"]   > Settings["GoalMin"]:
 		Session["CurrentGoal"] -= 1
 
 
