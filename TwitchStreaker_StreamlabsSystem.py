@@ -35,7 +35,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.6.0"
+Version     = "2.6.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -720,7 +720,7 @@ def LoadSettings():
 	Settings = new_settings
 
 	# Reconnect if Token changed
-	if old_token is not None and Settings["SocketToken"] != old_token:
+	if old_token is None or Settings["SocketToken"] != old_token:
 		if EventReceiver and EventReceiver.IsConnected:
 			EventReceiver.Disconnect()
 			EventReceiver = None

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.6.1 - Fixes
+
+* Fixed re-connect not happening if there was no old token in the settings
+
 ## 2.6.0 - Bits and Donations
 
 **IMPORTANT CHANGES!** We went ahead and changed a bunch of variables and terminology to reflect the changes we made to the script. In particular, how the Point-System works. `Points` is now used instead of Subs for the value that used to refer to the amount of Subs in the current Streak.
