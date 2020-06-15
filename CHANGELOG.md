@@ -2,7 +2,8 @@
 
 ## 2.6.1 - Fixes
 
-* Fixed re-connect not happening if there was no old token in the settings
+* Inreased refresh timer delay to 10 seconds
+* Further attempts at preventing multiple point additions on a single event
 
 ## 2.6.0 - Bits and Donations
 
