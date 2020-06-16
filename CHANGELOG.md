@@ -2,8 +2,9 @@
 
 ## 2.6.1 - Fixes
 
-* Inreased refresh timer delay to 10 seconds
-* Further attempts at preventing multiple point additions on a single event
+* ~~Fixed re-connect not happening if there was no old token in the settings~~
+* ~~Inreased refresh timer delay to 10 seconds~~
+* EventMessages are no longer run through a loop, since there is only a single entry per event anyways
 
 ## 2.6.0 - Bits and Donations
 
