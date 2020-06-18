@@ -208,7 +208,7 @@ def EventReceiverEvent(sender, args):
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
 				return
 
-			# Cumulative Donation
+			# Cumulative Bits
 			elif Settings["CountBitsCumulative"]:
 
 				BitsTemp += msg.Amount
@@ -217,14 +217,13 @@ def EventReceiverEvent(sender, args):
 				if BitsTemp > Settings["BitsMinAmount"]:
 
 					Session["CurrentPoints"] += Settings["BitsPointValue"]
-					DonationTemp             -= Settings["BitsMinAmount"]
+					BitsTemp                 -= Settings["BitsMinAmount"]
 
 					Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"]))
 					return
 
 			else:
 				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
-			del msg
 			return
 
 		# -------------
@@ -255,11 +254,6 @@ def EventReceiverEvent(sender, args):
 				if msg.Name == msg.Gifter and not msg.IsTest:
 					Log("Ignored SelfGift from {}".format(msg.Gifter))
 					return
-
-			# ReSub Check, skip resubs if option is disabled
-			if msg.SubType == "resub" and not Settings["CountReSubs"] and not msg.IsTest:
-				Log("Ignored Resub by {}".format(msg.Name))
-				return
 
 			# Gifted Subs (includes anonymous subs)
 			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
@@ -301,6 +295,11 @@ def EventReceiverEvent(sender, args):
 
 			# ReSubs
 			elif msg.SubType == "resub":
+
+				# Skip resubs if option is disabled
+				if not Settings["CountReSubs"] and not msg.IsTest:
+					Log("Ignored Resub by {}".format(msg.Name))
+					return
 
 				res = Settings["ReSub1"]
 
@@ -638,7 +637,7 @@ def LoadSession():
 		LoadSettings()
 		SanityCheck()
 
-	try:
+	try:  # Create file-handle and load the Session data
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			new_session = json.load(f, encoding="utf-8-sig")
 			f.close()
@@ -663,7 +662,7 @@ def LoadSession():
 def SaveSession():
 	global Session, SessionFile
 
-	try:
+	try:  # Create file-handle and save Session data
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
@@ -704,7 +703,7 @@ def LoadSettings():
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
-	try:
+	try:  # Create file-handle and load Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
@@ -736,7 +735,7 @@ def LoadSettings():
 def SaveSettings():
 	global Settings, SettingsFile
 
-	try:
+	try:  # Create file-handle and save Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
@@ -750,7 +749,7 @@ def ReloadSettings(json_data):
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
-	try:
+	try:  # Create file-handle and load Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
 			f.close()
@@ -886,5 +885,5 @@ def Execute(data):
 # -----------
 # Log Wrapper
 # -----------
-def Log(message):
+def Log(message):  # TODO add log to file
 	Parent.Log(ScriptName, message)

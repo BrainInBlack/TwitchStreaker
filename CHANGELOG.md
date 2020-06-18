@@ -2,9 +2,12 @@
 
 ## 2.6.1 - Fixes
 
+* Fixed using wrong temp variable for cumulative bits
 * ~~Fixed re-connect not happening if there was no old token in the settings~~
 * ~~Inreased refresh timer delay to 10 seconds~~
 * EventMessages are no longer run through a loop, since there is only a single entry per event anyways
+  * This should fix the doubling issue that can happen under rare circumstances
+* Moved early resub check into the resub section
 
 ## 2.6.0 - Bits and Donations
 
