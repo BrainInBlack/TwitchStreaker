@@ -835,6 +835,20 @@ def SubtractFromGoal():
 
 
 # ------
+# Toggle
+# ------
+def ScriptToggle(state):
+	if not state:
+		SaveSettings()
+		SaveSession()
+		Log("Deactivated")
+	else:
+		LoadSettings()
+		LoadSession()
+		Log("Activated")
+
+
+# ------
 # Unload
 # ------
 def Unload():
