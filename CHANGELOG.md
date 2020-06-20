@@ -1,15 +1,13 @@
 # Changelog
 
-## 2.6.1 - Fixes
+## 2.6.1 - Events, Logs and Fixes
 
 * Added logging to file
-* ~~Added proper script toggle implementation~~
-* Fixed using wrong temp variable for cumulative bits
-* ~~Fixed re-connect not happening if there was no old token in the settings~~
-* ~~Inreased refresh timer delay to 10 seconds~~
+* Refined Log function
 * EventMessages are no longer run through a loop, since there is only a single entry per event anyways
   * This should fix the doubling issue that can happen under rare circumstances
 * Moved early resub check into the resub section
+* Fixed using wrong temp variable for cumulative bits
 
 ## 2.6.0 - Bits and Donations
 

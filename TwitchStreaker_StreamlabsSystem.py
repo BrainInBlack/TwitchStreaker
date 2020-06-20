@@ -638,7 +638,8 @@ def LoadSession():
 		LoadSettings()
 		SanityCheck()
 
-	try:  # Create file-handle and load the Session data
+	try:
+		# Create file-handle and load the Session data
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
 			new_session = json.load(f, encoding="utf-8-sig")
 			f.close()
@@ -663,7 +664,8 @@ def LoadSession():
 def SaveSession():
 	global Session, SessionFile
 
-	try:  # Create file-handle and save Session data
+	try:
+		# Create file-handle and save Session data
 		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
@@ -704,12 +706,14 @@ def LoadSettings():
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
-	try:  # Create file-handle and load Settings data
+	try:
+		# Create file-handle and load Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except IOError:
-		SaveSettings()  # Save default Settings
+		# Save default Settings
+		SaveSettings()
 		return
 
 	# Cleanup old options
@@ -736,7 +740,8 @@ def LoadSettings():
 def SaveSettings():
 	global Settings, SettingsFile
 
-	try:  # Create file-handle and save Settings data
+	try:
+		# Create file-handle and save Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
@@ -750,7 +755,8 @@ def ReloadSettings(json_data):
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
-	try:  # Create file-handle and load Settings data
+	try:
+		# Create file-handle and load Settings data
 		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
 			f.close()
@@ -880,7 +886,7 @@ def Parse(parse_string, user_id, username, target_id, target_name, message):
 # Execute
 # -------
 def Execute(data):
-	return
+	pass
 
 
 # -----------
@@ -890,12 +896,12 @@ def Log(message):
 	global LogFile
 
 	try:
-		f = open(LogFile, "a+")
-		f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
-		f.close()
-	except IOError as e:
-		Parent.Log(ScriptName, "Unable to open logfile. ({})".format(e.message))
+		# Open/Create logfile and write the log-message
+		with codecs.open(LogFile, encoding="utf-8", mode="a+") as f:
+			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
+			f.close()
 		Parent.Log(ScriptName, message)
-		return
-
-	Parent.Log(ScriptName, message)
+	except IOError as e:
+		# Dump to bot-console if write failed
+		Parent.Log(ScriptName, "Unable to open or write to logfile. ({})".format(e.message))
+		Parent.Log(ScriptName, message)
