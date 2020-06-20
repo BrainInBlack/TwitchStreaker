@@ -3,7 +3,7 @@
 ## 2.6.1 - Fixes
 
 * Added logging to file
-* Added proper script toggle implementation
+* ~~Added proper script toggle implementation~~
 * Fixed using wrong temp variable for cumulative bits
 * ~~Fixed re-connect not happening if there was no old token in the settings~~
 * ~~Inreased refresh timer delay to 10 seconds~~
