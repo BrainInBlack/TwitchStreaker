@@ -9,6 +9,7 @@ import codecs, json, math, os, time
 ScriptFolder       = os.path.realpath(os.path.dirname(__file__))
 TextFolder         = os.path.join(ScriptFolder, "Text\\")
 
+LogFile            = os.path.join(ScriptFolder, "TwitchStreaker.log")
 SessionFile        = os.path.join(ScriptFolder, "Session.json")
 SettingsFile       = os.path.join(ScriptFolder, "Settings.json")
 
@@ -885,5 +886,16 @@ def Execute(data):
 # -----------
 # Log Wrapper
 # -----------
-def Log(message):  # TODO add log to file
+def Log(message):
+	global LogFile
+
+	try:
+		f = open(LogFile, "a+")
+		f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
+		f.close()
+	except IOError as e:
+		Parent.Log(ScriptName, "Unable to open logfile. ({})".format(e.message))
+		Parent.Log(ScriptName, message)
+		return
+
 	Parent.Log(ScriptName, message)
