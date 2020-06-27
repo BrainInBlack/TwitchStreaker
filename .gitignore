@@ -12,6 +12,7 @@ API_Key.js
 Session.json
 Settings.js
 Settings.json
+*.log
 
 # Exclude personal Files (BrainInBlack)
 AnEternalEnigma

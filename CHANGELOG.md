@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.6.1 - Events, Logs and Fixes
+
+* Added logging to file
+* Refined Log function
+* EventMessages are no longer run through a loop, since there is only a single entry per event anyways
+  * This should fix the doubling issue that can happen under rare circumstances
+* Moved early resub check into the resub section
+* Fixed using wrong temp variable for cumulative bits
+
 ## 2.6.0 - Bits and Donations
 
 **IMPORTANT CHANGES!** We went ahead and changed a bunch of variables and terminology to reflect the changes we made to the script. In particular, how the Point-System works. `Points` is now used instead of Subs for the value that used to refer to the amount of Subs in the current Streak.
