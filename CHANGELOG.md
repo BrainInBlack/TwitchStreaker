@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.0 - RIP Mixer
+
+* Removed Mixer support (for obvious reasons)
+
 ## 2.6.1 - Events, Logs and Fixes
 
 * Added logging to file

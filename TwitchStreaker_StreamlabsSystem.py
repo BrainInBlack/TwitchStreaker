@@ -335,33 +335,6 @@ def EventReceiverEvent(sender, args):
 
 		return  # /Twitch
 
-	# Mixer
-	if d.For == "mixer_account":
-
-		if d.Type == "subscription":
-			m = d.Message[0]
-
-			# Skip Repeat
-			if m.IsRepeat:
-				Log("Ignored Repeat Subscription from {} (Mixer)".format(m.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not m.IsLive and not m.IsTest:
-				Log("Ignored Subscription from {} (Mixer), Stream is not Live".format(m.Name))
-				return
-
-			if m.Months > 1 and not Settings["CountResubs"]:
-				Log("Ignored Resub from {} (Mixer)".format(m.Name))
-				return
-
-			Session["CurrentPoints"]    += Settings["Sub1"]
-			Session["CurrentTotalSubs"] += 1
-			Log("Added {} Point(s) by {} (Mixer)".format(Settings["Sub1"], m.Name))
-			return
-
-		return  # /Mixer
-
 	# Youtube
 	if d.For == "youtube_account":
 
@@ -718,7 +691,7 @@ def LoadSettings():
 
 	# Cleanup old options
 	is_dirty = False
-	diff = set(new_settings) ^ set(Settings)  # List options no longer present in the default settings
+	diff = set(new_settings) ^ set(Settings)  # List of options no longer present in the default settings
 	if len(diff) > 0:
 		for k in diff:
 			if k in new_settings:
