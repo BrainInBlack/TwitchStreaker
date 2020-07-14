@@ -3,6 +3,7 @@
 ## 2.7.0 - RIP Mixer
 
 * Removed Mixer support (for obvious reasons)
+* Further shortened highly used variable names
 
 ## 2.6.1 - Events, Logs and Fixes
 
