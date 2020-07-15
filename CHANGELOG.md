@@ -4,6 +4,7 @@
 
 * Removed Mixer support (for obvious reasons)
 * Further shortened highly used variable names
+* Another attempt at fix the sub multiplication bug
 
 ## 2.6.1 - Events, Logs and Fixes
 

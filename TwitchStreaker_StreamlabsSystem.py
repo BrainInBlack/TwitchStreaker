@@ -165,6 +165,12 @@ def Connect():
 def EventReceiverEvent(sender, args):
 	global BitsTemp, DonationTemp, ChannelName, Session, Settings
 
+	# Another attempt at fixing sub multiplication issue
+	d   = None
+	m   = None
+	res = None
+
+	# Get Data
 	d = args.Data
 
 	# Twitch
