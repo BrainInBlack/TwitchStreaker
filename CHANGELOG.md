@@ -4,7 +4,9 @@
 
 * Removed Mixer support (for obvious reasons)
 * Further shortened highly used variable names
-* Another attempt at fix the sub multiplication bug
+* Slight restructure
+* Session is no longer saved if the script is not ready yet
+  * Should not cause any issues since no changes can happen at that time
 
 ## 2.6.1 - Events, Logs and Fixes
 

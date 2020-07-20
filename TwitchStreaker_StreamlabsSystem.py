@@ -165,61 +165,56 @@ def Connect():
 def EventReceiverEvent(sender, args):
 	global BitsTemp, DonationTemp, ChannelName, Session, Settings
 
-	# Another attempt at fixing sub multiplication issue
-	d   = None
-	m   = None
-	res = None
-
 	# Get Data
-	d = args.Data
+	dat = args.Data
+	msg = dat.Message[0]
 
 	# Twitch
-	if d.For == "twitch_account":
+	if dat.For == "twitch_account":
 
 		# ----
 		# Bits
 		# ----
-		if d.Type == "bits" and Settings["CountBits"]:
-			m = d.Message[0]
+		if dat.Type == "bits" and Settings["CountBits"]:
 
 			# Skip Repeat
-			if m.IsRepeat:
-				Log("Ignored Repeat Bits by {}".format(m.Name))
+			if msg.IsRepeat:
+				Log("Ignored Repeat Bits by {}".format(msg.Name))
 				return
 
 			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not m.IsLive and not m.IsTest:
+			if not msg.IsLive and not msg.IsTest:
 				Log("Ignored Bits, Stream is not Live")
 				return
 
 			# Ignore TestBits
-			if not m.IsTest:
-				Session["CurrentTotalBits"] += m.Amount
+			if not msg.IsTest:
+				Session["CurrentTotalBits"] += msg.Amount
 
 			# Bits are above MinAmount
-			if m.Amount > Settings["BitsMinAmount"]:
+			if msg.Amount > Settings["BitsMinAmount"]:
 
 				if Settings["CountBitsOnce"]:
 					Session["CurrentPoints"] += Settings["BitsPointValue"]
-					Log("Added {} Point(s) for {} Bits from {}".format(Settings["BitsPointValue"], m.Amount, m.Name))
+					Log("Added {} Point(s) for {} Bits from {}".format(Settings["BitsPointValue"], msg.Amount, msg.Name))
 					return
 
-				res = Settings["BitsPointValue"] * math.trunc(m.Amount / Settings["BitsMinAmount"])
-				BitsTemp += m.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
+				res = Settings["BitsPointValue"] * math.trunc(msg.Amount / Settings["BitsMinAmount"])
+				BitsTemp += msg.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
 
 				if Settings["CountBitsCumulative"] and BitsTemp > Settings["BitsMinAmount"]:
 					res += Settings["BitsPointValue"]
 					BitsTemp -= Settings["BitsMinValue"]
 
 				Session["CurrentPoints"] += res
-				Log("Added {} Point(s) for {} Bits from {}".format(res, m.Amount, m.Name))
+				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
 				return
 
 			# Cumulative Bits
 			elif Settings["CountBitsCumulative"]:
 
-				BitsTemp += m.Amount
-				Log("Added {} Bit(s) from {} to the cumulative amount".format(m.Amount, m.Name))
+				BitsTemp += msg.Amount
+				Log("Added {} Bit(s) from {} to the cumulative amount".format(msg.Amount, msg.Name))
 
 				if BitsTemp > Settings["BitsMinAmount"]:
 
@@ -230,55 +225,54 @@ def EventReceiverEvent(sender, args):
 					return
 
 			else:
-				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(m.Amount, m.Name))
+				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
 			return
 
 		# -------------
 		# Subscriptions
 		# -------------
-		if d.Type == "subscription":
-			m = d.Message[0]
+		if dat.Type == "subscription":
 
 			# Skip Repeat
-			if m.IsRepeat:
-				Log("Ignored Repeat Subscription from {}".format(m.Name))
+			if msg.IsRepeat:
+				Log("Ignored Repeat Subscription from {}".format(msg.Name))
 				return
 
 			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not m.IsLive and not m.IsTest:
-				Log("Ignored Subscription from {}, Stream is not Live".format(m.Name))
+			if not msg.IsLive and not msg.IsTest:
+				Log("Ignored Subscription from {}, Stream is not Live".format(msg.Name))
 				return
 
 			# GiftSub Check
-			if m.SubType == "subgift":
+			if msg.SubType == "subgift":
 
 				# Ignore Gifted Subs by Streamer
-				if m.Gifter == ChannelName and not m.IsTest:
-					Log("Ignored StreamerGift from {}".format(m.Gifter))
+				if msg.Gifter == ChannelName and not msg.IsTest:
+					Log("Ignored StreamerGift from {}".format(msg.Gifter))
 					return
 
 				# Ignore Self-Gifted Subs
-				if m.Name == m.Gifter and not m.IsTest:
-					Log("Ignored SelfGift from {}".format(m.Gifter))
+				if msg.Name == msg.Gifter and not msg.IsTest:
+					Log("Ignored SelfGift from {}".format(msg.Gifter))
 					return
 
 			# Gifted Subs (includes anonymous subs)
-			if m.SubType == "subgift" or m.SubType == "anonsubgift":
+			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
 
 				# GiftedSubs (resubs)
-				if m.Months is not None:
+				if msg.Months is not None:
 
 					res = Settings["GiftReSub1"]
 
-					if m.SubPlan == "2000":
+					if msg.SubPlan == "2000":
 						res = Settings["GiftReSub2"]
 
-					if m.SubPlan == "3000":
+					if msg.SubPlan == "3000":
 						res = Settings["GiftReSub3"]
 
 					Session["CurrentPoints"]    += res
 					Session["CurrentTotalSubs"] += 1
-					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, m.SubType, m.Gifter, m.Name))
+					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 				# /GiftedSubs (resubs)
 
@@ -287,38 +281,38 @@ def EventReceiverEvent(sender, args):
 
 					res = Settings["GiftSub1"]
 
-					if m.SubPlan == "2000":
+					if msg.SubPlan == "2000":
 						res = Settings["GiftSub2"]
 
-					if m.SubPlan == "3000":
+					if msg.SubPlan == "3000":
 						res = Settings["GiftSub3"]
 
 					Session["CurrentPoints"]    += res
 					Session["CurrentTotalSubs"] += 1
-					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, m.SubType, m.Gifter, m.Name))
+					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 				# /GiftedSubs (normal)
 			# GiftedSubs - END
 
 			# ReSubs
-			elif m.SubType == "resub":
+			elif msg.SubType == "resub":
 
 				# Skip resubs if option is disabled
-				if not Settings["CountReSubs"] and not m.IsTest:
-					Log("Ignored Resub by {}".format(m.Name))
+				if not Settings["CountReSubs"] and not msg.IsTest:
+					Log("Ignored Resub by {}".format(msg.Name))
 					return
 
 				res = Settings["ReSub1"]
 
-				if m.SubPlan == "2000":
+				if msg.SubPlan == "2000":
 					res = Settings["ReSub2"]
 
-				if m.SubPlan == "3000":
+				if msg.SubPlan == "3000":
 					res = Settings["ReSub3"]
 
 				Session["CurrentPoints"]    += res
 				Session["CurrentTotalSubs"] += 1
-				Log("Added {} Point(s) for a {} Subscription from {}".format(res, m.SubType, m.Name))
+				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Resubs - END
 
@@ -327,91 +321,89 @@ def EventReceiverEvent(sender, args):
 
 				res = Settings["Sub1"]
 
-				if m.SubPlan == "2000":
+				if msg.SubPlan == "2000":
 					res = Settings["Sub2"]
 
-				if m.SubPlan == "3000":
+				if msg.SubPlan == "3000":
 					res = Settings["Sub3"]
 
 				Session["CurrentPoints"]    += res
 				Session["CurrentTotalSubs"] += 1
-				Log("Added {} Point(s) for a {} Subscription from {}".format(res, m.SubType, m.Name))
+				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Subs - END
 
 		return  # /Twitch
 
 	# Youtube
-	if d.For == "youtube_account":
+	if dat.For == "youtube_account":
 
-		if d.Type == "subscription":
-			m = d.Message[0]
+		if dat.Type == "subscription":
 
 			# Skip Repeat
-			if m.IsRepeat:
-				Log("Ignored Repeat Sponsor from {} (YouTube)".format(m.Name))
+			if msg.IsRepeat:
+				Log("Ignored Repeat Sponsor from {} (YouTube)".format(msg.Name))
 				return
 
 			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not m.IsLive and not m.IsTest:
-				Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(m.Name))
+			if not msg.IsLive and not msg.IsTest:
+				Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(msg.Name))
 				return
 
-			if m.Months > 1 and not Settings["CountResubs"]:
-				Log("Ignored Re-Sponsor from {}. (YouTube)".format(m.Name))
+			if msg.Months > 1 and not Settings["CountResubs"]:
+				Log("Ignored Re-Sponsor from {}. (YouTube)".format(msg.Name))
 				return
 
 			Session["CurrentPoints"]    += Settings["Sub1"]
 			Session["CurrentTotalSubs"] += 1
-			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], m.Name))
+			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], msg.Name))
 			return
 
 		return  # /Youtube
 
 	# Streamlabs
-	if d.For == "streamlabs":
+	if dat.For == "streamlabs":
 
-		if d.Type == "donation" and Settings["CountDonations"]:
-			m = d.Message[0]
+		if dat.Type == "donation" and Settings["CountDonations"]:
 
 			# Skip Repeat
-			if m.IsRepeat:
-				Log("Ignored Repeat Donation from {}".format(m.FromName))
+			if msg.IsRepeat:
+				Log("Ignored Repeat Donation from {}".format(msg.FromName))
 				return
 
 			# Live Check, skip subs if streamer is not live (does not apply to test donations)
-			if not m.IsLive and not m.IsTest:
-				Log("Ignored Donation from {}, Stream is not Live.".format(m.Name))
+			if not msg.IsLive and not msg.IsTest:
+				Log("Ignored Donation from {}, Stream is not Live.".format(msg.Name))
 				return
 
 			# Ignore test donations for the total amount
-			if not m.IsTest:
-				Session["CurrentTotalDonations"] += m.Amount
+			if not msg.IsTest:
+				Session["CurrentTotalDonations"] += msg.Amount
 
 			# Donation is above MinAmount
-			if m.Amount > Settings["DonationMinAmount"]:
+			if msg.Amount > Settings["DonationMinAmount"]:
 
 				if Settings["CountDonationsOnce"]:
 					Session["CurrentPoints"] += Settings["DonationsPointValue"]
-					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings["DonationsPointValue"], m.Amount, m.Currency, m.FromName))
+					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings["DonationsPointValue"], msg.Amount, msg.Currency, msg.FromName))
 					return
 
-				res = Settings["DonationPointValue"] * math.trunc(m.Amount / Settings["DonationMinAmount"])
-				DonationTemp += m.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
+				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
 
 				if Settings["CountDonationsCumulative"] and DonationTemp > Settings["DonationMinAmount"]:
 					res += Settings["DonationPointValue"]
 					DonationTemp -= Settings["DonationMinAmount"]
 
 				Session["CurrentPoints"] += res
-				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, m.Amount, m.Currency, m.FromName))
+				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
 				return
 
 			# Cumulative Donation
 			elif Settings["CountDonationsCumulative"]:
 
-				DonationTemp += m.Amount
-				Log("Added Donation of {} {} from {} to the cumulative amount.".format(m.Amount, m.Currency, m.FromName))
+				DonationTemp += msg.Amount
+				Log("Added Donation of {} {} from {} to the cumulative amount.".format(msg.Amount, msg.Currency, msg.FromName))
 
 				if DonationTemp > Settings["DonationMinAmount"]:
 
@@ -422,12 +414,12 @@ def EventReceiverEvent(sender, args):
 					return
 
 			else:
-				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(m.Amount, m.Currency, m.FromName))
+				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))
 				return
 
 		return  # /Streamlabs
 
-	Log("Unknown/Unsupported Platform {}!".format(d.For))
+	Log("Unknown/Unsupported Platform {}!".format(dat.For))
 
 
 # ---------------
@@ -466,6 +458,9 @@ def Tick():
 
 	# Slow Timer
 	if (time.time() - SaveStamp) > SaveDelay:
+
+		if not IsScriptReady: return
+
 		SaveSession()
 		SaveStamp = time.time()
 
