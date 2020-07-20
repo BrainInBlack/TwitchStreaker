@@ -452,6 +452,7 @@ def Tick():
 		# Reconnect
 		if EventReceiver is None or not EventReceiver.IsConnected:
 			Connect()
+			return
 
 		# Update Everything
 		UpdateTracker()
