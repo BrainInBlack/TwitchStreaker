@@ -36,7 +36,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.6.1"
+Version     = "2.7.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -98,6 +98,9 @@ RefreshDelay  = 5    # InSeconds
 RefreshStamp  = time.time()
 SaveDelay     = 300  # InSeconds
 SaveStamp     = time.time()
+FlushDelay    = 5    # InSeconds
+FlushStamp    = time.time()
+EventIDs      = []
 PointVars = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
@@ -163,18 +166,25 @@ def Connect():
 # Event Bus
 # ---------
 def EventReceiverEvent(sender, args):
-	global BitsTemp, DonationTemp, ChannelName, Session, Settings
+	global BitsTemp, DonationTemp, ChannelName, EventIDs, FlushStamp, Session, Settings
 
-	data = args.Data
+	# Get Data
+	dat = args.Data
+	msg = dat.Message[0]
+
+	# Event Filtering
+	FlushStamp = time.time()
+	if dat.EventID in EventIDs:
+		return
+	EventIDs.append(dat.EventID)
 
 	# Twitch
-	if data.For == "twitch_account":
+	if dat.For == "twitch_account":
 
 		# ----
 		# Bits
 		# ----
-		if data.Type == "bits" and Settings["CountBits"]:
-			msg = data.Message[0]
+		if dat.Type == "bits" and Settings["CountBits"]:
 
 			# Skip Repeat
 			if msg.IsRepeat:
@@ -230,8 +240,7 @@ def EventReceiverEvent(sender, args):
 		# -------------
 		# Subscriptions
 		# -------------
-		if data.Type == "subscription":
-			msg = data.Message[0]
+		if dat.Type == "subscription":
 
 			# Skip Repeat
 			if msg.IsRepeat:
@@ -335,38 +344,10 @@ def EventReceiverEvent(sender, args):
 
 		return  # /Twitch
 
-	# Mixer
-	if data.For == "mixer_account":
-
-		if data.Type == "subscription":
-			msg = data.Message[0]
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Subscription from {} (Mixer)".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Subscription from {} (Mixer), Stream is not Live".format(msg.Name))
-				return
-
-			if msg.Months > 1 and not Settings["CountResubs"]:
-				Log("Ignored Resub from {} (Mixer)".format(msg.Name))
-				return
-
-			Session["CurrentPoints"]    += Settings["Sub1"]
-			Session["CurrentTotalSubs"] += 1
-			Log("Added {} Point(s) by {} (Mixer)".format(Settings["Sub1"], msg.Name))
-			return
-
-		return  # /Mixer
-
 	# Youtube
-	if data.For == "youtube_account":
+	if dat.For == "youtube_account":
 
-		if data.Type == "subscription":
-			msg = data.Message[0]
+		if dat.Type == "subscription":
 
 			# Skip Repeat
 			if msg.IsRepeat:
@@ -390,10 +371,9 @@ def EventReceiverEvent(sender, args):
 		return  # /Youtube
 
 	# Streamlabs
-	if data.For == "streamlabs":
+	if dat.For == "streamlabs":
 
-		if data.Type == "donation" and Settings["CountDonations"]:
-			msg = data.Message[0]
+		if dat.Type == "donation" and Settings["CountDonations"]:
 
 			# Skip Repeat
 			if msg.IsRepeat:
@@ -448,7 +428,7 @@ def EventReceiverEvent(sender, args):
 
 		return  # /Streamlabs
 
-	Log("Unknown/Unsupported Platform {}!".format(data.For))
+	Log("Unknown/Unsupported Platform {}!".format(dat.For))
 
 
 # ---------------
@@ -469,7 +449,12 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global EventReceiver, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global EventIDs, EventReceiver, FlushDelay, FlushStamp, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+
+	# Event Filter Flush
+	if(time.time() - FlushStamp) > FlushDelay and len(EventIDs) > 0:
+		EventIDs = []
+		FlushStamp = time.time()
 
 	# Fast Timer
 	if (time.time() - RefreshStamp) > RefreshDelay:
@@ -481,12 +466,16 @@ def Tick():
 		# Reconnect
 		if EventReceiver is None or not EventReceiver.IsConnected:
 			Connect()
+			return
 
 		# Update Everything
 		UpdateTracker()
 
 	# Slow Timer
 	if (time.time() - SaveStamp) > SaveDelay:
+
+		if not IsScriptReady: return
+
 		SaveSession()
 		SaveStamp = time.time()
 
@@ -718,7 +707,7 @@ def LoadSettings():
 
 	# Cleanup old options
 	is_dirty = False
-	diff = set(new_settings) ^ set(Settings)  # List options no longer present in the default settings
+	diff = set(new_settings) ^ set(Settings)  # List of options no longer present in the default settings
 	if len(diff) > 0:
 		for k in diff:
 			if k in new_settings:
