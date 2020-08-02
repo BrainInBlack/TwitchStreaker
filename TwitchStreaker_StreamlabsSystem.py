@@ -36,7 +36,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.6.1"
+Version     = "2.7.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -98,6 +98,9 @@ RefreshDelay  = 5    # InSeconds
 RefreshStamp  = time.time()
 SaveDelay     = 300  # InSeconds
 SaveStamp     = time.time()
+FlushDelay    = 5    # InSeconds
+FlushStamp    = time.time()
+EventIDs      = []
 PointVars = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
@@ -163,11 +166,17 @@ def Connect():
 # Event Bus
 # ---------
 def EventReceiverEvent(sender, args):
-	global BitsTemp, DonationTemp, ChannelName, Session, Settings
+	global BitsTemp, DonationTemp, ChannelName, EventIDs, FlushStamp, Session, Settings
 
 	# Get Data
 	dat = args.Data
 	msg = dat.Message[0]
+
+	# Event Filtering
+	FlushStamp = time.time()
+	if dat.EventID in EventIDs:
+		return
+	EventIDs.append(dat.EventID)
 
 	# Twitch
 	if dat.For == "twitch_account":
@@ -440,7 +449,12 @@ def EventReceiverDisconnected(sender, args):
 # Tick
 # ----
 def Tick():
-	global EventReceiver, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global EventIDs, EventReceiver, FlushDelay, FlushStamp, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+
+	# Event Filter Flush
+	if(time.time() - FlushStamp) > FlushDelay and len(EventIDs) > 0:
+		EventIDs = []
+		FlushStamp = time.time()
 
 	# Fast Timer
 	if (time.time() - RefreshStamp) > RefreshDelay:

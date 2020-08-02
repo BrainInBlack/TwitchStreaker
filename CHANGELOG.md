@@ -2,6 +2,8 @@
 
 ## 2.7.0 - RIP Mixer
 
+* Added Event Filtering
+  * This should prevent events from being counted more than once
 * Removed Mixer support (for obvious reasons)
 * Further shortened highly used variable names
 * Slight restructure
