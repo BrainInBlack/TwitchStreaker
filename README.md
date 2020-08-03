@@ -2,7 +2,7 @@
 
 Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
-TwitchStreaker is compatible with Twitch, Mixer and YouTube. For Mixer and YouTube, only the regular Subscription options apply.
+TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regular Subscription options apply.
 
 ## Table of Contents
 

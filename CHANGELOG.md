@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.7.1 - Bug Fixes
+
+* Fixed Event Filtering
+
+## 2.7.0 - RIP Mixer
+
+* Added Event Filtering
+  * This should prevent events from being counted more than once
+* Removed Mixer support (for obvious reasons)
+* Further shortened highly used variable names
+* Slight restructure
+* Session is no longer saved if the script is not ready yet
+  * Should not cause any issues since no changes can happen at that time
+
 ## 2.6.1 - Events, Logs and Fixes
 
 * Added logging to file
