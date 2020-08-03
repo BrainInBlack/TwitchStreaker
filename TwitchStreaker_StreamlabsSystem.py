@@ -36,7 +36,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.7.0"
+Version     = "2.7.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -174,9 +174,9 @@ def EventReceiverEvent(sender, args):
 
 	# Event Filtering
 	FlushStamp = time.time()
-	if dat.EventID in EventIDs:
+	if msg.Id in EventIDs:
 		return
-	EventIDs.append(dat.EventID)
+	EventIDs.append(msg.Id)
 
 	# Twitch
 	if dat.For == "twitch_account":

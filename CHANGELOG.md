@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.1 - Bug Fixes
+
+* Fixed Event Filtering
+
 ## 2.7.0 - RIP Mixer
 
 * Added Event Filtering
