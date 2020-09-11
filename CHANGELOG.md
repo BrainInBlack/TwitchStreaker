@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.7.2 - Updates
+
+* Updated StreamlabsEventReceiver
+
 ## 2.7.1 - Bug Fixes
 
 * Fixed Event Filtering
