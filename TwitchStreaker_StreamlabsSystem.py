@@ -13,6 +13,7 @@ LogFile            = os.path.join(ScriptFolder, "TwitchStreaker.log")
 SessionFile        = os.path.join(ScriptFolder, "Session.json")
 SettingsFile       = os.path.join(ScriptFolder, "Settings.json")
 
+BitsLeftFile       = os.path.join(TextFolder, "BitsLeft.txt")
 GoalFile           = os.path.join(TextFolder, "Goal.txt")
 PointsFile         = os.path.join(TextFolder, "Points.txt")
 PointsLeftFile     = os.path.join(TextFolder, "PointsLeft.txt")
@@ -36,7 +37,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.7.2"
+Version     = "2.7.3"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -46,6 +47,7 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 ChannelName   = None
 EventReceiver = None
 Session = {
+	"CurrentBitsLeft": 0,
 	"CurrentGoal": 10,
 	"CurrentPoints": 0,
 	"CurrentPointsLeft": 10,
@@ -201,7 +203,7 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalBits"] += msg.Amount
 
 			# Bits are above MinAmount
-			if msg.Amount > Settings["BitsMinAmount"]:
+			if msg.Amount >= Settings["BitsMinAmount"]:
 
 				if Settings["CountBitsOnce"]:
 					Session["CurrentPoints"] += Settings["BitsPointValue"]
@@ -210,10 +212,6 @@ def EventReceiverEvent(sender, args):
 
 				res = Settings["BitsPointValue"] * math.trunc(msg.Amount / Settings["BitsMinAmount"])
 				BitsTemp += msg.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
-
-				if Settings["CountBitsCumulative"] and BitsTemp > Settings["BitsMinAmount"]:
-					res += Settings["BitsPointValue"]
-					BitsTemp -= Settings["BitsMinValue"]
 
 				Session["CurrentPoints"] += res
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
@@ -224,14 +222,6 @@ def EventReceiverEvent(sender, args):
 
 				BitsTemp += msg.Amount
 				Log("Added {} Bit(s) from {} to the cumulative amount".format(msg.Amount, msg.Name))
-
-				if BitsTemp > Settings["BitsMinAmount"]:
-
-					Session["CurrentPoints"] += Settings["BitsPointValue"]
-					BitsTemp                 -= Settings["BitsMinAmount"]
-
-					Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"]))
-					return
 
 			else:
 				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
@@ -390,7 +380,7 @@ def EventReceiverEvent(sender, args):
 				Session["CurrentTotalDonations"] += msg.Amount
 
 			# Donation is above MinAmount
-			if msg.Amount > Settings["DonationMinAmount"]:
+			if msg.Amount >= Settings["DonationMinAmount"]:
 
 				if Settings["CountDonationsOnce"]:
 					Session["CurrentPoints"] += Settings["DonationsPointValue"]
@@ -399,10 +389,6 @@ def EventReceiverEvent(sender, args):
 
 				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
 				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
-
-				if Settings["CountDonationsCumulative"] and DonationTemp > Settings["DonationMinAmount"]:
-					res += Settings["DonationPointValue"]
-					DonationTemp -= Settings["DonationMinAmount"]
 
 				Session["CurrentPoints"] += res
 				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
@@ -413,14 +399,6 @@ def EventReceiverEvent(sender, args):
 
 				DonationTemp += msg.Amount
 				Log("Added Donation of {} {} from {} to the cumulative amount.".format(msg.Amount, msg.Currency, msg.FromName))
-
-				if DonationTemp > Settings["DonationMinAmount"]:
-
-					Session["CurrentPoints"] += Settings["DonationPointValue"]
-					DonationTemp             -= Settings["DonationMinAmount"]
-
-					Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings["DonationPointValue"]))
-					return
 
 			else:
 				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))
@@ -484,11 +462,26 @@ def Tick():
 # Update Tracker
 # --------------
 def UpdateTracker():  # ! Only call if a quick response is required
-	global Session, Settings, RefreshStamp, GoalFile, PointsFile, StreakFile, PointsLeftFile, TotalSubsFile, TotalBitsFile, TotalDonationsFile
+	global BitsTemp, DonationTemp, Session, Settings, RefreshStamp, GoalFile, PointsFile, StreakFile, PointsLeftFile, TotalSubsFile, TotalBitsFile, TotalDonationsFile
+
+	# Calculate Bits
+	if Settings["CountBitsCumulative"] and BitsTemp >= Settings["BitsMinAmount"]:
+		res = math.trunc(BitsTemp / Settings["BitsMinAmount"])
+		Session["CurrentPoints"] += Settings["BitsPointValue"] * res
+		BitsTemp -= Settings["BitsMinAmount"] * res
+		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"] * res))
+		del res
+	Session["CurrentBitsLeft"] = Settings["BitsMinAmount"] - BitsTemp
+
+	# Calculate Donations
+	if Settings["CountDonationsCumulative"] and DonationTemp >= Settings["DonationMinAmount"]:
+		res = math.trunc(DonationTemp / Settings["DonationMinAmount"])
+		Session["CurrentPoints"] += Settings["DonationPointValue"]
+		DonationTemp -= Settings["DonationMinAmount"] * res
+		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings["DonationPointValue"] * res))
+		del res
 
 	# Calculate Streak
-	Session["CurrentPointsLeft"] = Session["CurrentGoal"] - Session["CurrentPoints"]
-
 	while Session["CurrentPoints"] >= Session["CurrentGoal"]:
 
 		# Subtract Goal and Increment Streak
@@ -502,6 +495,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
 			if Session["CurrentGoal"]  > Settings["GoalMax"]:
 				Session["CurrentGoal"] = Settings["GoalMax"]
+	Session["CurrentPointsLeft"] = Session["CurrentGoal"] - Session["CurrentPoints"]
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
@@ -511,6 +505,10 @@ def UpdateTracker():  # ! Only call if a quick response is required
 		os.mkdir(TextFolder)
 
 	try:
+		f = open(BitsLeftFile, "w")
+		f.write(str(Session["CurrentBitsLeft"]))
+		f.close()
+
 		f = open(GoalFile, "w")
 		f.write(str(Session["CurrentGoal"]))
 		f.close()
@@ -672,6 +670,7 @@ def ResetSession():
 	# Hard reset of the session
 	del Session
 	Session = {
+		"CurrentBitsLeft": Settings["BitsMinAmount"],
 		"CurrentGoal": Settings["Goal"],
 		"CurrentPoints": 0,
 		"CurrentPointsLeft": Settings["Goal"],
@@ -846,6 +845,9 @@ def Unload():
 # ---------------
 def Parse(parse_string, user_id, username, target_id, target_name, message):
 	global Session
+
+	if "$tsBitsLeft" in parse_string:
+		parse_string = parse_string.replace("$tsBitsLeft", str(Session["CurrentBitsLeft"]))
 
 	if "$tsGoal" in parse_string:
 		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))

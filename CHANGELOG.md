@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7.3 - Bits and Donation Fixes
+
+* Added BitsLeft Values for the Overlay and Command Variables
+  * `BitsLeft` for HTML/JavaScript
+  * `$BitsLeft` for Command Variables
+* Fixed ID bug in EventReceiver library
+* Fixed minimum bits/donation amount required being `Amount + 1`
+* Fixed Bits/Donation calculation
+
 ## 2.7.2 - Updates
 
 * Updated StreamlabsEventReceiver
