@@ -3,6 +3,7 @@
  *****************/
 var Overlay = {
 
+	'CurrentBitsLeft':       0,
 	'CurrentGoal':          10,
 	'CurrentStreak':         1,
 	'CurrentPoints':         0,
@@ -12,6 +13,7 @@ var Overlay = {
 	'CurrentTotalDonations': 0,
 
 	// Elements
+	'BitsLeft':       document.getElementById('BitsLeft'),
 	'Goal':           document.getElementById('Goal'),
 	'Points':         document.getElementById('Points'),
 	'PointsLeft':     document.getElementById('PointsLeft'),
@@ -23,6 +25,7 @@ var Overlay = {
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
+		if (this.BitsLeft)       this.BitsLeft.innerText       = this.BitsLeft;
 		if (this.Goal)           this.Goal.innerText           = this.CurrentGoal;
 		if (this.Points)         this.Points.innerText         = this.CurrentPoints;
 		if (this.PointsLeft)     this.PointsLeft.innerText     = this.CurrentPointsLeft;
@@ -74,6 +77,7 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
+				Overlay.BitsLeft              = data.CurrentBitsLeft;
 				Overlay.CurrentGoal           = data.CurrentGoal;
 				Overlay.CurrentStreak         = data.CurrentStreak;
 				Overlay.CurrentPoints         = data.CurrentPoints;
