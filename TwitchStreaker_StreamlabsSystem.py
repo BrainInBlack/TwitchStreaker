@@ -37,7 +37,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.7.3"
+Version     = "2.8.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -341,7 +341,7 @@ def EventReceiverEvent(sender, args):
 
 			# Skip Repeat
 			if msg.IsRepeat:
-				Log("Ignored Repeat Sponsor from {} (YouTube)".format(msg.Name))
+				Log("Ignored repeat Sponsor from {} (YouTube)".format(msg.Name))
 				return
 
 			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
@@ -357,6 +357,43 @@ def EventReceiverEvent(sender, args):
 			Session["CurrentTotalSubs"] += 1
 			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], msg.Name))
 			return
+
+		if dat.Type == 'superchat':
+
+			if msg.IsRepeat:
+				Log("Ignored repeat Superchat from {} (YouTube)".format(msg.Name))
+				return
+
+			if not msg.IsLive and not msg.IsTest:
+				Log("Ignored Superchat from {}, Stream is not Live. (YouTube)".format(msg.Name))
+				return
+
+			if not msg.IsTest:
+				Session["CurrentTotalDonations"] += msg.Amount
+
+			if msg.Amount >= Settings["DonationMinAmount"]:
+
+				if Settings["CountDonationsOnce"]:
+					Session["CurrentPoints"] += Settings["DonationsPointValue"]
+					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings["DonationsPointValue", msg.Amount, msg.Currency, msg.Name]))
+					return
+
+				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
+				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+
+				Session["CurrentPoints"] += res
+				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
+				return
+
+			elif Settings["CountDonationsCumulative"]:
+
+				DonationTemp += msg.Amount
+				Log("Added Superchat of {} {} from {} to the cumulative Amount.".format())
+				return
+
+			else:
+				Log("Ignored Superchat of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.Name))
+				return
 
 		return  # /Youtube
 
@@ -398,7 +435,8 @@ def EventReceiverEvent(sender, args):
 			elif Settings["CountDonationsCumulative"]:
 
 				DonationTemp += msg.Amount
-				Log("Added Donation of {} {} from {} to the cumulative amount.".format(msg.Amount, msg.Currency, msg.FromName))
+				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(msg.Amount, msg.Currency, msg.FromName))
+				return
 
 			else:
 				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))

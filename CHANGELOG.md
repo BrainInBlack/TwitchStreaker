@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.8.0 - Youtube Superchats
+
+* Added support for Superchats
+  * The Donation Settings are used for Superchats
+
 ## 2.7.3 - Bits and Donation Fixes
 
 * Added BitsLeft Values for the Overlay and Command Variables
