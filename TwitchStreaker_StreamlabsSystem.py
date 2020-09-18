@@ -727,7 +727,7 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global EventReceiver, Settings, SettingsFile
+	global EventReceiver, IsScriptReady, Settings, SettingsFile
 
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
@@ -758,6 +758,7 @@ def LoadSettings():
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
 		Connect()
+		if not IsScriptReady: IsScriptReady = True
 
 	if is_dirty:
 		SaveSettings()
@@ -776,7 +777,7 @@ def SaveSettings():
 
 
 def ReloadSettings(json_data):
-	global EventReceiver, Settings
+	global EventReceiver, IsScriptReady, Settings
 
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
@@ -796,6 +797,7 @@ def ReloadSettings(json_data):
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
 		Connect()
+		if not IsScriptReady: IsScriptReady = True
 
 	SanityCheck()
 	Log("Settings saved!")
@@ -870,10 +872,11 @@ def SubtractFromGoal():
 # Unload
 # ------
 def Unload():
-	global EventReceiver
+	global EventReceiver, IsScriptReady
 	if EventReceiver and EventReceiver.IsConnected:
 		EventReceiver.Disconnect()
 	EventReceiver = None
+	IsScriptReady = False
 	UpdateTracker()
 	SaveSession()
 

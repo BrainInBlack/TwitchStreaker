@@ -4,6 +4,7 @@
 
 * Added support for Superchats
   * The Donation Settings are used for Superchats
+* Fixed potential bug when changing the SocketToken
 
 ## 2.7.3 - Bits and Donation Fixes
 
