@@ -1,10 +1,12 @@
 # Changelog
 
-## 2.8.0 - Youtube Superchats
+## 2.8.0 - Youtube Superchats (Beta)
 
 * Added support for Superchats
   * The Donation Settings are used for Superchats
 * Fixed potential bug when changing the SocketToken
+* Fixed RefreshStamp never getting updated
+* Optimized Tick function
 
 ## 2.7.3 - Bits and Donation Fixes
 

@@ -170,6 +170,8 @@ def Connect():
 def EventReceiverEvent(sender, args):
 	global BitsTemp, DonationTemp, ChannelName, EventIDs, FlushStamp, Session, Settings
 
+	# TODO: Move redundant checks
+
 	# Get Data
 	dat = args.Data
 	msg = dat.Message[0]
@@ -467,13 +469,15 @@ def EventReceiverDisconnected(sender, args):
 def Tick():
 	global EventIDs, EventReceiver, FlushDelay, FlushStamp, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
+	now = time.time()
+
 	# Event Filter Flush
-	if(time.time() - FlushStamp) > FlushDelay and len(EventIDs) > 0:
+	if(now - FlushStamp) > FlushDelay and len(EventIDs) > 0:
 		EventIDs = []
-		FlushStamp = time.time()
+		FlushStamp = now
 
 	# Fast Timer
-	if (time.time() - RefreshStamp) > RefreshDelay:
+	if (now - RefreshStamp) > RefreshDelay:
 
 		# Attempt Startup
 		if not IsScriptReady:
@@ -484,16 +488,16 @@ def Tick():
 			Connect()
 			return
 
-		# Update Everything
 		UpdateTracker()
+		RefreshStamp = now
 
 	# Slow Timer
-	if (time.time() - SaveStamp) > SaveDelay:
+	if (now - SaveStamp) > SaveDelay:
 
 		if not IsScriptReady: return
 
 		SaveSession()
-		SaveStamp = time.time()
+		SaveStamp = now
 
 
 # --------------
@@ -926,6 +930,8 @@ def Execute(data):
 # -----------
 def Log(message):
 	global LogFile
+
+	# TODO: Generate LogFiles in subfolder and per session, session name = session start date/time
 
 	try:
 		# Open/Create logfile and write the log-message
