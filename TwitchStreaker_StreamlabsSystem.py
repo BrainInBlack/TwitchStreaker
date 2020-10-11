@@ -37,7 +37,7 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.7.3"
+Version     = "2.8.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -116,9 +116,7 @@ PointVars = [
 # Initiation
 # ----------
 def Init():
-	global RefreshStamp, SaveStamp
 
-	# ! Preserve Order
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
@@ -180,6 +178,10 @@ def EventReceiverEvent(sender, args):
 		return
 	EventIDs.append(msg.Id)
 
+	# Skip on Repeat and NotLive
+	if msg.IsRepeat: return
+	if not msg.IsLive and not msg.IsTest: return
+
 	# Twitch
 	if dat.For == "twitch_account":
 
@@ -187,16 +189,6 @@ def EventReceiverEvent(sender, args):
 		# Bits
 		# ----
 		if dat.Type == "bits" and Settings["CountBits"]:
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Bits by {}".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Bits, Stream is not Live")
-				return
 
 			# Ignore TestBits
 			if not msg.IsTest:
@@ -231,16 +223,6 @@ def EventReceiverEvent(sender, args):
 		# Subscriptions
 		# -------------
 		if dat.Type == "subscription":
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Subscription from {}".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Subscription from {}, Stream is not Live".format(msg.Name))
-				return
 
 			# GiftSub Check
 			if msg.SubType == "subgift":
@@ -339,16 +321,6 @@ def EventReceiverEvent(sender, args):
 
 		if dat.Type == "subscription":
 
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Sponsor from {} (YouTube)".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(msg.Name))
-				return
-
 			if msg.Months > 1 and not Settings["CountResubs"]:
 				Log("Ignored Re-Sponsor from {}. (YouTube)".format(msg.Name))
 				return
@@ -358,22 +330,41 @@ def EventReceiverEvent(sender, args):
 			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], msg.Name))
 			return
 
+		if dat.Type == 'superchat':
+
+			if not msg.IsTest:
+				Session["CurrentTotalDonations"] += msg.Amount
+
+			if msg.Amount >= Settings["DonationMinAmount"]:
+
+				if Settings["CountDonationsOnce"]:
+					Session["CurrentPoints"] += Settings["DonationsPointValue"]
+					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings["DonationsPointValue", msg.Amount, msg.Currency, msg.Name]))
+					return
+
+				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
+				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+
+				Session["CurrentPoints"] += res
+				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
+				return
+
+			elif Settings["CountDonationsCumulative"]:
+
+				DonationTemp += msg.Amount
+				Log("Added Superchat of {} {} from {} to the cumulative Amount.".format())
+				return
+
+			else:
+				Log("Ignored Superchat of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.Name))
+				return
+
 		return  # /Youtube
 
 	# Streamlabs
 	if dat.For == "streamlabs":
 
 		if dat.Type == "donation" and Settings["CountDonations"]:
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Donation from {}".format(msg.FromName))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test donations)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Donation from {}, Stream is not Live.".format(msg.Name))
-				return
 
 			# Ignore test donations for the total amount
 			if not msg.IsTest:
@@ -398,7 +389,8 @@ def EventReceiverEvent(sender, args):
 			elif Settings["CountDonationsCumulative"]:
 
 				DonationTemp += msg.Amount
-				Log("Added Donation of {} {} from {} to the cumulative amount.".format(msg.Amount, msg.Currency, msg.FromName))
+				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(msg.Amount, msg.Currency, msg.FromName))
+				return
 
 			else:
 				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))
@@ -429,13 +421,15 @@ def EventReceiverDisconnected(sender, args):
 def Tick():
 	global EventIDs, EventReceiver, FlushDelay, FlushStamp, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
 
+	now = time.time()
+
 	# Event Filter Flush
-	if(time.time() - FlushStamp) > FlushDelay and len(EventIDs) > 0:
+	if(now - FlushStamp) > FlushDelay and len(EventIDs) > 0:
 		EventIDs = []
-		FlushStamp = time.time()
+		FlushStamp = now
 
 	# Fast Timer
-	if (time.time() - RefreshStamp) > RefreshDelay:
+	if (now - RefreshStamp) > RefreshDelay:
 
 		# Attempt Startup
 		if not IsScriptReady:
@@ -446,16 +440,16 @@ def Tick():
 			Connect()
 			return
 
-		# Update Everything
 		UpdateTracker()
+		# RefreshStamp = now  # ! updated by UpdateTracker
 
-	# Slow Timer
-	if (time.time() - SaveStamp) > SaveDelay:
+	# Save Timer
+	if (now - SaveStamp) > SaveDelay:
 
 		if not IsScriptReady: return
 
 		SaveSession()
-		SaveStamp = time.time()
+		SaveStamp = now
 
 
 # --------------
@@ -553,10 +547,8 @@ def SanityCheck():
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
-	if Settings is None:  # ! Has to be loaded first
-		LoadSettings()
-	if Session is None:
-		LoadSession()
+	if Settings is None: LoadSettings()
+	if Session is None: LoadSession()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
@@ -618,12 +610,7 @@ def SanityCheck():
 # Session Functions
 # -----------------
 def LoadSession():
-	global Session, SessionFile, Settings
-
-	# Make sure Settings are loaded
-	if Settings is None:
-		LoadSettings()
-		SanityCheck()
+	global Session, SessionFile
 
 	try:
 		# Create file-handle and load the Session data
@@ -663,9 +650,8 @@ def SaveSession():
 def ResetSession():
 	global Session, Settings
 
-	if Settings is None:
-		LoadSettings()
-		SanityCheck()
+	# Load Settings if not loaded
+	if Settings is None: LoadSettings()
 
 	# Hard reset of the session
 	del Session
@@ -680,7 +666,7 @@ def ResetSession():
 		"CurrentTotalDonations": 0
 	}
 
-	SaveSession()
+	SanityCheck()
 	UpdateTracker()
 	Log("Session Reset!")
 
@@ -689,7 +675,7 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global EventReceiver, Settings, SettingsFile
+	global EventReceiver, IsScriptReady, Settings, SettingsFile
 
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
@@ -720,6 +706,7 @@ def LoadSettings():
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
 		Connect()
+		if not IsScriptReady: IsScriptReady = True
 
 	if is_dirty:
 		SaveSettings()
@@ -737,8 +724,8 @@ def SaveSettings():
 		Log("Unable to save Settings! ({})".format(e.message))
 
 
-def ReloadSettings(json_data):
-	global EventReceiver, Settings
+def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
+	global EventReceiver, IsScriptReady, Settings
 
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
@@ -753,11 +740,12 @@ def ReloadSettings(json_data):
 		return
 
 	# Reconnect if Token changed
-	if old_token is not None and Settings["SocketToken"] != old_token:
+	if old_token is None or Settings["SocketToken"] != old_token:
 		if EventReceiver:
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
 		Connect()
+		if not IsScriptReady: IsScriptReady = True
 
 	SanityCheck()
 	Log("Settings saved!")
@@ -832,10 +820,11 @@ def SubtractFromGoal():
 # Unload
 # ------
 def Unload():
-	global EventReceiver
+	global EventReceiver, IsScriptReady
 	if EventReceiver and EventReceiver.IsConnected:
 		EventReceiver.Disconnect()
 	EventReceiver = None
+	IsScriptReady = False
 	UpdateTracker()
 	SaveSession()
 
