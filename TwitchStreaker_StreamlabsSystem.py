@@ -168,8 +168,6 @@ def Connect():
 def EventReceiverEvent(sender, args):
 	global BitsTemp, DonationTemp, ChannelName, EventIDs, FlushStamp, Session, Settings
 
-	# TODO: Move redundant checks
-
 	# Get Data
 	dat = args.Data
 	msg = dat.Message[0]
@@ -180,6 +178,10 @@ def EventReceiverEvent(sender, args):
 		return
 	EventIDs.append(msg.Id)
 
+	# Skip on Repeat and NotLive
+	if msg.IsRepeat: return
+	if not msg.IsLive and not msg.IsTest: return
+
 	# Twitch
 	if dat.For == "twitch_account":
 
@@ -187,16 +189,6 @@ def EventReceiverEvent(sender, args):
 		# Bits
 		# ----
 		if dat.Type == "bits" and Settings["CountBits"]:
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Bits by {}".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Bits, Stream is not Live")
-				return
 
 			# Ignore TestBits
 			if not msg.IsTest:
@@ -231,16 +223,6 @@ def EventReceiverEvent(sender, args):
 		# Subscriptions
 		# -------------
 		if dat.Type == "subscription":
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Subscription from {}".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Subscription from {}, Stream is not Live".format(msg.Name))
-				return
 
 			# GiftSub Check
 			if msg.SubType == "subgift":
@@ -339,16 +321,6 @@ def EventReceiverEvent(sender, args):
 
 		if dat.Type == "subscription":
 
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored repeat Sponsor from {} (YouTube)".format(msg.Name))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test subscriptions)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Sponsor from {}, Stream is not Live. (YouTube)".format(msg.Name))
-				return
-
 			if msg.Months > 1 and not Settings["CountResubs"]:
 				Log("Ignored Re-Sponsor from {}. (YouTube)".format(msg.Name))
 				return
@@ -359,14 +331,6 @@ def EventReceiverEvent(sender, args):
 			return
 
 		if dat.Type == 'superchat':
-
-			if msg.IsRepeat:
-				Log("Ignored repeat Superchat from {} (YouTube)".format(msg.Name))
-				return
-
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Superchat from {}, Stream is not Live. (YouTube)".format(msg.Name))
-				return
 
 			if not msg.IsTest:
 				Session["CurrentTotalDonations"] += msg.Amount
@@ -401,16 +365,6 @@ def EventReceiverEvent(sender, args):
 	if dat.For == "streamlabs":
 
 		if dat.Type == "donation" and Settings["CountDonations"]:
-
-			# Skip Repeat
-			if msg.IsRepeat:
-				Log("Ignored Repeat Donation from {}".format(msg.FromName))
-				return
-
-			# Live Check, skip subs if streamer is not live (does not apply to test donations)
-			if not msg.IsLive and not msg.IsTest:
-				Log("Ignored Donation from {}, Stream is not Live.".format(msg.Name))
-				return
 
 			# Ignore test donations for the total amount
 			if not msg.IsTest:
@@ -713,7 +667,6 @@ def ResetSession():
 	}
 
 	SanityCheck()
-	SaveSession()
 	UpdateTracker()
 	Log("Session Reset!")
 
@@ -921,8 +874,6 @@ def Execute(data):
 # -----------
 def Log(message):
 	global LogFile
-
-	# TODO: Generate LogFiles in subfolder and per session, session name = session start date/time
 
 	try:
 		# Open/Create logfile and write the log-message

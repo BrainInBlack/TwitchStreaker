@@ -7,6 +7,7 @@
 * Updated README.md
 * Fixed potential bug when changing the SocketToken
 * Optimized Tick function
+* Optimized Event Function
 
 ## 2.7.3 - Bits and Donation Fixes
 
