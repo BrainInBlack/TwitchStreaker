@@ -2,10 +2,10 @@
 
 ## 2.8.0 - Youtube Superchats (Beta)
 
-* Added support for Superchats
+* Added support for Superchats (Beta)
   * The Donation Settings are used for Superchats
+* Updated README.md
 * Fixed potential bug when changing the SocketToken
-* Fixed RefreshStamp never getting updated
 * Optimized Tick function
 
 ## 2.7.3 - Bits and Donation Fixes

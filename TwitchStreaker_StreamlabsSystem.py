@@ -116,9 +116,7 @@ PointVars = [
 # Initiation
 # ----------
 def Init():
-	global RefreshStamp, SaveStamp
 
-	# ! Preserve Order
 	LoadSettings()
 	LoadSession()
 	SanityCheck()
@@ -489,9 +487,9 @@ def Tick():
 			return
 
 		UpdateTracker()
-		RefreshStamp = now
+		# RefreshStamp = now  # ! updated by UpdateTracker
 
-	# Slow Timer
+	# Save Timer
 	if (now - SaveStamp) > SaveDelay:
 
 		if not IsScriptReady: return
@@ -595,10 +593,8 @@ def SanityCheck():
 	is_settings_dirty = False
 
 	# Load Session/Settings if not loaded
-	if Settings is None:  # ! Has to be loaded first
-		LoadSettings()
-	if Session is None:
-		LoadSession()
+	if Settings is None: LoadSettings()
+	if Session is None: LoadSession()
 
 	# Prevent GoalMin from being Zero
 	if Settings["GoalMin"]  < 1:
@@ -660,12 +656,7 @@ def SanityCheck():
 # Session Functions
 # -----------------
 def LoadSession():
-	global Session, SessionFile, Settings
-
-	# Make sure Settings are loaded
-	if Settings is None:
-		LoadSettings()
-		SanityCheck()
+	global Session, SessionFile
 
 	try:
 		# Create file-handle and load the Session data
@@ -705,9 +696,8 @@ def SaveSession():
 def ResetSession():
 	global Session, Settings
 
-	if Settings is None:
-		LoadSettings()
-		SanityCheck()
+	# Load Settings if not loaded
+	if Settings is None: LoadSettings()
 
 	# Hard reset of the session
 	del Session
@@ -722,6 +712,7 @@ def ResetSession():
 		"CurrentTotalDonations": 0
 	}
 
+	SanityCheck()
 	SaveSession()
 	UpdateTracker()
 	Log("Session Reset!")
@@ -780,7 +771,7 @@ def SaveSettings():
 		Log("Unable to save Settings! ({})".format(e.message))
 
 
-def ReloadSettings(json_data):
+def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 	global EventReceiver, IsScriptReady, Settings
 
 	# Backup old token for comparison
@@ -796,7 +787,7 @@ def ReloadSettings(json_data):
 		return
 
 	# Reconnect if Token changed
-	if old_token is not None and Settings["SocketToken"] != old_token:
+	if old_token is None or Settings["SocketToken"] != old_token:
 		if EventReceiver:
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
