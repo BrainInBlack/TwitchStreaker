@@ -1,6 +1,6 @@
 # TwitchStreaker for Streamlabs Chatbot
 
-Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
+Initially created for the Twitch-Streamer [AnEternalEnigma](https://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
 TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regular Subscription options apply.
 
@@ -37,7 +37,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
 
 ## Installation
 
-1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+1. Download the [latest release](https://github.com/BrainInBlack/TwitchStreaker/releases/latest).
 2. Extract the downloaded archive into the `Chatbot > Services > Scripts` directory.
 3. In the Chatbot, open the Scripts Tab and click the `Reload Scripts` button.
 4. Right click on the `TwitchStreaker` script and click `Insert API Key`.
@@ -50,7 +50,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
 
 **Remember to Backup your customized files!**
 
-1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+1. Download the [latest release](https://github.com/BrainInBlack/TwitchStreaker/releases/latest).
 2. Check the [Changelog](CHANGELOG.md) for additional instructions
 3. Extract the downloaded archive and overwrite existing files.
 4. Reapply your customization's.
@@ -278,17 +278,17 @@ Reset Tracker   | Resets everything to their initial values.
 
 [Discord](https://discord.gg/HWTaady)
 
-[Twitter](http://twitter.com/BrainInBlack)
+[Twitter](https://twitter.com/BrainInBlack)
 
 ## Streamers using TwitchStreaker
 
-[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma)
+[**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma)
 
-[**BloodThunder**](http://twitch.tv/BloodThunder)
+[**BloodThunder**](https://twitch.tv/BloodThunder)
 
-[**KatLink**](http://twitch.tv/KatLink)
+[**KatLink**](https://twitch.tv/KatLink)
 
-[**PersonSuit**](http://twitch.tv/PersonSuit)
+[**PersonSuit**](https://twitch.tv/PersonSuit)
 
 ## Contributing
 
@@ -302,7 +302,7 @@ Reset Tracker   | Resets everything to their initial values.
 
 [**BrainInBlack**](https://github.com/BrainInBlack) - Programming
 
-[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma) - Initial Concept
+[**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma) - Initial Concept
 
 ## Project Info
 

@@ -174,8 +174,7 @@ def EventReceiverEvent(sender, args):
 
 	# Event Filtering
 	FlushStamp = time.time()
-	if msg.Id in EventIDs:
-		return
+	if msg.Id in EventIDs: return
 	EventIDs.append(msg.Id)
 
 	# Skip on Repeat and NotLive
@@ -228,14 +227,10 @@ def EventReceiverEvent(sender, args):
 			if msg.SubType == "subgift":
 
 				# Ignore Gifted Subs by Streamer
-				if msg.Gifter == ChannelName and not msg.IsTest:
-					Log("Ignored StreamerGift from {}".format(msg.Gifter))
-					return
+				if msg.Gifter == ChannelName and not msg.IsTest: return
 
 				# Ignore Self-Gifted Subs
-				if msg.Name == msg.Gifter and not msg.IsTest:
-					Log("Ignored SelfGift from {}".format(msg.Gifter))
-					return
+				if msg.Name == msg.Gifter and not msg.IsTest: return
 
 			# Gifted Subs (includes anonymous subs)
 			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
@@ -279,9 +274,7 @@ def EventReceiverEvent(sender, args):
 			elif msg.SubType == "resub":
 
 				# Skip resubs if option is disabled
-				if not Settings["CountReSubs"] and not msg.IsTest:
-					Log("Ignored Resub by {}".format(msg.Name))
-					return
+				if not Settings["CountReSubs"] and not msg.IsTest: return
 
 				res = Settings["ReSub1"]
 
@@ -321,9 +314,7 @@ def EventReceiverEvent(sender, args):
 
 		if dat.Type == "subscription":
 
-			if msg.Months > 1 and not Settings["CountResubs"]:
-				Log("Ignored Re-Sponsor from {}. (YouTube)".format(msg.Name))
-				return
+			if msg.Months > 1 and not Settings["CountResubs"]: return
 
 			Session["CurrentPoints"]    += Settings["Sub1"]
 			Session["CurrentTotalSubs"] += 1
@@ -332,8 +323,7 @@ def EventReceiverEvent(sender, args):
 
 		if dat.Type == 'superchat':
 
-			if not msg.IsTest:
-				Session["CurrentTotalDonations"] += msg.Amount
+			if not msg.IsTest: Session["CurrentTotalDonations"] += msg.Amount
 
 			if msg.Amount >= Settings["DonationMinAmount"]:
 
@@ -367,8 +357,7 @@ def EventReceiverEvent(sender, args):
 		if dat.Type == "donation" and Settings["CountDonations"]:
 
 			# Ignore test donations for the total amount
-			if not msg.IsTest:
-				Session["CurrentTotalDonations"] += msg.Amount
+			if not msg.IsTest: Session["CurrentTotalDonations"] += msg.Amount
 
 			# Donation is above MinAmount
 			if msg.Amount >= Settings["DonationMinAmount"]:
