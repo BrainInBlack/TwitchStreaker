@@ -5,6 +5,7 @@
 * Cleaned up Log messages
   * Removed messages that are not really needed
 * Fixed Links in the README.md and CHANGELOG.md
+* Added CONTRIBUTING.md
 
 ## 2.8.0 - Youtube Superchats (Beta)
 
