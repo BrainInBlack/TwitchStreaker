@@ -869,8 +869,8 @@ def Log(message):
 		with codecs.open(LogFile, encoding="utf-8", mode="a+") as f:
 			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
 			f.close()
-		Parent.Log(ScriptName, message)
 	except IOError as e:
 		# Dump to bot-console if write failed
 		Parent.Log(ScriptName, "Unable to open or write to logfile. ({})".format(e.message))
-		Parent.Log(ScriptName, message)
+
+	Parent.Log(ScriptName, message)

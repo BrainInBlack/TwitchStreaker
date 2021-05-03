@@ -100,7 +100,7 @@ Option            | Description
 ------------------|------------
 Goal              | The amount of `Points` required for the next Streak.
 Goal Min          | Minimum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
-Goal Max          | Maximum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Goal Max          | Maximum value of the `Goal` option (Defaults to the value of `Goal` when below the `Goal`)
 Increment Goal By | Value by which the `Goal` will be increased when completing a Streak (Leave at `0` to disable this mechanic)
 Allow Resubs      | Allows Resubs to be counted as well as regular Subs.
 
