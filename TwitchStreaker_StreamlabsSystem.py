@@ -6,28 +6,28 @@ import codecs, json, math, os, time
 # -----
 # Paths
 # -----
-ScriptFolder       = os.path.realpath(os.path.dirname(__file__))
-TextFolder         = os.path.join(ScriptFolder, "Text\\")
+SCRIPT_FOLDER        = os.path.realpath(os.path.dirname(__file__))
+TEXT_FOLDER          = os.path.join(SCRIPT_FOLDER, "Text\\")
 
-LogFile            = os.path.join(ScriptFolder, "TwitchStreaker.log")
-SessionFile        = os.path.join(ScriptFolder, "Session.json")
-SettingsFile       = os.path.join(ScriptFolder, "Settings.json")
+LOG_FILE             = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
+SESSION_FILE         = os.path.join(SCRIPT_FOLDER, "Session.json")
+SETTINGS_FILE        = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
-BitsLeftFile       = os.path.join(TextFolder, "BitsLeft.txt")
-GoalFile           = os.path.join(TextFolder, "Goal.txt")
-PointsFile         = os.path.join(TextFolder, "Points.txt")
-PointsLeftFile     = os.path.join(TextFolder, "PointsLeft.txt")
-StreakFile         = os.path.join(TextFolder, "Streak.txt")
-TotalBitsFile      = os.path.join(TextFolder, "TotalBits.txt")
-TotalSubsFile      = os.path.join(TextFolder, "TotalSubs.txt")
-TotalDonationsFile = os.path.join(TextFolder, "TotalDonations.txt")
+BITS_LEFT_FILE       = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
+GOAL_FILE            = os.path.join(TEXT_FOLDER, "Goal.txt")
+POINTS_FILE          = os.path.join(TEXT_FOLDER, "Points.txt")
+POINTS_LEFT_FILE     = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
+STREAK_FILE          = os.path.join(TEXT_FOLDER, "Streak.txt")
+TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
+TOTAL_SUBS_FILE      = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
+TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 
 # ----------
 # References
 # ----------
 import clr
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReferenceToFileAndPath(os.path.join(ScriptFolder, "Lib\\StreamlabsEventReceiver.dll"))
+clr.AddReferenceToFileAndPath(os.path.join(SCRIPT_FOLDER, "Lib\\StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 
@@ -96,14 +96,14 @@ Settings = {
 BitsTemp      = 0
 DonationTemp  = 0.0
 IsScriptReady = False
-RefreshDelay  = 5    # InSeconds
+REFRESH_DELAY  = 5    # InSeconds
 RefreshStamp  = time.time()
-SaveDelay     = 300  # InSeconds
+SAVE_DELAY     = 300  # InSeconds
 SaveStamp     = time.time()
-FlushDelay    = 5    # InSeconds
+FLUSH_DELAY    = 5    # InSeconds
 FlushStamp    = time.time()
 EventIDs      = []
-PointVars = [
+POINT_VARS = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
@@ -393,32 +393,30 @@ def EventReceiverEvent(sender, args):
 # ---------------
 # Event Connected
 # ---------------
-def EventReceiverConnected(sender, args):
-	Log("Connected")
+def EventReceiverConnected(sender, args): Log("Connected")
 
 
 # ------------------
 # Event Disconnected
 # ------------------
-def EventReceiverDisconnected(sender, args):
-	Log("Disconnected")
+def EventReceiverDisconnected(sender, args): Log("Disconnected")
 
 
 # ----
 # Tick
 # ----
 def Tick():
-	global EventIDs, EventReceiver, FlushDelay, FlushStamp, IsScriptReady, RefreshDelay, RefreshStamp, SaveDelay, SaveStamp
+	global EventIDs, FlushStamp, SaveStamp
 
 	now = time.time()
 
 	# Event Filter Flush
-	if(now - FlushStamp) > FlushDelay and len(EventIDs) > 0:
+	if(now - FlushStamp) > FLUSH_DELAY and len(EventIDs) > 0:
 		EventIDs = []
 		FlushStamp = now
 
 	# Fast Timer
-	if (now - RefreshStamp) > RefreshDelay:
+	if (now - RefreshStamp) > REFRESH_DELAY:
 
 		# Attempt Startup
 		if not IsScriptReady:
@@ -433,7 +431,7 @@ def Tick():
 		# RefreshStamp = now  # ! updated by UpdateTracker
 
 	# Save Timer
-	if (now - SaveStamp) > SaveDelay:
+	if (now - SaveStamp) > SAVE_DELAY:
 
 		if not IsScriptReady: return
 
@@ -445,7 +443,7 @@ def Tick():
 # Update Tracker
 # --------------
 def UpdateTracker():  # ! Only call if a quick response is required
-	global BitsTemp, DonationTemp, Session, Settings, RefreshStamp, GoalFile, PointsFile, StreakFile, PointsLeftFile, TotalSubsFile, TotalBitsFile, TotalDonationsFile
+	global BitsTemp, DonationTemp, Session, Settings, RefreshStamp
 
 	# Calculate Bits
 	if Settings["CountBitsCumulative"] and BitsTemp >= Settings["BitsMinAmount"]:
@@ -484,39 +482,39 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
 
 	# Update Text Files
-	if not os.path.isdir(TextFolder):
-		os.mkdir(TextFolder)
+	if not os.path.isdir(TEXT_FOLDER):
+		os.mkdir(TEXT_FOLDER)
 
 	try:
-		f = open(BitsLeftFile, "w")
+		f = open(BITS_LEFT_FILE, "w")
 		f.write(str(Session["CurrentBitsLeft"]))
 		f.close()
 
-		f = open(GoalFile, "w")
+		f = open(GOAL_FILE, "w")
 		f.write(str(Session["CurrentGoal"]))
 		f.close()
 
-		f = open(PointsFile, "w")
+		f = open(POINTS_FILE, "w")
 		f.write(str(Session["CurrentPoints"]))
 		f.close()
 
-		f = open(PointsLeftFile, "w")
+		f = open(POINTS_LEFT_FILE, "w")
 		f.write(str(Session["CurrentPointsLeft"]))
 		f.close()
 
-		f = open(StreakFile, "w")
+		f = open(STREAK_FILE, "w")
 		f.write(str(Session["CurrentStreak"]))
 		f.close()
 
-		f = open(TotalSubsFile, "w")
+		f = open(TOTAL_SUBS_FILE, "w")
 		f.write(str(Session["CurrentTotalSubs"]))
 		f.close()
 
-		f = open(TotalBitsFile, "w")
+		f = open(TOTAL_BITS_FILE, "w")
 		f.write(str(Session["CurrentTotalBits"]))
 		f.close()
 
-		f = open(TotalDonationsFile, "w")
+		f = open(TOTAL_DONATIONS_FILE, "w")
 		f.write(str(Session["CurrentTotalDonations"]))
 		f.close()
 	except IOError as e:
@@ -530,7 +528,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings, PointVars
+	global Session, Settings
 
 	is_session_dirty  = False
 	is_settings_dirty = False
@@ -565,7 +563,7 @@ def SanityCheck():
 		is_session_dirty       = True
 
 	# Prevent Points from being below 1
-	for var in PointVars:
+	for var in POINT_VARS:
 		if var < 1:
 			Settings[var]     = 1
 			is_settings_dirty = True
@@ -599,11 +597,11 @@ def SanityCheck():
 # Session Functions
 # -----------------
 def LoadSession():
-	global Session, SessionFile
+	global Session
 
 	try:
 		# Create file-handle and load the Session data
-		with codecs.open(SessionFile, encoding="utf-8-sig", mode="r") as f:
+		with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
 			new_session = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except IOError:
@@ -625,11 +623,10 @@ def LoadSession():
 
 
 def SaveSession():
-	global Session, SessionFile
 
 	try:
 		# Create file-handle and save Session data
-		with codecs.open(SessionFile, encoding="utf-8-sig", mode="w") as f:
+		with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
 	except IOError as e:
@@ -637,7 +634,7 @@ def SaveSession():
 
 
 def ResetSession():
-	global Session, Settings
+	global Session
 
 	# Load Settings if not loaded
 	if Settings is None: LoadSettings()
@@ -664,14 +661,14 @@ def ResetSession():
 # Settings Functions
 # ------------------
 def LoadSettings():
-	global EventReceiver, IsScriptReady, Settings, SettingsFile
+	global EventReceiver, IsScriptReady, Settings
 
 	# Backup old token for comparison
 	old_token = Settings["SocketToken"]
 
 	try:
 		# Create file-handle and load Settings data
-		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
+		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
 			new_settings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except IOError:
@@ -702,11 +699,10 @@ def LoadSettings():
 
 
 def SaveSettings():
-	global Settings, SettingsFile
 
 	try:
 		# Create file-handle and save Settings data
-		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="w") as f:
+		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="w") as f:
 			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 			f.close()
 	except IOError as e:
@@ -721,7 +717,7 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	try:
 		# Create file-handle and load Settings data
-		with codecs.open(SettingsFile, encoding="utf-8-sig", mode="r") as f:
+		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
 			Settings = json.load(f, encoding="utf-8-sig")
 			f.close()
 	except IOError:
@@ -822,7 +818,6 @@ def Unload():
 # Parse Parameter
 # ---------------
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-	global Session
 
 	if "$tsBitsLeft" in parse_string:
 		parse_string = parse_string.replace("$tsBitsLeft", str(Session["CurrentBitsLeft"]))
@@ -862,11 +857,10 @@ def Execute(data):
 # Log Wrapper
 # -----------
 def Log(message):
-	global LogFile
 
 	try:
 		# Open/Create logfile and write the log-message
-		with codecs.open(LogFile, encoding="utf-8", mode="a+") as f:
+		with codecs.open(LOG_FILE, encoding="utf-8", mode="a+") as f:
 			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
 			f.close()
 	except IOError as e:

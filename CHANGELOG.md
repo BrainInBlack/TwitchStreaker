@@ -4,6 +4,8 @@
 
 * Cleaned up Log messages
   * Removed messages that are not really needed
+* Changed constants are now using MACRO_CASE
+* Cleaned up globals declaration
 * Fixed Links in the README.md and CHANGELOG.md
 * Added CONTRIBUTING.md
 
