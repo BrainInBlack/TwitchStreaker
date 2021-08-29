@@ -26,7 +26,6 @@ TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 # References
 # ----------
 import clr
-clr.AddReference("IronPython.Modules.dll")
 clr.AddReferenceToFileAndPath(os.path.join(SCRIPT_FOLDER, "Lib\\StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
@@ -41,53 +40,185 @@ Version     = "2.8.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
+# -------------
+# Session Class
+# -------------
+class ScriptSession(object):
+
+	CurrentBitsLeft       = 0
+	CurrentGoal           = 10
+	CurrentPoints         = 0
+	CurrentPointsLeft     = 10
+	CurrentStreak         = 1
+	CurrentTotalSubs      = 0
+	CurrentTotalBits      = 0
+	CurrentTotalDonations = 0
+
+	def __init__(self):
+		self.__dict__ = self.DefaultSession()
+		self.Load()
+
+	def Load(self):
+		try:
+			with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
+				_new = json.load(f, encoding="utf-8-sig")
+				f.close()
+		except:
+			self.Save()
+			return
+		
+		# Cleanup
+		_dirty = False
+		diff = set(_new) ^ set(self.__dict__)
+		if len(diff) > 0:
+			for k in diff:
+				if k in _new:
+					del _new[k]
+					_dirty = True
+		self.__dict__ = _new
+		if _dirty: self.Save()
+
+	def Save(self):
+		try:
+			with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="w") as f:
+				json.dump(self.__dict__, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+				f.close()
+		except IOError as e:
+			Log("Unable to save Session ({})".format(e.message))
+		except:
+			Log("Unable to save Session (Unknown Error)")
+
+	def DefaultSession(self):
+		return {
+			"CurrentBitsLeft": 0,
+			"CurrentGoal": 10,
+			"CurrentPoints": 0,
+			"CurrentPointsLeft": 10,
+			"CurrentStreak": 1,
+			"CurrentTotalSubs": 0,
+			"CurrentTotalBits": 0,
+			"CurrentTotalDonations": 0
+		}
+
+
+# --------------
+# Settings Class
+# --------------
+class ScriptSettings(object):
+
+	# General
+	Goal = 10
+	GoalMin = 5
+	GoalMax = 10
+	GoalIncrement = 1
+
+	# Bits
+	BitsMinAmount = 500
+	BitsPointValue = 1
+	CountBits = False
+	CountBitsOnce = False
+	CountBitsCumulative = False
+
+	# Donations
+	DonationMinAmount = 5.0
+	DonationPointValue = 1
+	CountDonations = False
+	CountDonationsOnce = False
+	CountDonationsCumulative = False
+
+	# Subscriptions
+	CountReSubs = False
+	Sub1 = 1
+	Sub2 = 1
+	Sub3 = 1
+	ReSub1 = 1
+	ReSub2 = 1
+	ReSub3 = 1
+	GiftSub1 = 1
+	GiftSub2 = 1
+	GiftSub3 = 1
+	GiftReSub1 = 1
+	GiftReSub2 = 1
+	GiftReSub3 = 1
+
+	# Streamlabs
+	SocketToken = None
+
+	def __init__(self):
+		self.__dict__ = self.DefaultSettings()
+		self.Load()
+
+	def Load(self):
+		try:
+			with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
+				_new = json.load(f, encoding="utf-8-sig")
+				f.close()
+		except:
+			self.Save()
+			return
+
+		# Cleanup
+		_dirty = False
+		diff = set(_new) ^ set(self.__dict__)
+		if len(diff) > 0:
+			for k in diff:
+				if k in _new:
+					del _new[k]
+					_dirty = True
+		self.__dict__ = _new
+		if _dirty: self.Save()
+
+	def Save(self):
+		try:
+			with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="w") as f:
+				json.dump(self.__dict__, f, encoding="utf-8-sig", sort_keys=True, indent=4)
+				f.close()
+		except IOError as e:
+			Log("Unable to save Settings ({})".format(e.message))
+		except:
+			Log("Unable to save Settings (Unknown error)")
+
+	def DefaultSettings(self):
+		return {
+			# General
+			"Goal": 10,
+			"GoalMin": 5,
+			"GoalMax": 10,
+			"GoalIncrement": 1,
+
+			# Bits
+			"BitsMinAmount": 500,
+			"BitsPointValue": 1,
+			"CountBits": False,
+			"CountBitsOnce": False,
+			"CountBitsCumulative": False,
+
+			# Donations
+			"DonationMinAmount": 5.0,
+			"DonationPointValue": 1,
+			"CountDonations": False,
+			"CountDonationsOnce": False,
+			"CountDonationsCumulative": False,
+
+			# Subscriptions
+			"CountReSubs": False,
+			"Sub1": 1, "Sub2": 1, "Sub3": 1,
+			"ReSub1": 1, "ReSub2": 1, "ReSub3": 1,
+			"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
+			"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1,
+
+			# Streamlabs
+			"SocketToken": None
+		}
+
+
 # ----------------
 # Global Variables
 # ----------------
 ChannelName   = None
 EventReceiver = None
-Session = {
-	"CurrentBitsLeft": 0,
-	"CurrentGoal": 10,
-	"CurrentPoints": 0,
-	"CurrentPointsLeft": 10,
-	"CurrentStreak": 1,
-	"CurrentTotalSubs": 0,
-	"CurrentTotalBits": 0,
-	"CurrentTotalDonations": 0
-}
-Settings = {
-
-	# General
-	"Goal": 10,
-	"GoalMin": 5,
-	"GoalMax": 10,
-	"GoalIncrement": 1,
-
-	# Bits
-	"BitsMinAmount": 500,
-	"BitsPointValue": 1,
-	"CountBits": False,
-	"CountBitsOnce": False,
-	"CountBitsCumulative": False,
-
-	# Donations
-	"DonationMinAmount": 5.0,
-	"DonationPointValue": 1,
-	"CountDonations": False,
-	"CountDonationsOnce": False,
-	"CountDonationsCumulative": False,
-
-	# Subscriptions
-	"CountReSubs": False,
-	"Sub1": 1, "Sub2": 1, "Sub3": 1,
-	"ReSub1": 1, "ReSub2": 1, "ReSub3": 1,
-	"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
-	"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1,
-
-	# Streamlabs
-	"SocketToken": None
-}
+Session       = ScriptSession()
+Settings      = ScriptSettings()
 
 
 # ------------------
@@ -96,14 +227,19 @@ Settings = {
 BitsTemp      = 0
 DonationTemp  = 0.0
 IsScriptReady = False
-REFRESH_DELAY  = 5    # InSeconds
 RefreshStamp  = time.time()
-SAVE_DELAY     = 300  # InSeconds
 SaveStamp     = time.time()
-FLUSH_DELAY    = 5    # InSeconds
 FlushStamp    = time.time()
 EventIDs      = []
-POINT_VARS = [
+
+
+# ---------
+# Constants
+# ---------
+FLUSH_DELAY   = 5    # InSeconds
+REFRESH_DELAY = 5    # InSeconds
+SAVE_DELAY    = 300  # InSeconds
+POINT_VARS    = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
@@ -116,11 +252,7 @@ POINT_VARS = [
 # Initiation
 # ----------
 def Init():
-
-	LoadSettings()
-	LoadSession()
 	SanityCheck()
-
 	StartUp()
 
 
@@ -128,12 +260,12 @@ def Init():
 # StartUp
 # -------
 def StartUp():
-	global ChannelName, IsScriptReady, Settings
+	global ChannelName, IsScriptReady
 
 	IsScriptReady = False
 
 	# Check Token
-	if Settings["SocketToken"] is None or len(Settings["SocketToken"]) < 100:
+	if Settings.SocketToken is None or len(Settings.SocketToken) < 50:
 		Log("Socket Token is missing. Please read the README.md for further instructions.")
 		return
 
@@ -153,20 +285,20 @@ def StartUp():
 # Connect EventReceiver
 # ---------------------
 def Connect():
-	global EventReceiver, Settings
+	global EventReceiver
 
 	EventReceiver = StreamlabsEventClient()
 	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
 	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
 	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
-	EventReceiver.Connect(Settings["SocketToken"])
+	EventReceiver.Connect(Settings.SocketToken)
 
 
 # ---------
 # Event Bus
 # ---------
 def EventReceiverEvent(sender, args):
-	global BitsTemp, DonationTemp, ChannelName, EventIDs, FlushStamp, Session, Settings
+	global BitsTemp, DonationTemp, EventIDs, FlushStamp
 
 	# Get Data
 	dat = args.Data
@@ -187,29 +319,29 @@ def EventReceiverEvent(sender, args):
 		# ----
 		# Bits
 		# ----
-		if dat.Type == "bits" and Settings["CountBits"]:
+		if dat.Type == "bits" and Settings.CountBits:
 
 			# Ignore TestBits
 			if not msg.IsTest:
-				Session["CurrentTotalBits"] += msg.Amount
+				Session.CurrentTotalBits += msg.Amount
 
 			# Bits are above MinAmount
-			if msg.Amount >= Settings["BitsMinAmount"]:
+			if msg.Amount >= Settings.BitsMinAmount:
 
-				if Settings["CountBitsOnce"]:
-					Session["CurrentPoints"] += Settings["BitsPointValue"]
-					Log("Added {} Point(s) for {} Bits from {}".format(Settings["BitsPointValue"], msg.Amount, msg.Name))
+				if Settings.CountBitsOnce:
+					Session.CurrentPoints += Settings.BitsPointValue
+					Log("Added {} Point(s) for {} Bits from {}".format(Settings.BitsPointValue, msg.Amount, msg.Name))
 					return
 
-				res = Settings["BitsPointValue"] * math.trunc(msg.Amount / Settings["BitsMinAmount"])
-				BitsTemp += msg.Amount % Settings["BitsMinAmount"]  # Add remainder to BitsTemp
+				res = Settings.BitsPointValue * math.trunc(msg.Amount / Settings.BitsMinAmount)
+				BitsTemp += msg.Amount % Settings.BitsMinAmount  # Add remainder to BitsTemp
 
-				Session["CurrentPoints"] += res
+				Session.CurrentPoints += res
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
 				return
 
 			# Cumulative Bits
-			elif Settings["CountBitsCumulative"]:
+			elif Settings.CountBitsCumulative:
 
 				BitsTemp += msg.Amount
 				Log("Added {} Bit(s) from {} to the cumulative amount".format(msg.Amount, msg.Name))
@@ -238,16 +370,16 @@ def EventReceiverEvent(sender, args):
 				# GiftedSubs (resubs)
 				if msg.Months is not None:
 
-					res = Settings["GiftReSub1"]
+					res = Settings.GiftReSub1
 
 					if msg.SubPlan == "2000":
-						res = Settings["GiftReSub2"]
+						res = Settings.GiftReSub2
 
 					if msg.SubPlan == "3000":
-						res = Settings["GiftReSub3"]
+						res = Settings.GiftReSub3
 
-					Session["CurrentPoints"]    += res
-					Session["CurrentTotalSubs"] += 1
+					Session.CurrentPoints    += res
+					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 				# /GiftedSubs (resubs)
@@ -255,16 +387,16 @@ def EventReceiverEvent(sender, args):
 				# GiftedSubs (normal)
 				else:
 
-					res = Settings["GiftSub1"]
+					res = Settings.GiftSub1
 
 					if msg.SubPlan == "2000":
-						res = Settings["GiftSub2"]
+						res = Settings.GiftSub2
 
 					if msg.SubPlan == "3000":
-						res = Settings["GiftSub3"]
+						res = Settings.GiftSub3
 
-					Session["CurrentPoints"]    += res
-					Session["CurrentTotalSubs"] += 1
+					Session.CurrentPoints    += res
+					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 				# /GiftedSubs (normal)
@@ -274,18 +406,18 @@ def EventReceiverEvent(sender, args):
 			elif msg.SubType == "resub":
 
 				# Skip resubs if option is disabled
-				if not Settings["CountReSubs"] and not msg.IsTest: return
+				if not Settings.CountReSubs and not msg.IsTest: return
 
-				res = Settings["ReSub1"]
+				res = Settings.ReSub1
 
 				if msg.SubPlan == "2000":
-					res = Settings["ReSub2"]
+					res = Settings.ReSub2
 
 				if msg.SubPlan == "3000":
-					res = Settings["ReSub3"]
+					res = Settings.ReSub3
 
-				Session["CurrentPoints"]    += res
-				Session["CurrentTotalSubs"] += 1
+				Session.CurrentPoints    += res
+				Session.CurrentTotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Resubs - END
@@ -293,16 +425,16 @@ def EventReceiverEvent(sender, args):
 			# Subs
 			else:
 
-				res = Settings["Sub1"]
+				res = Settings.Sub1
 
 				if msg.SubPlan == "2000":
-					res = Settings["Sub2"]
+					res = Settings.Sub2
 
 				if msg.SubPlan == "3000":
-					res = Settings["Sub3"]
+					res = Settings.Sub3
 
-				Session["CurrentPoints"]    += res
-				Session["CurrentTotalSubs"] += 1
+				Session.CurrentPoints    += res
+				Session.CurrentTotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Subs - END
@@ -314,32 +446,32 @@ def EventReceiverEvent(sender, args):
 
 		if dat.Type == "subscription":
 
-			if msg.Months > 1 and not Settings["CountResubs"]: return
+			if msg.Months > 1 and not Settings.CountResubs: return
 
-			Session["CurrentPoints"]    += Settings["Sub1"]
-			Session["CurrentTotalSubs"] += 1
-			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings["Sub1"], msg.Name))
+			Session.CurrentPoints    += Settings.Sub1
+			Session.CurrentTotalSubs += 1
+			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings.Sub1, msg.Name))
 			return
 
 		if dat.Type == 'superchat':
 
-			if not msg.IsTest: Session["CurrentTotalDonations"] += msg.Amount
+			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
 
-			if msg.Amount >= Settings["DonationMinAmount"]:
+			if msg.Amount >= Settings.DonationMinAmount:
 
-				if Settings["CountDonationsOnce"]:
-					Session["CurrentPoints"] += Settings["DonationsPointValue"]
-					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings["DonationsPointValue", msg.Amount, msg.Currency, msg.Name]))
+				if Settings.CountDonationsOnce:
+					Session.CurrentPoints += Settings.DonationPointValue
+					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.Name))
 					return
 
-				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
-				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
+				DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
-				Session["CurrentPoints"] += res
+				Session.CurrentPoints += res
 				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
 				return
 
-			elif Settings["CountDonationsCumulative"]:
+			elif Settings.CountDonationsCumulative:
 
 				DonationTemp += msg.Amount
 				Log("Added Superchat of {} {} from {} to the cumulative Amount.".format())
@@ -354,28 +486,28 @@ def EventReceiverEvent(sender, args):
 	# Streamlabs
 	if dat.For == "streamlabs":
 
-		if dat.Type == "donation" and Settings["CountDonations"]:
+		if dat.Type == "donation" and Settings.CountDonations:
 
 			# Ignore test donations for the total amount
-			if not msg.IsTest: Session["CurrentTotalDonations"] += msg.Amount
+			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
 
 			# Donation is above MinAmount
-			if msg.Amount >= Settings["DonationMinAmount"]:
+			if msg.Amount >= Settings.DonationMinAmount:
 
-				if Settings["CountDonationsOnce"]:
-					Session["CurrentPoints"] += Settings["DonationsPointValue"]
-					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings["DonationsPointValue"], msg.Amount, msg.Currency, msg.FromName))
+				if Settings.CountDonationsOnce:
+					Session.CurrentPoints += Settings.DonationPointValue
+					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.FromName))
 					return
 
-				res = Settings["DonationPointValue"] * math.trunc(msg.Amount / Settings["DonationMinAmount"])
-				DonationTemp += msg.Amount % Settings["DonationMinAmount"]  # Add remainder to DonationTemp
+				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
+				DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
-				Session["CurrentPoints"] += res
+				Session.CurrentPoints += res
 				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
 				return
 
 			# Cumulative Donation
-			elif Settings["CountDonationsCumulative"]:
+			elif Settings.CountDonationsCumulative:
 
 				DonationTemp += msg.Amount
 				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(msg.Amount, msg.Currency, msg.FromName))
@@ -432,10 +564,8 @@ def Tick():
 
 	# Save Timer
 	if (now - SaveStamp) > SAVE_DELAY:
-
 		if not IsScriptReady: return
-
-		SaveSession()
+		Session.Save()
 		SaveStamp = now
 
 
@@ -443,82 +573,55 @@ def Tick():
 # Update Tracker
 # --------------
 def UpdateTracker():  # ! Only call if a quick response is required
-	global BitsTemp, DonationTemp, Session, Settings, RefreshStamp
+	global BitsTemp, DonationTemp, RefreshStamp
 
 	# Calculate Bits
-	if Settings["CountBitsCumulative"] and BitsTemp >= Settings["BitsMinAmount"]:
-		res = math.trunc(BitsTemp / Settings["BitsMinAmount"])
-		Session["CurrentPoints"] += Settings["BitsPointValue"] * res
-		BitsTemp -= Settings["BitsMinAmount"] * res
-		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings["BitsPointValue"] * res))
+	if Settings.CountBitsCumulative and BitsTemp >= Settings.BitsMinAmount:
+		res = math.trunc(BitsTemp / Settings.BitsMinAmount)
+		Session.CurrentPoints += Settings.BitsPointValue * res
+		BitsTemp -= Settings.BitsMinAmount * res
+		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
 		del res
-	Session["CurrentBitsLeft"] = Settings["BitsMinAmount"] - BitsTemp
+	Session.CurrentBitsLeft = Settings.BitsMinAmount - BitsTemp
 
 	# Calculate Donations
-	if Settings["CountDonationsCumulative"] and DonationTemp >= Settings["DonationMinAmount"]:
-		res = math.trunc(DonationTemp / Settings["DonationMinAmount"])
-		Session["CurrentPoints"] += Settings["DonationPointValue"]
-		DonationTemp -= Settings["DonationMinAmount"] * res
-		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings["DonationPointValue"] * res))
+	if Settings.CountDonationsCumulative and DonationTemp >= Settings.DonationMinAmount:
+		res = math.trunc(DonationTemp / Settings.DonationMinAmount)
+		Session.CurrentPoints += Settings.DonationPointValue
+		DonationTemp -= Settings.DonationMinAmount * res
+		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings.DonationPointValue * res))
 		del res
 
 	# Calculate Streak
-	while Session["CurrentPoints"] >= Session["CurrentGoal"]:
+	while Session.CurrentPoints >= Session.CurrentGoal:
 
 		# Subtract Goal and Increment Streak
-		Session["CurrentPoints"] -= Session["CurrentGoal"]
-		Session["CurrentStreak"] += 1
+		Session.CurrentPoints -= Session.CurrentGoal
+		Session.CurrentStreak += 1
 
 		# Increment CurrentGoal
-		if Session["CurrentGoal"]   < Settings["GoalMax"]:
-			Session["CurrentGoal"] += Settings["GoalIncrement"]
+		if Session.CurrentGoal   < Settings.GoalMax:
+			Session.CurrentGoal += Settings.GoalIncrement
 
 			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
-			if Session["CurrentGoal"]  > Settings["GoalMax"]:
-				Session["CurrentGoal"] = Settings["GoalMax"]
-	Session["CurrentPointsLeft"] = Session["CurrentGoal"] - Session["CurrentPoints"]
+			if Session.CurrentGoal  > Settings.GoalMax:
+				Session.CurrentGoal = Settings.GoalMax
+	Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
 
 	# Update Overlay
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session)))
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session.__dict__)))
 
 	# Update Text Files
-	if not os.path.isdir(TEXT_FOLDER):
-		os.mkdir(TEXT_FOLDER)
+	if not os.path.isdir(TEXT_FOLDER): os.mkdir(TEXT_FOLDER)
 
-	try:
-		f = open(BITS_LEFT_FILE, "w")
-		f.write(str(Session["CurrentBitsLeft"]))
-		f.close()
-
-		f = open(GOAL_FILE, "w")
-		f.write(str(Session["CurrentGoal"]))
-		f.close()
-
-		f = open(POINTS_FILE, "w")
-		f.write(str(Session["CurrentPoints"]))
-		f.close()
-
-		f = open(POINTS_LEFT_FILE, "w")
-		f.write(str(Session["CurrentPointsLeft"]))
-		f.close()
-
-		f = open(STREAK_FILE, "w")
-		f.write(str(Session["CurrentStreak"]))
-		f.close()
-
-		f = open(TOTAL_SUBS_FILE, "w")
-		f.write(str(Session["CurrentTotalSubs"]))
-		f.close()
-
-		f = open(TOTAL_BITS_FILE, "w")
-		f.write(str(Session["CurrentTotalBits"]))
-		f.close()
-
-		f = open(TOTAL_DONATIONS_FILE, "w")
-		f.write(str(Session["CurrentTotalDonations"]))
-		f.close()
-	except IOError as e:
-		Log("Unable to update Text Files! ({})".format(e.message))
+	SimpleWrite(BITS_LEFT_FILE,       Session.CurrentBitsLeft)
+	SimpleWrite(GOAL_FILE,            Session.CurrentGoal)
+	SimpleWrite(POINTS_FILE,          Session.CurrentPoints)
+	SimpleWrite(POINTS_LEFT_FILE,     Session.CurrentPointsLeft)
+	SimpleWrite(STREAK_FILE,          Session.CurrentStreak)
+	SimpleWrite(TOTAL_SUBS_FILE,      Session.CurrentTotalSubs)
+	SimpleWrite(TOTAL_BITS_FILE,      Session.CurrentTotalBits)
+	SimpleWrite(TOTAL_DONATIONS_FILE, Session.CurrentTotalDonations)
 
 	# Update Refresh Stamp
 	RefreshStamp = time.time()
@@ -528,39 +631,34 @@ def UpdateTracker():  # ! Only call if a quick response is required
 # Sanity Check
 # ------------
 def SanityCheck():
-	global Session, Settings
 
 	is_session_dirty  = False
 	is_settings_dirty = False
 
-	# Load Session/Settings if not loaded
-	if Settings is None: LoadSettings()
-	if Session is None: LoadSession()
-
 	# Prevent GoalMin from being Zero
-	if Settings["GoalMin"]  < 1:
-		Settings["GoalMin"] = 1
-		is_settings_dirty   = True
+	if Settings.GoalMin   < 1:
+		Settings.GoalMin  = 1
+		is_settings_dirty = True
 
 	# Prevent GoalMin from being higher than the Goal
-	if Settings["GoalMin"]  > Settings["Goal"]:
-		Settings["GoalMin"] = Settings["Goal"]
-		is_settings_dirty   = True
+	if Settings.GoalMin   > Settings.Goal:
+		Settings.GoalMin  = Settings.Goal
+		is_settings_dirty = True
 
 	# Prevent GoalMax from being lower than the Goal
-	if Settings["GoalMax"]  < Settings["Goal"]:
-		Settings["GoalMax"] = Settings["Goal"]
-		is_settings_dirty   = True
+	if Settings.GoalMax   < Settings.Goal:
+		Settings.GoalMax  = Settings.Goal
+		is_settings_dirty = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
-	if Session["CurrentGoal"]  < Settings["GoalMin"]:
-		Session["CurrentGoal"] = Settings["GoalMin"]
-		is_session_dirty       = True
+	if Session.CurrentGoal  < Settings.GoalMin:
+		Session.CurrentGoal = Settings.GoalMin
+		is_session_dirty    = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
-	if Session["CurrentGoal"]  > Settings["GoalMax"]:
-		Session["CurrentGoal"] = Settings["GoalMax"]
-		is_session_dirty       = True
+	if Session.CurrentGoal  > Settings.GoalMax:
+		Session.CurrentGoal = Settings.GoalMax
+		is_session_dirty    = True
 
 	# Prevent Points from being below 1
 	for var in POINT_VARS:
@@ -569,88 +667,36 @@ def SanityCheck():
 			is_settings_dirty = True
 
 	# Prevent GoalIncrement from being less than 0
-	if Settings["GoalIncrement"]  < 0:
-		Settings["GoalIncrement"] = 0
-		is_settings_dirty         = True
+	if Settings.GoalIncrement  < 0:
+		Settings.GoalIncrement = 0
+		is_settings_dirty      = True
 
 	# Prevent Totals from being less than 0
-	if Session["CurrentTotalSubs"]  < 0:
-		Session["CurrentTotalSubs"] = 0
-		is_session_dirty            = True
+	if Session.CurrentTotalSubs  < 0:
+		Session.CurrentTotalSubs = 0
+		is_session_dirty         = True
 
-	if Session["CurrentTotalBits"]  < 0:
-		Session["CurrentTotalBits"] = 0
-		is_session_dirty            = True
+	if Session.CurrentTotalBits  < 0:
+		Session.CurrentTotalBits = 0
+		is_session_dirty         = True
 
-	if Session["CurrentTotalDonations"]  < 0:
-		Session["CurrentTotalDonations"] = 0
-		is_session_dirty                 = True
+	if Session.CurrentTotalDonations  < 0:
+		Session.CurrentTotalDonations = 0
+		is_session_dirty              = True
 
 	# Save Session/Settings if dirty
-	if is_session_dirty:
-		SaveSession()
-	if is_settings_dirty:
-		SaveSettings()
+	if is_session_dirty:  Session.Save()
+	if is_settings_dirty: Settings.Save()
 
 
 # -----------------
 # Session Functions
 # -----------------
-def LoadSession():
-	global Session
-
-	try:
-		# Create file-handle and load the Session data
-		with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
-			new_session = json.load(f, encoding="utf-8-sig")
-			f.close()
-	except IOError:
-		SaveSession()  # Save default Session
-		return
-
-	# Cleanup old session
-	is_dirty = False
-	diff = set(new_session) ^ set(Session)  # List options no longer present in the session
-	if len(diff) > 0:
-		for k in diff:
-			if k in new_session:
-				del new_session[k]
-				is_dirty = True
-	Session = new_session
-
-	if is_dirty:
-		SaveSession()
-
-
-def SaveSession():
-
-	try:
-		# Create file-handle and save Session data
-		with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="w") as f:
-			json.dump(Session, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-			f.close()
-	except IOError as e:
-		Log("Unable to save Session! ({})".format(e.message))
-
-
 def ResetSession():
-	global Session
-
-	# Load Settings if not loaded
-	if Settings is None: LoadSettings()
-
-	# Hard reset of the session
-	del Session
-	Session = {
-		"CurrentBitsLeft": Settings["BitsMinAmount"],
-		"CurrentGoal": Settings["Goal"],
-		"CurrentPoints": 0,
-		"CurrentPointsLeft": Settings["Goal"],
-		"CurrentStreak": 1,
-		"CurrentTotalSubs": 0,
-		"CurrentTotalBits": 0,
-		"CurrentTotalDonations": 0
-	}
+	Session.__dict__          = Session.DefaultSession()
+	Session.CurrentBitsLeft   = Settings.BitsMinAmount
+	Session.CurrentGoal       = Settings.Goal
+	Session.CurrentPointsLeft = Settings.Goal
 
 	SanityCheck()
 	UpdateTracker()
@@ -660,72 +706,15 @@ def ResetSession():
 # ------------------
 # Settings Functions
 # ------------------
-def LoadSettings():
-	global EventReceiver, IsScriptReady, Settings
-
-	# Backup old token for comparison
-	old_token = Settings["SocketToken"]
-
-	try:
-		# Create file-handle and load Settings data
-		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
-			new_settings = json.load(f, encoding="utf-8-sig")
-			f.close()
-	except IOError:
-		# Save default Settings
-		SaveSettings()
-		return
-
-	# Cleanup old options
-	is_dirty = False
-	diff = set(new_settings) ^ set(Settings)  # List of options no longer present in the default settings
-	if len(diff) > 0:
-		for k in diff:
-			if k in new_settings:
-				del new_settings[k]
-				is_dirty = True
-	Settings = new_settings
-
-	# Reconnect if Token changed
-	if old_token and Settings["SocketToken"] != old_token:
-		if EventReceiver:
-			if EventReceiver.IsConnected: EventReceiver.Disconnect()
-			EventReceiver = None
-		Connect()
-		if not IsScriptReady: IsScriptReady = True
-
-	if is_dirty:
-		SaveSettings()
-
-
-def SaveSettings():
-
-	try:
-		# Create file-handle and save Settings data
-		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="w") as f:
-			json.dump(Settings, f, encoding="utf-8-sig", sort_keys=True, indent=4)
-			f.close()
-	except IOError as e:
-		Log("Unable to save Settings! ({})".format(e.message))
-
-
 def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
-	global EventReceiver, IsScriptReady, Settings
+	global EventReceiver, IsScriptReady
 
 	# Backup old token for comparison
-	old_token = Settings["SocketToken"]
-
-	try:
-		# Create file-handle and load Settings data
-		with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
-			Settings = json.load(f, encoding="utf-8-sig")
-			f.close()
-	except IOError:
-		SaveSettings()  # Save default Settings
-		return
+	old_token = Settings.SocketToken
+	Settings.Load()
 
 	# Reconnect if Token changed
-	if old_token is None or Settings["SocketToken"] != old_token:
+	if old_token is None or Settings.SocketToken != old_token:
 		if EventReceiver:
 			if EventReceiver.IsConnected: EventReceiver.Disconnect()
 			EventReceiver = None
@@ -740,65 +729,55 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 # Sub Functions
 # -------------
 def AddPoint():
-	global Session
-	Session["CurrentPoints"] += 1
+	Session.CurrentPoints += 1
 
 
 def SubtractPoint():
-	global Session
-	if Session["CurrentPoints"]   > 0:
-		Session["CurrentPoints"] -= 1
+	if Session.CurrentPoints   > 0:
+		Session.CurrentPoints -= 1
 
 
 # ----------------
 # Streak Functions
 # ----------------
 def AddStreak():
-	global Session
-	Session["CurrentStreak"] += 1
+	Session.CurrentStreak += 1
 
 
 def AddStreak5():
-	global Session
-	Session["CurrentStreak"] += 5
+	Session.CurrentStreak += 5
 
 
 def AddStreak10():
-	global Session
-	Session["CurrentStreak"] += 10
+	Session.CurrentStreak += 10
 
 
 def SubtractStreak():
-	global Session
-	if Session["CurrentStreak"]   > 1:
-		Session["CurrentStreak"] -= 1
+	if Session.CurrentStreak   > 1:
+		Session.CurrentStreak -= 1
 
 
 def SubtractStreak5():
-	global Session
-	if Session["CurrentStreak"]   > 1:
-		Session["CurrentStreak"] -= 5
+	if Session.CurrentStreak   > 1:
+		Session.CurrentStreak -= 5
 
 
 def SubtractStreak10():
-	global Session
-	if Session["CurrentStreak"]   > 1:
-		Session["CurrentStreak"] -= 10
+	if Session.CurrentStreak   > 1:
+		Session.CurrentStreak -= 10
 
 
 # --------------
 # Goal Functions
 # --------------
 def AddToGoal():
-	global Session
-	if Session["CurrentGoal"]   < Settings["GoalMax"]:
-		Session["CurrentGoal"] += 1
+	if Session.CurrentGoal   < Settings.GoalMax:
+		Session.CurrentGoal += 1
 
 
 def SubtractFromGoal():
-	global Session
-	if Session["CurrentGoal"]   > Settings["GoalMin"]:
-		Session["CurrentGoal"] -= 1
+	if Session.CurrentGoal   > Settings.GoalMin:
+		Session.CurrentGoal -= 1
 
 
 # ------
@@ -811,7 +790,7 @@ def Unload():
 	EventReceiver = None
 	IsScriptReady = False
 	UpdateTracker()
-	SaveSession()
+	Session.Save()
 
 
 # ---------------
@@ -820,28 +799,28 @@ def Unload():
 def Parse(parse_string, user_id, username, target_id, target_name, message):
 
 	if "$tsBitsLeft" in parse_string:
-		parse_string = parse_string.replace("$tsBitsLeft", str(Session["CurrentBitsLeft"]))
+		parse_string = parse_string.replace("$tsBitsLeft", str(Session.CurrentBitsLeft))
 
 	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal", str(Session["CurrentGoal"]))
+		parse_string = parse_string.replace("$tsGoal", str(Session.CurrentGoal))
 
 	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak", str(Session["CurrentStreak"]))
+		parse_string = parse_string.replace("$tsStreak", str(Session.CurrentStreak))
 
 	if "$tsPoints" in parse_string:
-		parse_string = parse_string.replace("$tsPoints", str(Session["CurrentPoints"]))
+		parse_string = parse_string.replace("$tsPoints", str(Session.CurrentPoints))
 
 	if "$tsPointsLeft" in parse_string:
-		parse_string = parse_string.replace("$tsPointsLeft", str(Session["CurrentPointsLeft"]))
+		parse_string = parse_string.replace("$tsPointsLeft", str(Session.CurrentPointsLeft))
 
 	if "$tsTotalSubs" in parse_string:
-		parse_string = parse_string.replace("$tsTotalSubs", str(Session["CurrentTotalSubs"]))
+		parse_string = parse_string.replace("$tsTotalSubs", str(Session.CurrentTotalSubs))
 
 	if "$tsTotalBits" in parse_string:
-		parse_string = parse_string.replace("$tsTotalBits", str(Session["CurrentTotalBits"]))
+		parse_string = parse_string.replace("$tsTotalBits", str(Session.CurrentTotalBits))
 
 	if "$tsTotalDonations" in parse_string:
-		parse_string = parse_string.replace("$tsTotalDonations", str(Session["CurrentTotalDonations"]))
+		parse_string = parse_string.replace("$tsTotalDonations", str(Session.CurrentTotalDonations))
 
 	return parse_string
 
@@ -868,3 +847,17 @@ def Log(message):
 		Parent.Log(ScriptName, "Unable to open or write to logfile. ({})".format(e.message))
 
 	Parent.Log(ScriptName, message)
+
+
+# ------------
+# Simple Write
+# ------------
+def SimpleWrite(path, content):
+	try:
+		f = open(path, "w")
+		f.write(str(content))
+		f.close()
+	except IOError as e:
+		Log("Unable to write file \"{}\" ({})".format(path, e.message))
+	except:
+		Log("Unable to write file \"{}\"".format(path))

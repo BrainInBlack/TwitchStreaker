@@ -6,6 +6,8 @@
   * Removed messages that are not really needed
 * Changed constants are now using MACRO_CASE
 * Cleaned up globals declaration
+* Changed Session and Settings into classes
+  * This should prevent typos
 * Fixed Links in the README.md and CHANGELOG.md
 * Added CONTRIBUTING.md
 
