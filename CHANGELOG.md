@@ -4,10 +4,12 @@
 
 * Cleaned up Log messages
   * Removed messages that are not really needed
-* Changed constants are now using MACRO_CASE
 * Cleaned up globals declaration
+* Changed constants are now using MACRO_CASE
 * Changed Session and Settings into classes
   * This should prevent typos
+* Simplified ParseString
+* Fixed CurrentPointsLeft de-sync
 * Fixed Links in the README.md and CHANGELOG.md
 * Added CONTRIBUTING.md
 

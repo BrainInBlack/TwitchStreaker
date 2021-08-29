@@ -66,7 +66,7 @@ class ScriptSession(object):
 		except:
 			self.Save()
 			return
-		
+
 		# Cleanup
 		_dirty = False
 		diff = set(_new) ^ set(self.__dict__)
@@ -84,11 +84,12 @@ class ScriptSession(object):
 				json.dump(self.__dict__, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 				f.close()
 		except IOError as e:
-			Log("Unable to save Session ({})".format(e.message))
+			raise Exception("Unable to save Session ({})".format(e.message))
 		except:
-			Log("Unable to save Session (Unknown Error)")
+			raise Exception("Unable to save Session (Unknown Error)")
 
-	def DefaultSession(self):
+	@staticmethod
+	def DefaultSession():
 		return {
 			"CurrentBitsLeft": 0,
 			"CurrentGoal": 10,
@@ -174,11 +175,12 @@ class ScriptSettings(object):
 				json.dump(self.__dict__, f, encoding="utf-8-sig", sort_keys=True, indent=4)
 				f.close()
 		except IOError as e:
-			Log("Unable to save Settings ({})".format(e.message))
+			raise Exception("Unable to save Settings ({})".format(e.message))
 		except:
-			Log("Unable to save Settings (Unknown error)")
+			raise Exception("Unable to save Settings (Unknown error)")
 
-	def DefaultSettings(self):
+	@staticmethod
+	def DefaultSettings():
 		return {
 			# General
 			"Goal": 10,
@@ -217,8 +219,8 @@ class ScriptSettings(object):
 # ----------------
 ChannelName   = None
 EventReceiver = None
-Session       = ScriptSession()
-Settings      = ScriptSettings()
+Session       = None
+Settings      = None
 
 
 # ------------------
@@ -246,12 +248,25 @@ POINT_VARS    = [
 	"GiftReSub1", "GiftReSub2", "GiftReSub3",
 	"BitsPointValue", "DonationsPointValue"
 ]
+PARSE_PARAMETERS = {
+	"$tsBitsLeft":       "CurrentBitsLeft",
+	"$tsGoal":           "CurrentGoal",
+	"$tsStreak":         "CurrentStreak",
+	"$tsPoints":         "CurrentPoints",
+	"$tsPointsLeft":     "CurrentPointsLeft",
+	"$tsTotalSubs":      "CurrentTotalSubs",
+	"$tsTotalBits":      "CurrentTotalBits",
+	"$tsTotalDonations": "CurrentTotalDonations"
+}
 
 
 # ----------
 # Initiation
 # ----------
 def Init():
+	global Session, Settings
+	Session  = ScriptSession()
+	Settings = ScriptSettings()
 	SanityCheck()
 	StartUp()
 
@@ -609,7 +624,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
 
 	# Update Overlay
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.JSONEncoder().encode(Session.__dict__)))
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
 
 	# Update Text Files
 	if not os.path.isdir(TEXT_FOLDER): os.mkdir(TEXT_FOLDER)
@@ -659,6 +674,11 @@ def SanityCheck():
 	if Session.CurrentGoal  > Settings.GoalMax:
 		Session.CurrentGoal = Settings.GoalMax
 		is_session_dirty    = True
+
+	# Prevent CurrentPointsLeft de-sync
+	if Session.CurrentGoal != (Session.CurrentPointsLeft + Session.CurrentPoints):
+		Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
+		is_session_dirty = True
 
 	# Prevent Points from being below 1
 	for var in POINT_VARS:
@@ -797,31 +817,10 @@ def Unload():
 # Parse Parameter
 # ---------------
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-
-	if "$tsBitsLeft" in parse_string:
-		parse_string = parse_string.replace("$tsBitsLeft", str(Session.CurrentBitsLeft))
-
-	if "$tsGoal" in parse_string:
-		parse_string = parse_string.replace("$tsGoal", str(Session.CurrentGoal))
-
-	if "$tsStreak" in parse_string:
-		parse_string = parse_string.replace("$tsStreak", str(Session.CurrentStreak))
-
-	if "$tsPoints" in parse_string:
-		parse_string = parse_string.replace("$tsPoints", str(Session.CurrentPoints))
-
-	if "$tsPointsLeft" in parse_string:
-		parse_string = parse_string.replace("$tsPointsLeft", str(Session.CurrentPointsLeft))
-
-	if "$tsTotalSubs" in parse_string:
-		parse_string = parse_string.replace("$tsTotalSubs", str(Session.CurrentTotalSubs))
-
-	if "$tsTotalBits" in parse_string:
-		parse_string = parse_string.replace("$tsTotalBits", str(Session.CurrentTotalBits))
-
-	if "$tsTotalDonations" in parse_string:
-		parse_string = parse_string.replace("$tsTotalDonations", str(Session.CurrentTotalDonations))
-
+	for key in PARSE_PARAMETERS:
+		if key in parse_string:
+			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[key]))
+			pass
 	return parse_string
 
 
@@ -836,7 +835,6 @@ def Execute(data):
 # Log Wrapper
 # -----------
 def Log(message):
-
 	try:
 		# Open/Create logfile and write the log-message
 		with codecs.open(LOG_FILE, encoding="utf-8", mode="a+") as f:
