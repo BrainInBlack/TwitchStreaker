@@ -265,8 +265,12 @@ PARSE_PARAMETERS = {
 # ----------
 def Init():
 	global Session, Settings
-	Session  = ScriptSession()
-	Settings = ScriptSettings()
+	try:
+		Session  = ScriptSession()
+		Settings = ScriptSettings()
+	except Exception as e:
+		Log(e.message)
+		return
 	SanityCheck()
 	StartUp()
 
@@ -580,7 +584,10 @@ def Tick():
 	# Save Timer
 	if (now - SaveStamp) > SAVE_DELAY:
 		if not IsScriptReady: return
-		Session.Save()
+		try:
+			Session.Save()
+		except Exception as e:
+			Log(e.message)
 		SaveStamp = now
 
 
@@ -705,8 +712,12 @@ def SanityCheck():
 		is_session_dirty              = True
 
 	# Save Session/Settings if dirty
-	if is_session_dirty:  Session.Save()
-	if is_settings_dirty: Settings.Save()
+	try:
+		if is_session_dirty:  Session.Save()
+		if is_settings_dirty: Settings.Save()
+	except Exception as e:
+		Log(e.message)
+
 
 
 # -----------------
@@ -731,7 +742,11 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	# Backup old token for comparison
 	old_token = Settings.SocketToken
-	Settings.Load()
+	try:
+		Settings.Load()
+	except Exception as e:
+		Log(e.message)
+		return
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
@@ -810,7 +825,10 @@ def Unload():
 	EventReceiver = None
 	IsScriptReady = False
 	UpdateTracker()
-	Session.Save()
+	try:
+		Session.Save()
+	except Exception as e:
+		Log(e.message)
 
 
 # ---------------
