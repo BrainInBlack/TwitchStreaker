@@ -299,12 +299,15 @@ def SocketEvent(sender, args):
 
 	# Event Filtering
 	FlushStamp = time.time()
-	if msg.Id in EventIDs: return
+	if msg.Id in EventIDs:
+		return
 	EventIDs.append(msg.Id)
 
 	# Skip on Repeat and NotLive
-	if msg.IsRepeat: return
-	if not msg.IsLive and not msg.IsTest: return
+	if msg.IsRepeat:
+		return
+	if not msg.IsLive and not msg.IsTest:
+		return
 
 	# === Twitch ===
 	if data.For == "twitch_account":
@@ -351,8 +354,10 @@ def SocketEvent(sender, args):
 			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
 
 				# Ignore gifted Subs by the Streamer or the Recipient
-				if msg.Gifter == ChannelName and not msg.IsTest: return
-				if msg.Name == msg.Gifter and not msg.IsTest: return
+				if msg.Gifter == ChannelName and not msg.IsTest:
+					return
+				if msg.Name == msg.Gifter and not msg.IsTest:
+					return
 
 				# ReSub
 				if msg.Months is not None:
@@ -412,7 +417,8 @@ def SocketEvent(sender, args):
 		# === Subscription ===
 		if data.Type == "subscription":
 
-			if msg.Months > 1 and not Settings.CountResubs: return
+			if msg.Months > 1 and not Settings.CountResubs:
+				return
 
 			Session.CurrentPoints    += Settings.Sub1
 			Session.CurrentTotalSubs += 1
@@ -422,7 +428,8 @@ def SocketEvent(sender, args):
 		# === Superchat ===
 		if data.Type == 'superchat':
 
-			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
+			if not msg.IsTest:
+				Session.CurrentTotalDonations += msg.Amount
 
 			if msg.Amount >= Settings.DonationMinAmount:
 
@@ -460,7 +467,8 @@ def SocketEvent(sender, args):
 		if data.Type == "donation" and Settings.CountDonations:
 
 			# Ignore test donations for the total amount
-			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
+			if not msg.IsTest:
+				Session.CurrentTotalDonations += msg.Amount
 
 			# Donation is above MinAmount
 			if msg.Amount >= Settings.DonationMinAmount:
@@ -657,8 +665,10 @@ def SanityCheck():
 
 	# Save Session/Settings if dirty
 	try:
-		if is_session_dirty:  Session.Save()
-		if is_settings_dirty: Settings.Save()
+		if is_session_dirty:
+			Session.Save()
+		if is_settings_dirty:
+			Settings.Save()
 	except Exception as e:
 		Log(e.message)
 
@@ -690,7 +700,8 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
 		if Socket:
-			if Socket.IsConnected: Socket.Disconnect()
+			if Socket.IsConnected:
+				Socket.Disconnect()
 			Socket = None
 		Connect()
 		if not IsScriptReady: IsScriptReady = True
