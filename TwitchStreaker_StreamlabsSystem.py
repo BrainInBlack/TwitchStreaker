@@ -20,6 +20,9 @@ TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 
 # === External References ===
 import clr
+clr.AddReference("Newtonsoft.Json.dll")
+clr.AddReference("EngineIoClientDotNet.dll")
+clr.AddReference("SocketIoClientDotNet.dll")
 clr.AddReferenceToFileAndPath(os.path.join(SCRIPT_FOLDER, "Lib\\StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 

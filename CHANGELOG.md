@@ -4,6 +4,7 @@
 
 * Added Disclaimer regarding platform ToS to README.md
 * Added CONTRIBUTING.md
+* Added possible fix for (#38)
 * Cleaned up Log messages
   * Removed messages that are not really needed
 * Cleaned up globals declaration
