@@ -35,6 +35,10 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Contributor's](#contributors)
   - [Project Info](#project-info)
 
+## Disclaimer
+
+**We are not responsible for the misuse of this script!** It is up to YOU to apply the scripts functionality according to your platforms Terms of Service. For example, Twitch does NOT allow you to give away Subscriptions for Bits (see [Bits Acceptable Use Policy](https://www.twitch.tv/p/en/legal/bits-acceptable-use/)). Please make sure that you use the Script in a way that does not violate any Terms of Your the platform that you are using.
+
 ## Installation
 
 1. Download the [latest release](https://github.com/BrainInBlack/TwitchStreaker/releases/latest).

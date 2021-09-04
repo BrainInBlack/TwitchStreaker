@@ -1,11 +1,7 @@
-# -------
-# Imports
-# -------
+# === Imports ===
 import codecs, json, math, os, time
 
-# -----
-# Paths
-# -----
+# === Paths ===
 SCRIPT_FOLDER        = os.path.realpath(os.path.dirname(__file__))
 TEXT_FOLDER          = os.path.join(SCRIPT_FOLDER, "Text\\")
 
@@ -22,17 +18,13 @@ TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
 TOTAL_SUBS_FILE      = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
 TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 
-# ----------
-# References
-# ----------
+# === External References ===
 import clr
 clr.AddReferenceToFileAndPath(os.path.join(SCRIPT_FOLDER, "Lib\\StreamlabsEventReceiver.dll"))
 from StreamlabsEventReceiver import StreamlabsEventClient
 
 
-# -----------
-# Script Info
-# -----------
+# === Script Info ===
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
@@ -40,9 +32,7 @@ Version     = "2.8.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
-# -------------
-# Session Class
-# -------------
+# === Session Class ===
 class ScriptSession(object):
 
 	CurrentBitsLeft       = 0
@@ -67,7 +57,7 @@ class ScriptSession(object):
 			self.Save()
 			return
 
-		# Cleanup
+		# Remove old data and update the loaded file
 		_dirty = False
 		diff = set(_new) ^ set(self.__dict__)
 		if len(diff) > 0:
@@ -102,9 +92,7 @@ class ScriptSession(object):
 		}
 
 
-# --------------
-# Settings Class
-# --------------
+# === Settings Class ===
 class ScriptSettings(object):
 
 	# General
@@ -158,7 +146,7 @@ class ScriptSettings(object):
 			self.Save()
 			return
 
-		# Cleanup
+		# Remove old options and update the loaded file
 		_dirty = False
 		diff = set(_new) ^ set(self.__dict__)
 		if len(diff) > 0:
@@ -214,18 +202,14 @@ class ScriptSettings(object):
 		}
 
 
-# ----------------
-# Global Variables
-# ----------------
+# === Global Variables ===
 ChannelName   = None
-EventReceiver = None
+Socket        = None
 Session       = None
 Settings      = None
 
 
-# ------------------
-# Internal Variables
-# ------------------
+# === Internal Variables ===
 BitsTemp      = 0
 DonationTemp  = 0.0
 IsScriptReady = False
@@ -235,12 +219,10 @@ FlushStamp    = time.time()
 EventIDs      = []
 
 
-# ---------
-# Constants
-# ---------
-FLUSH_DELAY   = 5    # InSeconds
-REFRESH_DELAY = 5    # InSeconds
-SAVE_DELAY    = 300  # InSeconds
+# === Constants ===
+FLUSH_DELAY   = 5
+REFRESH_DELAY = 5
+SAVE_DELAY    = 300
 POINT_VARS    = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
@@ -260,9 +242,7 @@ PARSE_PARAMETERS = {
 }
 
 
-# ----------
-# Initiation
-# ----------
+# === Initiation ===
 def Init():
 	global Session, Settings
 	try:
@@ -275,9 +255,7 @@ def Init():
 	StartUp()
 
 
-# -------
-# StartUp
-# -------
+# === StartUp ===
 def StartUp():
 	global ChannelName, IsScriptReady
 
@@ -300,28 +278,24 @@ def StartUp():
 	Connect()
 
 
-# ---------------------
-# Connect EventReceiver
-# ---------------------
+# === Connect Socket ===
 def Connect():
-	global EventReceiver
+	global Socket
 
-	EventReceiver = StreamlabsEventClient()
-	EventReceiver.StreamlabsSocketConnected    += EventReceiverConnected
-	EventReceiver.StreamlabsSocketDisconnected += EventReceiverDisconnected
-	EventReceiver.StreamlabsSocketEvent        += EventReceiverEvent
-	EventReceiver.Connect(Settings.SocketToken)
+	Socket = StreamlabsEventClient()
+	Socket.StreamlabsSocketConnected    += SocketConnected
+	Socket.StreamlabsSocketDisconnected += SocketDisconnected
+	Socket.StreamlabsSocketEvent        += SocketEvent
+	Socket.Connect(Settings.SocketToken)
 
 
-# ---------
-# Event Bus
-# ---------
-def EventReceiverEvent(sender, args):
+# === Event Bus ===
+def SocketEvent(sender, args):
 	global BitsTemp, DonationTemp, EventIDs, FlushStamp
 
 	# Get Data
-	dat = args.Data
-	msg = dat.Message[0]
+	data = args.Data
+	msg  = data.Message[0]  # Messages come in as single events, no need for a loop
 
 	# Event Filtering
 	FlushStamp = time.time()
@@ -332,15 +306,13 @@ def EventReceiverEvent(sender, args):
 	if msg.IsRepeat: return
 	if not msg.IsLive and not msg.IsTest: return
 
-	# Twitch
-	if dat.For == "twitch_account":
+	# === Twitch ===
+	if data.For == "twitch_account":
 
-		# ----
-		# Bits
-		# ----
-		if dat.Type == "bits" and Settings.CountBits:
+		# === Bits ===
+		if data.Type == "bits" and Settings.CountBits:
 
-			# Ignore TestBits
+			# Ignore TestBits for the total amount of Bits
 			if not msg.IsTest:
 				Session.CurrentTotalBits += msg.Amount
 
@@ -353,7 +325,10 @@ def EventReceiverEvent(sender, args):
 					return
 
 				res = Settings.BitsPointValue * math.trunc(msg.Amount / Settings.BitsMinAmount)
-				BitsTemp += msg.Amount % Settings.BitsMinAmount  # Add remainder to BitsTemp
+
+				# Add remainder to BitsTemp, if cumulative Bits are enabled
+				if Settings.CountBitsCumulative:
+					BitsTemp += msg.Amount % Settings.BitsMinAmount
 
 				Session.CurrentPoints += res
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
@@ -369,71 +344,46 @@ def EventReceiverEvent(sender, args):
 				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
 			return
 
-		# -------------
-		# Subscriptions
-		# -------------
-		if dat.Type == "subscription":
+		# === Subscriptions ===
+		if data.Type == "subscription":
 
-			# GiftSub Check
-			if msg.SubType == "subgift":
-
-				# Ignore Gifted Subs by Streamer
-				if msg.Gifter == ChannelName and not msg.IsTest: return
-
-				# Ignore Self-Gifted Subs
-				if msg.Name == msg.Gifter and not msg.IsTest: return
-
-			# Gifted Subs (includes anonymous subs)
+			# === Gifted Subs ===
 			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
 
-				# GiftedSubs (resubs)
+				# Ignore gifted Subs by the Streamer or the Recipient
+				if msg.Gifter == ChannelName and not msg.IsTest: return
+				if msg.Name == msg.Gifter and not msg.IsTest: return
+
+				# ReSub
 				if msg.Months is not None:
 
 					res = Settings.GiftReSub1
-
-					if msg.SubPlan == "2000":
-						res = Settings.GiftReSub2
-
-					if msg.SubPlan == "3000":
-						res = Settings.GiftReSub3
+					if msg.SubPlan == "2000": res = Settings.GiftReSub2
+					if msg.SubPlan == "3000": res = Settings.GiftReSub3
 
 					Session.CurrentPoints    += res
 					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
-				# /GiftedSubs (resubs)
 
-				# GiftedSubs (normal)
+				# New Sub
 				else:
 
 					res = Settings.GiftSub1
-
-					if msg.SubPlan == "2000":
-						res = Settings.GiftSub2
-
-					if msg.SubPlan == "3000":
-						res = Settings.GiftSub3
+					if msg.SubPlan == "2000": res = Settings.GiftSub2
+					if msg.SubPlan == "3000": res = Settings.GiftSub3
 
 					Session.CurrentPoints    += res
 					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
-				# /GiftedSubs (normal)
-			# GiftedSubs - END
 
 			# ReSubs
-			elif msg.SubType == "resub":
-
-				# Skip resubs if option is disabled
-				if not Settings.CountReSubs and not msg.IsTest: return
+			elif msg.SubType == "resub" and (Settings.CountReSubs or msg.IsTest):
 
 				res = Settings.ReSub1
-
-				if msg.SubPlan == "2000":
-					res = Settings.ReSub2
-
-				if msg.SubPlan == "3000":
-					res = Settings.ReSub3
+				if msg.SubPlan == "2000": res = Settings.ReSub2
+				if msg.SubPlan == "3000": res = Settings.ReSub3
 
 				Session.CurrentPoints    += res
 				Session.CurrentTotalSubs += 1
@@ -445,12 +395,8 @@ def EventReceiverEvent(sender, args):
 			else:
 
 				res = Settings.Sub1
-
-				if msg.SubPlan == "2000":
-					res = Settings.Sub2
-
-				if msg.SubPlan == "3000":
-					res = Settings.Sub3
+				if msg.SubPlan == "2000": res = Settings.Sub2
+				if msg.SubPlan == "3000": res = Settings.Sub3
 
 				Session.CurrentPoints    += res
 				Session.CurrentTotalSubs += 1
@@ -460,10 +406,11 @@ def EventReceiverEvent(sender, args):
 
 		return  # /Twitch
 
-	# Youtube
-	if dat.For == "youtube_account":
+	# === Youtube ===
+	if data.For == "youtube_account":
 
-		if dat.Type == "subscription":
+		# === Subscription ===
+		if data.Type == "subscription":
 
 			if msg.Months > 1 and not Settings.CountResubs: return
 
@@ -472,7 +419,8 @@ def EventReceiverEvent(sender, args):
 			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings.Sub1, msg.Name))
 			return
 
-		if dat.Type == 'superchat':
+		# === Superchat ===
+		if data.Type == 'superchat':
 
 			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
 
@@ -484,7 +432,10 @@ def EventReceiverEvent(sender, args):
 					return
 
 				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
-				DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
+
+				# Add remainder to DonationTemp, if cumulative Donations are enabled
+				if Settings.CountDonationsCumulative:
+					DonationTemp += msg.Amount % Settings.DonationMinAmount
 
 				Session.CurrentPoints += res
 				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
@@ -500,12 +451,13 @@ def EventReceiverEvent(sender, args):
 				Log("Ignored Superchat of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.Name))
 				return
 
-		return  # /Youtube
+		return
 
-	# Streamlabs
-	if dat.For == "streamlabs":
+	# === Streamlabs ===
+	if data.For == "streamlabs":
 
-		if dat.Type == "donation" and Settings.CountDonations:
+		# === Donation ===
+		if data.Type == "donation" and Settings.CountDonations:
 
 			# Ignore test donations for the total amount
 			if not msg.IsTest: Session.CurrentTotalDonations += msg.Amount
@@ -519,7 +471,10 @@ def EventReceiverEvent(sender, args):
 					return
 
 				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
-				DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
+
+				# Add remainder to DonationTemp, if cumulative Donations are enabled
+				if Settings.CountDonationsCumulative:
+					DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
 				Session.CurrentPoints += res
 				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
@@ -538,35 +493,29 @@ def EventReceiverEvent(sender, args):
 
 		return  # /Streamlabs
 
-	Log("Unknown/Unsupported Platform {}!".format(dat.For))
+	Log("Unknown/Unsupported Platform {}!".format(data.For))
 
 
-# ---------------
-# Event Connected
-# ---------------
-def EventReceiverConnected(sender, args): Log("Connected")
+# === Event Connected ===
+def SocketConnected(sender, args): Log("Connected")
 
 
-# ------------------
-# Event Disconnected
-# ------------------
-def EventReceiverDisconnected(sender, args): Log("Disconnected")
+# === Event Disconnected ===
+def SocketDisconnected(sender, args): Log("Disconnected")
 
 
-# ----
-# Tick
-# ----
+# === Tick ===
 def Tick():
 	global EventIDs, FlushStamp, SaveStamp
 
 	now = time.time()
 
-	# Event Filter Flush
+	# Flush EventIDs, executed every 5 seconds
 	if(now - FlushStamp) > FLUSH_DELAY and len(EventIDs) > 0:
 		EventIDs = []
 		FlushStamp = now
 
-	# Fast Timer
+	# Main Refresh, executed every 5 seconds
 	if (now - RefreshStamp) > REFRESH_DELAY:
 
 		# Attempt Startup
@@ -574,12 +523,11 @@ def Tick():
 			StartUp()
 
 		# Reconnect
-		if EventReceiver is None or not EventReceiver.IsConnected:
+		if Socket is None or not Socket.IsConnected:
 			Connect()
 			return
 
-		UpdateTracker()
-		# RefreshStamp = now  # ! updated by UpdateTracker
+		UpdateTracker()  # Updates RefreshStamp
 
 	# Save Timer
 	if (now - SaveStamp) > SAVE_DELAY:
@@ -591,9 +539,7 @@ def Tick():
 		SaveStamp = now
 
 
-# --------------
-# Update Tracker
-# --------------
+# === Update Tracker ===
 def UpdateTracker():  # ! Only call if a quick response is required
 	global BitsTemp, DonationTemp, RefreshStamp
 
@@ -603,8 +549,8 @@ def UpdateTracker():  # ! Only call if a quick response is required
 		Session.CurrentPoints += Settings.BitsPointValue * res
 		BitsTemp -= Settings.BitsMinAmount * res
 		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
+		Session.CurrentBitsLeft = Settings.BitsMinAmount - BitsTemp
 		del res
-	Session.CurrentBitsLeft = Settings.BitsMinAmount - BitsTemp
 
 	# Calculate Donations
 	if Settings.CountDonationsCumulative and DonationTemp >= Settings.DonationMinAmount:
@@ -615,7 +561,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 		del res
 
 	# Calculate Streak
-	while Session.CurrentPoints >= Session.CurrentGoal:
+	while Session.CurrentPoints >= Session.CurrentGoal:  # A loop is used in case the Goal gets incremented for each completed Streak
 
 		# Subtract Goal and Increment Streak
 		Session.CurrentPoints -= Session.CurrentGoal
@@ -649,9 +595,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	RefreshStamp = time.time()
 
 
-# ------------
-# Sanity Check
-# ------------
+# === Sanity Check ===
 def SanityCheck():
 
 	is_session_dirty  = False
@@ -719,10 +663,7 @@ def SanityCheck():
 		Log(e.message)
 
 
-
-# -----------------
-# Session Functions
-# -----------------
+# === Reset Session ===
 def ResetSession():
 	Session.__dict__          = Session.DefaultSession()
 	Session.CurrentBitsLeft   = Settings.BitsMinAmount
@@ -734,11 +675,9 @@ def ResetSession():
 	Log("Session Reset!")
 
 
-# ------------------
-# Settings Functions
-# ------------------
+# === Reload Settings ===
 def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
-	global EventReceiver, IsScriptReady
+	global Socket, IsScriptReady
 
 	# Backup old token for comparison
 	old_token = Settings.SocketToken
@@ -750,9 +689,9 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
-		if EventReceiver:
-			if EventReceiver.IsConnected: EventReceiver.Disconnect()
-			EventReceiver = None
+		if Socket:
+			if Socket.IsConnected: Socket.Disconnect()
+			Socket = None
 		Connect()
 		if not IsScriptReady: IsScriptReady = True
 
@@ -760,9 +699,7 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 	Log("Settings saved!")
 
 
-# -------------
-# Sub Functions
-# -------------
+# === UI Sub Functions ===
 def AddPoint():
 	Session.CurrentPoints += 1
 
@@ -772,9 +709,7 @@ def SubtractPoint():
 		Session.CurrentPoints -= 1
 
 
-# ----------------
-# Streak Functions
-# ----------------
+# === UI Streak Functions ===
 def AddStreak():
 	Session.CurrentStreak += 1
 
@@ -802,9 +737,7 @@ def SubtractStreak10():
 		Session.CurrentStreak -= 10
 
 
-# --------------
-# Goal Functions
-# --------------
+# === UI Goal Functions ===
 def AddToGoal():
 	if Session.CurrentGoal   < Settings.GoalMax:
 		Session.CurrentGoal += 1
@@ -815,14 +748,12 @@ def SubtractFromGoal():
 		Session.CurrentGoal -= 1
 
 
-# ------
-# Unload
-# ------
+# === Unload ===
 def Unload():
-	global EventReceiver, IsScriptReady
-	if EventReceiver and EventReceiver.IsConnected:
-		EventReceiver.Disconnect()
-	EventReceiver = None
+	global Socket, IsScriptReady
+	if Socket and Socket.IsConnected:
+		Socket.Disconnect()
+	Socket = None
 	IsScriptReady = False
 	UpdateTracker()
 	try:
@@ -831,43 +762,33 @@ def Unload():
 		Log(e.message)
 
 
-# ---------------
-# Parse Parameter
-# ---------------
+# === Parse Parameters ===
 def Parse(parse_string, user_id, username, target_id, target_name, message):
 	for key in PARSE_PARAMETERS:
 		if key in parse_string:
 			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[key]))
-			pass
 	return parse_string
 
 
-# -------
-# Execute
-# -------
-def Execute(data):
-	pass
+# === Execute ===
+def Execute(data): pass
 
 
-# -----------
-# Log Wrapper
-# -----------
+# === Log Wrapper ===
 def Log(message):
 	try:
-		# Open/Create logfile and write the log-message
 		with codecs.open(LOG_FILE, encoding="utf-8", mode="a+") as f:
 			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
 			f.close()
 	except IOError as e:
-		# Dump to bot-console if write failed
-		Parent.Log(ScriptName, "Unable to open or write to logfile. ({})".format(e.message))
+		Parent.Log(ScriptName, "Unable to write to logfile. ({})".format(e.message))
+	except:
+		Parent.Log(ScriptName, "Unable to write to logfile.")
 
 	Parent.Log(ScriptName, message)
 
 
-# ------------
-# Simple Write
-# ------------
+# === Simple Write ===
 def SimpleWrite(path, content):
 	try:
 		f = open(path, "w")

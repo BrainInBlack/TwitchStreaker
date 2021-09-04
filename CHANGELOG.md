@@ -2,6 +2,8 @@
 
 ## 2.8.1 - Fixes and Cleanup
 
+* Added Disclaimer regarding platform ToS to README.md
+* Added CONTRIBUTING.md
 * Cleaned up Log messages
   * Removed messages that are not really needed
 * Cleaned up globals declaration
@@ -11,7 +13,7 @@
 * Simplified ParseString
 * Fixed CurrentPointsLeft de-sync
 * Fixed Links in the README.md and CHANGELOG.md
-* Added CONTRIBUTING.md
+* Fixed Cumulative Bits being counted even when the option was disabled
 
 ## 2.8.0 - Youtube Superchats (Beta)
 
