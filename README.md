@@ -1,6 +1,6 @@
 # TwitchStreaker for Streamlabs Chatbot
 
-Initially created for the Twitch-Streamer [AnEternalEnigma](http://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
+Initially created for the Twitch-Streamer [AnEternalEnigma](https://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
 TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regular Subscription options apply.
 
@@ -35,9 +35,13 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Contributor's](#contributors)
   - [Project Info](#project-info)
 
+## Disclaimer
+
+**We are not responsible for the misuse of this script!** It is up to YOU to apply the scripts functionality according to your platforms Terms of Service. For example, Twitch does NOT allow you to give away Subscriptions for Bits (see [Bits Acceptable Use Policy](https://www.twitch.tv/p/en/legal/bits-acceptable-use/)). Please make sure that you use the Script in a way that does not violate any Terms of Your the platform that you are using.
+
 ## Installation
 
-1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+1. Download the [latest release](https://github.com/BrainInBlack/TwitchStreaker/releases/latest).
 2. Extract the downloaded archive into the `Chatbot > Services > Scripts` directory.
 3. In the Chatbot, open the Scripts Tab and click the `Reload Scripts` button.
 4. Right click on the `TwitchStreaker` script and click `Insert API Key`.
@@ -50,7 +54,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
 
 **Remember to Backup your customized files!**
 
-1. Download the [latest release](http://github.com/BrainInBlack/TwitchStreaker/releases/latest).
+1. Download the [latest release](https://github.com/BrainInBlack/TwitchStreaker/releases/latest).
 2. Check the [Changelog](CHANGELOG.md) for additional instructions
 3. Extract the downloaded archive and overwrite existing files.
 4. Reapply your customization's.
@@ -100,7 +104,7 @@ Option            | Description
 ------------------|------------
 Goal              | The amount of `Points` required for the next Streak.
 Goal Min          | Minimum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
-Goal Max          | Maximum value of the `Goal` option (Defaults to the value of `Goal` when above the `Goal`)
+Goal Max          | Maximum value of the `Goal` option (Defaults to the value of `Goal` when below the `Goal`)
 Increment Goal By | Value by which the `Goal` will be increased when completing a Streak (Leave at `0` to disable this mechanic)
 Allow Resubs      | Allows Resubs to be counted as well as regular Subs.
 
@@ -278,17 +282,17 @@ Reset Tracker   | Resets everything to their initial values.
 
 [Discord](https://discord.gg/HWTaady)
 
-[Twitter](http://twitter.com/BrainInBlack)
+[Twitter](https://twitter.com/BrainInBlack)
 
 ## Streamers using TwitchStreaker
 
-[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma)
+[**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma)
 
-[**BloodThunder**](http://twitch.tv/BloodThunder)
+[**BloodThunder**](https://twitch.tv/BloodThunder)
 
-[**KatLink**](http://twitch.tv/KatLink)
+[**KatLink**](https://twitch.tv/KatLink)
 
-[**PersonSuit**](http://twitch.tv/PersonSuit)
+[**PersonSuit**](https://twitch.tv/PersonSuit)
 
 ## Contributing
 
@@ -302,7 +306,7 @@ Reset Tracker   | Resets everything to their initial values.
 
 [**BrainInBlack**](https://github.com/BrainInBlack) - Programming
 
-[**AnEternalEnigma**](http://twitch.tv/AnEternalEnigma) - Initial Concept
+[**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma) - Initial Concept
 
 ## Project Info
 

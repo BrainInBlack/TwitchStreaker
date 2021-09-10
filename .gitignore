@@ -1,5 +1,6 @@
 # Exclude Common Files and Folders
 .vscode/
+.builds/
 .notes/
 .idea/
 venv/
@@ -13,6 +14,7 @@ Session.json
 Settings.js
 Settings.json
 *.log
+*.ps1
 
 # Exclude personal Files (BrainInBlack)
 AnEternalEnigma

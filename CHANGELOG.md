@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.8.1 - Fixes and Cleanup
+
+* Added Disclaimer regarding platform ToS to README.md
+* Added CONTRIBUTING.md
+* Added possible fix for (#38)
+* Cleaned up Log messages
+  * Removed messages that are not really needed
+* Cleaned up globals declaration
+* Changed constants are now using MACRO_CASE
+* Changed Session and Settings into classes
+  * This should prevent typos
+* Simplified ParseString
+* Fixed CurrentPointsLeft de-sync
+* Fixed Links in the README.md and CHANGELOG.md
+* Fixed Cumulative Bits being counted even when the option was disabled
+
 ## 2.8.0 - Youtube Superchats (Beta)
 
 * Added support for Superchats (Beta)
@@ -239,14 +255,11 @@ This Updates some things in the Settings and Session files, you might have to sa
 
 ## 2.0.0 & 2.0.1 - General Rework
 
-**IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst
-other things, your Subs and Streaks are now tracked across sessions and
-require a manual reset.
+**IMPORTANT CHANGES!** A lot of things have changed with this rework. Amongst other things, your Subs and Streaks are now tracked across sessions and require a manual reset.
 
 Please take your time and consult the README.md there you find a guide for upgrading to 2.x
 
-* Moved core logic into the python part of the script for consistent tracking
-over multiple sessions (the reset is now done manually via the menu within the bot)
+* Moved core logic into the python part of the script for consistent tracking over multiple sessions (the reset is now done manually via the menu within the bot)
 * Updated README.md
 * Fixed SelfGiftSubs and StreamerSubs being detected incorrectly
 * ~~Moved Refresh Overlay function into the python part, since it makes more sense there~~
@@ -358,7 +371,7 @@ In an effort to make things a little more clear for everybody, we changed the na
 
 **Click "Save Settings" at least once!** Otherwise the script wont work as intended.
 
-* Added multiplier for tiered subs (default: 1), thanks to [KatLink](http://twitch.tv/KatLink) for the idea
+* Added multiplier for tiered subs (default: 1), thanks to [KatLink](https://twitch.tv/KatLink) for the idea
 * Streak calculation moved to refresh(), less overhead
 * Fixed reset setting the current streak to 0 instead of 1
 * Changed streak calculation, now able to calculate multiple streaks at once
