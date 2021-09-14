@@ -255,6 +255,7 @@ The following variables are available for your custom script.
 
 Variable                      | Description
 ------------------------------|------------
+Overlay.CurrentBitsLeft       | Amount of `Bits` needed to get the next `Point`
 Overlay.CurrentGoal           | Amount of `Points` needed to complete a Streak (min: 1)
 Overlay.CurrentStreak         | Current amount Streaks (min: 1)
 Overlay.CurrentPoints         | Current amount of `Points` in the Streak (min: 0)

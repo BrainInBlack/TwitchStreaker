@@ -3,9 +3,8 @@
 ## 2.8.2 - More Fixes
 
 * Fixed typo in README.md
-
-* Added `$tsBitsLeft` command parameter description to the README.md
-* Added `BitsLeft` element description for the Overlay to the README.md
+* Added missing `BitsLeft` descriptions for several sections in the README.md
+  * Functionality was implemented, but was not mentioned in the README.md
 
 ## 2.8.1 - Fixes and Cleanup
 
