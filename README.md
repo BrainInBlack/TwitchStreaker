@@ -151,6 +151,7 @@ You can use the following Parameters in your Commands and Timers:
 
 Parameter         | Description
 ------------------|------------
+$tsBitsLeft       | Amount of `Bits` needed to get the next `Point`
 $tsGoal           | Amount of `Points` needed per Streak
 $tsPoints         | Current amount of `Points` in the current Streak
 $tsPointsLeft     | Amount of `Points` needed to complete the current Streak

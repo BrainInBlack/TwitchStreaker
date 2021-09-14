@@ -4,6 +4,8 @@
 
 * Fixed typo in README.md
 
+* Added `$tsBitsLeft` parameter description to the README.md
+
 ## 2.8.1 - Fixes and Cleanup
 
 * Added Disclaimer regarding platform ToS to README.md
