@@ -202,6 +202,7 @@ The following element ID's are available for use in your design:
 
 ID             | Description
 ---------------|------------
+BitsLeft       | Amount of `Bits` needed to get the next `Point`
 Goal           | Amount of `Points` needed per Streak
 Points         | Current amount of `Points` in the current Streak
 PointsLeft     | Amount of `Points` needed to complete the current Streak
