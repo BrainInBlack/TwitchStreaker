@@ -16,6 +16,11 @@ As you might have guessed, this update will change a lot of things in the script
   * Added BarDisplayColors toggle, enables separate colors for each type of points within the progressbar
   * Added BarSegmentCount field, amount of segments withing the progressbar their value will be calculated automatically
 
+* New Command Parameters
+  * Added $tsBitPoints
+  * Added $tsDonationPoints
+  * Added $tsSubPoints
+
 ## 2.8.2 - More Fixes
 
 * Fixed typo in README.md

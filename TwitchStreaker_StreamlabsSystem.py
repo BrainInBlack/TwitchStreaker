@@ -254,8 +254,11 @@ POINT_VARS    = [
 ]
 PARSE_PARAMETERS = {
 	"$tsBitsLeft":       "CurrentBitsLeft",
+	"$tsBitPoints":      "CurrentBitPoints",
+	"$tsDonationPoints": "CurrentDonationPoints",
 	"$tsGoal":           "CurrentGoal",
 	"$tsStreak":         "CurrentStreak",
+	"$tsSubPoints":      "CurrentSubPoints",
 	"$tsPoints":         "CurrentPoints",
 	"$tsPointsLeft":     "CurrentPointsLeft",
 	"$tsTotalSubs":      "CurrentTotalSubs",
