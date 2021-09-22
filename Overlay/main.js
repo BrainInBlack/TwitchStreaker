@@ -3,54 +3,71 @@
  *****************/
 var Overlay = {
 
-	'CurrentBitsLeft':       0,
-	'CurrentBitPoints':      0,
-	'CurrentDonationPoints': 0,
-	'CurrentGoal':          10,
-	'CurrentStreak':         1,
-	'CurrentSubPoints':      1,
-	'CurrentPoints':         0,
-	'CurrentPointsLeft':    10,
-	'CurrentTotalSubs':      0,
-	'CurrentTotalBits':      0,
-	'CurrentTotalDonations': 0,
+	// === Text Overlay ===
+	'Text': {
+		'BitsLeft'      : 0,
+		'BitPoints'     : 0,
+		'DonationPoints': 0,
+		'Goal'          : 10,
+		'Streak'        : 1,
+		'SubPoints'     : 1,
+		'Points'        : 0,
+		'PointsLeft'    : 10,
+		'TotalSubs'     : 0,
+		'TotalBits'     : 0,
+		'TotalDonations': 0,
+	
+		// Elements
+		// TODO: Implement follows
+		'eBitsLeft'      : document.getElementById('BitsLeft'),
+		'eBitPoints'     : document.getElementById('BitPoints'),
+		'eDonationPoints': document.getElementById('DonationPoints'),
+		'eGoal'          : document.getElementById('Goal'),
+		'ePoints'        : document.getElementById('Points'),
+		'ePointsLeft'    : document.getElementById('PointsLeft'),
+		'eStreak'        : document.getElementById('Streak'),
+		'eSubPoints'     : document.getElementById('SubPoints'),
+		'eTotalSubs'     : document.getElementById('TotalSubs'),
+		'eTotalBits'     : document.getElementById('TotalBits'),
+		'eTotalDonations': document.getElementById('TotalDonations'),
+		'eTracker'       : document.getElementById('Tracker'),          // ! Outline Hack!
+	
+		// Refresh, gets called for each Event coming through the EventBus
+		// TODO: Implement follows
+		'refresh': function() {
+			if (this.eBitsLeft)       this.eBitsLeft.innerText       = this.BitsLeft;
+			if (this.eBitPoints)      this.eBitPoints.innerText      = this.BitPoints;
+			if (this.eGoal)           this.eGoal.innerText           = this.Goal;
+			if (this.ePoints)         this.ePoints.innerText         = this.Points;
+			if (this.ePointsLeft)     this.ePointsLeft.innerText     = this.PointsLeft;
+			if (this.eStreak)         this.eStreak.innerText         = this.Streak;
+			if (this.eTotalSubs)      this.eTotalSubs.innerText      = this.TotalSubs;
+			if (this.eTotalBits)      this.eTotalBits.innerText      = this.TotalBits;
+			if (this.eTotalDonations) this.eTotalDonations.innerText = this.TotalDonations;
+			if (this.eTracker)        this.eTracker.title            = this.eTracker.innerText;     // ! Outline Hack!
+		},
 
-	'BarDisplayColors': true,
-	'BarGoal'         : 100,
-	'BarSegmentCount' : 4,
-	'BarSegmentSize'  : 25,
-
-	// Elements
-	'BitsLeft':       document.getElementById('BitsLeft'),
-	'BitPoints':      document.getElementById('BitPoints'),
-	'DonationPoints': document.getElementById('DonationPoints'),
-	'Goal':           document.getElementById('Goal'),
-	'Points':         document.getElementById('Points'),
-	'PointsLeft':     document.getElementById('PointsLeft'),
-	'Streak':         document.getElementById('Streak'),
-	'SubPoints':      document.getElementById('SubPoints'),
-	'TotalSubs':      document.getElementById('TotalSubs'),
-	'TotalBits':      document.getElementById('TotalBits'),
-	'TotalDonations': document.getElementById('TotalDonations'),
-	'Tracker':        document.getElementById('Tracker'),                                    // ! Outline Hack!
-
-	// Refresh, gets called for each Event coming through the EventBus
-	'refresh': function() {
-		if (this.BitsLeft)       this.BitsLeft.innerText       = this.CurrentBitsLeft;
-		if (this.BitPoints)      this.BitPoints.innerText      = this.CurrentBitPoints;
-		if (this.Goal)           this.Goal.innerText           = this.CurrentGoal;
-		if (this.Points)         this.Points.innerText         = this.CurrentPoints;
-		if (this.PointsLeft)     this.PointsLeft.innerText     = this.CurrentPointsLeft;
-		if (this.Streak)         this.Streak.innerText         = this.CurrentStreak;
-		if (this.TotalSubs)      this.TotalSubs.innerText      = this.CurrentTotalSubs;
-		if (this.TotalBits)      this.TotalBits.innerText      = this.CurrentTotalBits;
-		if (this.TotalDonations) this.TotalDonations.innerText = this.CurrentTotalDonations;
-		if (this.Tracker)        this.Tracker.title            = this.Tracker.innerText;     // ! Outline Hack!
+		// User Refresh
+		'onrefresh': function() {}
 	},
 
-	// User Refresh is triggered every refresh
-	'onrefresh': function() {}
+	// === Progress Bar ===
+	'Bar': {
+		'DisplayColors' : true,
+		'Goal'          : 100,
+		'SegmentCount'  : 4,
+		'SegmentSize'   : 25,
+		'BitPoints'     : 0,
+		'DonationPoints': 0,
+		'SubPoints'     : 0,
+	
+		'refresh': function() {
+			// TODO: Implement
+		},
 
+		// User Refresh
+		'onrefresh':  function() {}
+	}
 }
 
 /**********************
@@ -66,7 +83,8 @@ function connectWebsocket() {
 			website: 'https://github.com/BrainInBlack/TwitchStreaker',
 			api_key:  API_Key,
 			events: [
-				'EVENT_UPDATE_OVERLAY'
+				'EVENT_UPDATE_OVERLAY',
+				'EVENT_UPDATE_BAR'
 			]
 		}));
 		console.log('TwitchStreaker: Connected (Socket)');
@@ -87,25 +105,35 @@ function connectWebsocket() {
 		var socketMessage = JSON.parse(message.data);
 
 		switch (socketMessage.event) {
-			case 'EVENT_UPDATE_OVERLAY':
+			case 'EVENT_UPDATE_BAR':  // TODO: Complete separation
 				var data = JSON.parse(socketMessage.data);
+				Overlay.Bar.DisplayColors  = data.DisplayColors;
+				Overlay.Bar.Goal           = data.Goal;
+				Overlay.Bar.SegmentCount   = data.SegmentCount;
+				Overlay.Bar.SegmentSize    = data.SegmentSize;
 
-				Overlay.BarDisplayColors      = data.BarDisplayColors
-				Overlay.BarGoal               = data.BarGoal
-				Overlay.BarSegmentCount       = data.BarSegmentCount
-				Overlay.BarSegmentSize        = data.BarSegmentSize
+				Overlay.Bar.BitPoints      = data.BitPoints;
+				Overlay.Bar.DonationPoints = data.DonationPoints;
+				Overlay.Bar.SubPoints      = data.SubPoints;
 
-				Overlay.CurrentBitsLeft       = data.CurrentBitsLeft;
-				Overlay.CurrentBitPoints      = data.CurrentBitPoints;
-				Overlay.CurrentDonationPoints = data.CurrentDonationPoints;
-				Overlay.CurrentGoal           = data.CurrentGoal;
-				Overlay.CurrentStreak         = data.CurrentStreak;
-				Overlay.CurrentSubPoints      = data.CurrentSubPoints;
-				Overlay.CurrentPoints         = data.CurrentPoints;
-				Overlay.CurrentPointsLeft     = data.CurrentPointsLeft;
-				Overlay.CurrentTotalSubs      = data.CurrentTotalSubs;
-				Overlay.CurrentTotalBits      = data.CurrentTotalBits;
-				Overlay.CurrentTotalDonations = data.CurrentTotalDonations;
+				Overlay.Bar.refresh();
+				Overlay.Bar.onrefresh();
+				break
+			case 'EVENT_UPDATE_OVERLAY':  // TODO: Implement follows
+				var data = JSON.parse(socketMessage.data);
+				Overlay.Text.BitsLeft       = data.BitsLeft;
+				Overlay.Text.BitPoints      = data.BitPoints;
+				Overlay.Text.DonationPoints = data.DonationPoints;
+				Overlay.Text.Goal           = data.Goal;
+				Overlay.Text.Streak         = data.Streak;
+				Overlay.Text.SubPoints      = data.SubPoints;
+				Overlay.Text.Points         = data.Points;
+				Overlay.Text.PointsLeft     = data.PointsLeft;
+				Overlay.Text.TotalSubs      = data.TotalSubs;
+				Overlay.Text.TotalBits      = data.TotalBits;
+				Overlay.Text.TotalDonations = data.TotalDonations;
+				Overlay.Text.refresh();
+				Overlay.Text.onrefresh();
 				break;
 
 			default:
@@ -113,8 +141,6 @@ function connectWebsocket() {
 				console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
 				return;
 		}
-		Overlay.refresh();
-		Overlay.onrefresh();
 	}
 };
 
@@ -129,6 +155,6 @@ connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
-	Overlay.refresh();
+	Overlay.refreshText();
 	console.log('TwitchStreaker: Loaded (Init)');
 }, 500);

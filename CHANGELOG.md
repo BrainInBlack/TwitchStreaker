@@ -6,14 +6,16 @@ Brand new feature, segmented Progressbar! This feature adds a progressbar to the
 
 As you might have guessed, this update will change a lot of things in the script. And as such a lot of things will be broken, meaning you might have to redo a lot of your settings and customizations. Though the old settings will probably still work, it is recommended to start from scratch. That way you can avoid a lot of issues that might come up.
 
-* New Session Variables
+* New ProgressBar Class
   * Added BarDisplayColors
   * Added BarGoal
   * Added BarSegmentCount
   * Added BarSegmentSize
-  * Added CurrentBitPoints
-  * Added CurrentDonationPoints
-  * Added CurrentSubPoints
+
+* New Session Variables
+  * Added BitPoints
+  * Added DonationPoints
+  * Added SubPoints
 
 * New Script Settings
   * Added BarGoal field
@@ -26,6 +28,9 @@ As you might have guessed, this update will change a lot of things in the script
   * Added $tsBitPoints
   * Added $tsDonationPoints
   * Added $tsSubPoints
+
+* Added `e` prefix for the html elements in the overlay
+* Removed `Current` prefix from all Session variables
 
 ## 2.8.2 - More Fixes
 

@@ -9,6 +9,7 @@ LOG_FILE             = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
 SESSION_FILE         = os.path.join(SCRIPT_FOLDER, "Session.json")
 SETTINGS_FILE        = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
+# TODO: Implement follows
 BITS_LEFT_FILE       = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
 GOAL_FILE            = os.path.join(TEXT_FOLDER, "Goal.txt")
 POINTS_FILE          = os.path.join(TEXT_FOLDER, "Points.txt")
@@ -35,25 +36,49 @@ Version     = "3.0.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
+# === Progress Bar ===
+class ScriptProgressBar(object):  # TODO: Implement follows
+
+	DisplayColors = True
+	Goal          = 100
+	SegmentCount  = 4
+	SegmentSize   = 25
+
+	BitPoints      = 0
+	DonationPoints = 0
+	SubPoints      = 0
+
+	def __init__(self):
+		pass
+
+	@staticmethod
+	def DefaultBar():
+		return {
+			"DisplayColors": True,
+			"Goal": 100,
+			"SegmentCount": 4,
+			"SegmentSize": 25,
+
+			"BitPoints": 0,
+			"DonationPoints": 0,
+			"SubPoints": 0
+		}
+
+
 # === Session Class ===
-class ScriptSession(object):
+class ScriptSession(object):  # TODO: Implement follows
 
-	BarDisplayColors      = None
-	BarGoal               = None
-	BarSegmentCount       = None
-	BarSegmentSize        = None
-
-	CurrentBitsLeft       = 0
-	CurrentBitPoints      = 0
-	CurrentDonationPoints = 0
-	CurrentGoal           = 10
-	CurrentPoints         = 0
-	CurrentPointsLeft     = 10
-	CurrentStreak         = 1
-	CurrentSubPoints      = 0
-	CurrentTotalSubs      = 0
-	CurrentTotalBits      = 0
-	CurrentTotalDonations = 0
+	BitsLeft       = 0
+	BitPoints      = 0
+	DonationPoints = 0
+	Goal           = 10
+	Points         = 0
+	PointsLeft     = 10
+	Streak         = 1
+	SubPoints      = 0
+	TotalSubs      = 0
+	TotalBits      = 0
+	TotalDonations = 0
 
 	def __init__(self):
 		self.__dict__ = self.DefaultSession()
@@ -92,26 +117,22 @@ class ScriptSession(object):
 	@staticmethod
 	def DefaultSession():
 		return {
-			"BarDisplayColors": True,
-			"BarGoal": None,
-			"BarSegmentCount": None,
-			"BarSegmentSize": None,
-			"CurrentBitsLeft": 0,
-			"CurrentBitPoints": 0,
-			"CurrentDonationPoints": 0,
-			"CurrentGoal": 10,
-			"CurrentPoints": 0,
-			"CurrentPointsLeft": 10,
-			"CurrentStreak": 1,
-			"CurrentSubPoints": 1,
-			"CurrentTotalSubs": 0,
-			"CurrentTotalBits": 0,
-			"CurrentTotalDonations": 0
+			"BitsLeft": 0,
+			"BitPoints": 0,
+			"DonationPoints": 0,
+			"Goal": 10,
+			"Points": 0,
+			"PointsLeft": 10,
+			"Streak": 1,
+			"SubPoints": 1,
+			"TotalSubs": 0,
+			"TotalBits": 0,
+			"TotalDonations": 0
 		}
 
 
 # === Settings Class ===
-class ScriptSettings(object):
+class ScriptSettings(object):  # TODO: Implement follows
 
 	# General
 	Goal = 10
@@ -224,6 +245,11 @@ class ScriptSettings(object):
 			"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
 			"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1,
 
+			# Progressbar
+			"BarDisplayColors": True,
+			"BarGoal": 100,
+			"BarSegmentCount": 4,
+
 			# Streamlabs
 			"SocketToken": None
 		}
@@ -231,6 +257,7 @@ class ScriptSettings(object):
 
 # === Global Variables ===
 ChannelName   = None
+ProgressBar   = None
 Socket        = None
 Session       = None
 Settings      = None
@@ -250,45 +277,38 @@ EventIDs      = []
 FLUSH_DELAY   = 5
 REFRESH_DELAY = 5
 SAVE_DELAY    = 300
-POINT_VARS    = [
+POINT_VARS    = [  # TODO: Implement follows
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
 	"GiftReSub1", "GiftReSub2", "GiftReSub3",
 	"BitsPointValue", "DonationsPointValue"
 ]
-PARSE_PARAMETERS = {
-	"$tsBitsLeft":       "CurrentBitsLeft",
-	"$tsBitPoints":      "CurrentBitPoints",
-	"$tsDonationPoints": "CurrentDonationPoints",
-	"$tsGoal":           "CurrentGoal",
-	"$tsStreak":         "CurrentStreak",
-	"$tsSubPoints":      "CurrentSubPoints",
-	"$tsPoints":         "CurrentPoints",
-	"$tsPointsLeft":     "CurrentPointsLeft",
-	"$tsTotalSubs":      "CurrentTotalSubs",
-	"$tsTotalBits":      "CurrentTotalBits",
-	"$tsTotalDonations": "CurrentTotalDonations"
+PARSE_PARAMETERS = {  # TODO: Implement follows
+	"$tsBitsLeft":       "BitsLeft",
+	"$tsBitPoints":      "BitPoints",
+	"$tsDonationPoints": "DonationPoints",
+	"$tsGoal":           "Goal",
+	"$tsStreak":         "Streak",
+	"$tsSubPoints":      "SubPoints",
+	"$tsPoints":         "Points",
+	"$tsPointsLeft":     "PointsLeft",
+	"$tsTotalSubs":      "TotalSubs",
+	"$tsTotalBits":      "TotalBits",
+	"$tsTotalDonations": "TotalDonations"
 }
 
 
 # === Initiation ===
 def Init():
-	global Session, Settings
+	global Progressbar, Session, Settings
 	try:
-		Session  = ScriptSession()
-		Settings = ScriptSettings()
+		Session     = ScriptSession()
+		Settings    = ScriptSettings()
+		Progressbar = ScriptProgressBar()
 	except Exception as e:
 		Log(e.message)
 		return
-
-	Session.CurrentBitsLeft   = Settings.BitsMinAmount
-	Session.CurrentGoal       = Settings.Goal
-	Session.CurrentPointsLeft = Settings.Goal
-	Session.BarDisplayColors  = Settings.BarDisplayColors
-	Session.BarGoal           = Settings.BarGoal
-	Session.BarSegmentCount   = Settings.BarSegmentCount
-	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 
 	SanityCheck()
 	StartUp()
@@ -329,7 +349,7 @@ def Connect():
 
 
 # === Event Bus ===
-def SocketEvent(sender, args):
+def SocketEvent(sender, args):  # TODO: Implement follows
 	global BitsTemp, DonationTemp, EventIDs, FlushStamp
 
 	# Get Data
@@ -356,13 +376,14 @@ def SocketEvent(sender, args):
 
 			# Ignore TestBits for the total amount of Bits
 			if not msg.IsTest:
-				Session.CurrentTotalBits += msg.Amount
+				Session.TotalBits += msg.Amount
 
 			# Bits are above MinAmount
 			if msg.Amount >= Settings.BitsMinAmount:
 
 				if Settings.CountBitsOnce:
-					Session.CurrentPoints += Settings.BitsPointValue
+					Session.Points    += Settings.BitsPointValue
+					Session.BitPoints += Settings.BitsPointValue
 					Log("Added {} Point(s) for {} Bits from {}".format(Settings.BitsPointValue, msg.Amount, msg.Name))
 					return
 
@@ -372,8 +393,8 @@ def SocketEvent(sender, args):
 				if Settings.CountBitsCumulative:
 					BitsTemp += msg.Amount % Settings.BitsMinAmount
 
-				Session.CurrentPoints    += res
-				Session.CurrentBitPoints += res
+				Session.Points    += res
+				Session.BitPoints += res
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
 				return
 
@@ -406,9 +427,9 @@ def SocketEvent(sender, args):
 					if msg.SubPlan == "2000": res = Settings.GiftReSub2
 					if msg.SubPlan == "3000": res = Settings.GiftReSub3
 
-					Session.CurrentPoints    += res
-					Session.CurrentSubPoints += res
-					Session.CurrentTotalSubs += 1
+					Session.Points    += res
+					Session.SubPoints += res
+					Session.TotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 
@@ -419,9 +440,9 @@ def SocketEvent(sender, args):
 					if msg.SubPlan == "2000": res = Settings.GiftSub2
 					if msg.SubPlan == "3000": res = Settings.GiftSub3
 
-					Session.CurrentPoints    += res
-					Session.CurrentSubPoints += res
-					Session.CurrentTotalSubs += 1
+					Session.Points    += res
+					Session.SubPoints += res
+					Session.TotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
 
@@ -432,9 +453,9 @@ def SocketEvent(sender, args):
 				if msg.SubPlan == "2000": res = Settings.ReSub2
 				if msg.SubPlan == "3000": res = Settings.ReSub3
 
-				Session.CurrentPoints    += res
-				Session.CurrentSubPoints += res
-				Session.CurrentTotalSubs += 1
+				Session.Points    += res
+				Session.SubPoints += res
+				Session.TotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Resubs - END
@@ -446,9 +467,9 @@ def SocketEvent(sender, args):
 				if msg.SubPlan == "2000": res = Settings.Sub2
 				if msg.SubPlan == "3000": res = Settings.Sub3
 
-				Session.CurrentPoints    += res
-				Session.CurrentSubPoints += res
-				Session.CurrentTotalSubs += 1
+				Session.Points    += res
+				Session.SubPoints += res
+				Session.TotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
 			# Subs - END
@@ -464,9 +485,9 @@ def SocketEvent(sender, args):
 			if msg.Months > 1 and not Settings.CountResubs:
 				return
 
-			Session.CurrentPoints    += Settings.Sub1
-			Session.CurrentSubPoints += Settings.Sub2
-			Session.CurrentTotalSubs += 1
+			Session.Points    += Settings.Sub1
+			Session.SubPoints += Settings.Sub2
+			Session.TotalSubs += 1
 			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings.Sub1, msg.Name))
 			return
 
@@ -474,12 +495,12 @@ def SocketEvent(sender, args):
 		if data.Type == 'superchat':
 
 			if not msg.IsTest:
-				Session.CurrentTotalDonations += msg.Amount
+				Session.TotalDonations += msg.Amount
 
 			if msg.Amount >= Settings.DonationMinAmount:
 
 				if Settings.CountDonationsOnce:
-					Session.CurrentPoints += Settings.DonationPointValue
+					Session.Points += Settings.DonationPointValue
 					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.Name))
 					return
 
@@ -489,8 +510,8 @@ def SocketEvent(sender, args):
 				if Settings.CountDonationsCumulative:
 					DonationTemp += msg.Amount % Settings.DonationMinAmount
 
-				Session.CurrentPoints         += res
-				Session.CurrentDonationPoints += res
+				Session.Points         += res
+				Session.DonationPoints += res
 				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
 				return
 
@@ -514,13 +535,13 @@ def SocketEvent(sender, args):
 
 			# Ignore test donations for the total amount
 			if not msg.IsTest:
-				Session.CurrentTotalDonations += msg.Amount
+				Session.TotalDonations += msg.Amount
 
 			# Donation is above MinAmount
 			if msg.Amount >= Settings.DonationMinAmount:
 
 				if Settings.CountDonationsOnce:
-					Session.CurrentPoints += Settings.DonationPointValue
+					Session.Points += Settings.DonationPointValue
 					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.FromName))
 					return
 
@@ -530,8 +551,8 @@ def SocketEvent(sender, args):
 				if Settings.CountDonationsCumulative:
 					DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
-				Session.CurrentPoints         += res
-				Session.CurrentDonationPoints += res
+				Session.Points         += res
+				Session.DonationPoints += res
 				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
 				return
 
@@ -601,60 +622,71 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	# Calculate Bits
 	if Settings.CountBitsCumulative and BitsTemp >= Settings.BitsMinAmount:
 		res = math.trunc(BitsTemp / Settings.BitsMinAmount)
-		Session.CurrentPoints += Settings.BitsPointValue * res
+		Session.Points += Settings.BitsPointValue * res
 		BitsTemp -= Settings.BitsMinAmount * res
 		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
-		Session.CurrentBitsLeft = Settings.BitsMinAmount - BitsTemp
+		Session.BitsLeft = Settings.BitsMinAmount - BitsTemp
 		del res
 
 	# Calculate Donations
 	if Settings.CountDonationsCumulative and DonationTemp >= Settings.DonationMinAmount:
 		res = math.trunc(DonationTemp / Settings.DonationMinAmount)
-		Session.CurrentPoints += Settings.DonationPointValue
+		Session.Points += Settings.DonationPointValue
 		DonationTemp -= Settings.DonationMinAmount * res
 		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings.DonationPointValue * res))
 		del res
 
 	# Calculate Streak
-	while Session.CurrentPoints >= Session.CurrentGoal:  # A loop is used in case the Goal gets incremented for each completed Streak
+	while Session.Points >= Session.Goal:  # A loop is used in case the Goal gets incremented for each completed Streak
 
 		# Subtract Goal and Increment Streak
-		Session.CurrentPoints -= Session.CurrentGoal
-		Session.CurrentStreak += 1
+		Session.Points -= Session.Goal
+		Session.Streak += 1
 
 		# Increment CurrentGoal
-		if Session.CurrentGoal   < Settings.GoalMax:
-			Session.CurrentGoal += Settings.GoalIncrement
+		if Session.Goal   < Settings.GoalMax:
+			Session.Goal += Settings.GoalIncrement
 
 			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
-			if Session.CurrentGoal  > Settings.GoalMax:
-				Session.CurrentGoal = Settings.GoalMax
-	Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
+			if Session.Goal  > Settings.GoalMax:
+				Session.Goal = Settings.GoalMax
+	Session.PointsLeft = Session.Goal - Session.Points
 
-	# Calculate Bar Display
-	# TODO: Implentation
+	# Calculate Progress Bar
+	# TODO: Implement follows
+	Progressbar.DisplayColors  = Settings.BarDisplayColors
+	Progressbar.Goal           = Settings.BarGoal
+	Progressbar.SegmentCount   = Settings.BarSegmentCount
+	Progressbar.SegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
+
+	Progressbar.BitPoints      = Session.BitPoints
+	Progressbar.DonationPoints = Session.DonationPoints
+	Progressbar.SubPoints      = Session.SubPoints
+	# TODO: Implement sound system
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
+	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps(Progressbar.__dict__)))
 
 	# Update Text Files
 	if not os.path.isdir(TEXT_FOLDER): os.mkdir(TEXT_FOLDER)
 
-	SimpleWrite(BITS_LEFT_FILE,       Session.CurrentBitsLeft)
-	SimpleWrite(GOAL_FILE,            Session.CurrentGoal)
-	SimpleWrite(POINTS_FILE,          Session.CurrentPoints)
-	SimpleWrite(POINTS_LEFT_FILE,     Session.CurrentPointsLeft)
-	SimpleWrite(STREAK_FILE,          Session.CurrentStreak)
-	SimpleWrite(TOTAL_SUBS_FILE,      Session.CurrentTotalSubs)
-	SimpleWrite(TOTAL_BITS_FILE,      Session.CurrentTotalBits)
-	SimpleWrite(TOTAL_DONATIONS_FILE, Session.CurrentTotalDonations)
+	# TODO: Add type values and follows
+	SimpleWrite(BITS_LEFT_FILE,       Session.BitsLeft)
+	SimpleWrite(GOAL_FILE,            Session.Goal)
+	SimpleWrite(POINTS_FILE,          Session.Points)
+	SimpleWrite(POINTS_LEFT_FILE,     Session.PointsLeft)
+	SimpleWrite(STREAK_FILE,          Session.Streak)
+	SimpleWrite(TOTAL_SUBS_FILE,      Session.TotalSubs)
+	SimpleWrite(TOTAL_BITS_FILE,      Session.TotalBits)
+	SimpleWrite(TOTAL_DONATIONS_FILE, Session.TotalDonations)
 
 	# Update Refresh Stamp
 	RefreshStamp = time.time()
 
 
 # === Sanity Check ===
-def SanityCheck():
+def SanityCheck():  # TODO: Implement follows
 
 	is_session_dirty  = False
 	is_settings_dirty = False
@@ -675,18 +707,18 @@ def SanityCheck():
 		is_settings_dirty = True
 
 	# Prevent CurrentGoal from being lower than GoalMin
-	if Session.CurrentGoal  < Settings.GoalMin:
-		Session.CurrentGoal = Settings.GoalMin
+	if Session.Goal  < Settings.GoalMin:
+		Session.Goal = Settings.GoalMin
 		is_session_dirty    = True
 
 	# Prevent CurrentGoal from being higher than GoalMax
-	if Session.CurrentGoal  > Settings.GoalMax:
-		Session.CurrentGoal = Settings.GoalMax
+	if Session.Goal  > Settings.GoalMax:
+		Session.Goal = Settings.GoalMax
 		is_session_dirty    = True
 
 	# Prevent CurrentPointsLeft de-sync
-	if Session.CurrentGoal != (Session.CurrentPointsLeft + Session.CurrentPoints):
-		Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
+	if Session.Goal != (Session.PointsLeft + Session.Points):
+		Session.PointsLeft = Session.Goal - Session.Points
 		is_session_dirty = True
 
 	# Prevent Points from being below 1
@@ -701,16 +733,16 @@ def SanityCheck():
 		is_settings_dirty      = True
 
 	# Prevent Totals from being less than 0
-	if Session.CurrentTotalSubs  < 0:
-		Session.CurrentTotalSubs = 0
+	if Session.TotalSubs  < 0:
+		Session.TotalSubs = 0
 		is_session_dirty         = True
 
-	if Session.CurrentTotalBits  < 0:
-		Session.CurrentTotalBits = 0
+	if Session.TotalBits  < 0:
+		Session.TotalBits = 0
 		is_session_dirty         = True
 
-	if Session.CurrentTotalDonations  < 0:
-		Session.CurrentTotalDonations = 0
+	if Session.TotalDonations  < 0:
+		Session.TotalDonations = 0
 		is_session_dirty              = True
 
 	# Prevent Bar Values
@@ -718,18 +750,9 @@ def SanityCheck():
 		Settings.BarGoal = Settings.Goal
 		is_settings_dirty = True
 
-	if Session.BarGoal   < Settings.Goal:
-		Session.BarGoal  = Settings.Goal
-		is_session_dirty = True
-
 	if Settings.BarSegmentCount  > Settings.BarGoal:
 		Settings.BarSegmentCount = 1
 		is_settings_dirty        = True
-
-	if Session.BarSegmentCount  > Settings.BarGoal:
-		Session.BarSegmentCount = 1
-		is_session_dirty        = True
-
 
 	# Save Session/Settings if dirty
 	try:
@@ -744,13 +767,9 @@ def SanityCheck():
 # === Reset Session ===
 def ResetSession():
 	Session.__dict__          = Session.DefaultSession()
-	Session.CurrentBitsLeft   = Settings.BitsMinAmount
-	Session.CurrentGoal       = Settings.Goal
-	Session.CurrentPointsLeft = Settings.Goal
-	Session.BarDisplayColors  = Settings.BarDisplayColors
-	Session.BarGoal           = Settings.BarGoal
-	Session.BarSegmentCount   = Settings.BarSegmentCount
-	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
+	Session.BitsLeft   = Settings.BitsMinAmount
+	Session.Goal       = Settings.Goal
+	Session.PointsLeft = Settings.Goal
 
 	SanityCheck()
 	UpdateTracker()
@@ -778,65 +797,57 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 		Connect()
 		if not IsScriptReady: IsScriptReady = True
 
-	Session.CurrentBitsLeft   = Settings.BitsMinAmount
-	Session.CurrentGoal       = Settings.Goal
-	Session.CurrentPointsLeft = Settings.Goal
-	Session.BarDisplayColors  = Settings.BarDisplayColors
-	Session.BarGoal           = Settings.BarGoal
-	Session.BarSegmentCount   = Settings.BarSegmentCount
-	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
-
 	SanityCheck()
 	Log("Settings saved!")
 
 
 # === UI Sub Functions ===
 def AddPoint():
-	Session.CurrentPoints += 1
+	Session.Points += 1
 
 
 def SubtractPoint():
-	if Session.CurrentPoints   > 0:
-		Session.CurrentPoints -= 1
+	if Session.Points   > 0:
+		Session.Points -= 1
 
 
 # === UI Streak Functions ===
 def AddStreak():
-	Session.CurrentStreak += 1
+	Session.Streak += 1
 
 
 def AddStreak5():
-	Session.CurrentStreak += 5
+	Session.Streak += 5
 
 
 def AddStreak10():
-	Session.CurrentStreak += 10
+	Session.Streak += 10
 
 
 def SubtractStreak():
-	if Session.CurrentStreak   > 1:
-		Session.CurrentStreak -= 1
+	if Session.Streak   > 1:
+		Session.Streak -= 1
 
 
 def SubtractStreak5():
-	if Session.CurrentStreak   > 1:
-		Session.CurrentStreak -= 5
+	if Session.Streak   > 1:
+		Session.Streak -= 5
 
 
 def SubtractStreak10():
-	if Session.CurrentStreak   > 1:
-		Session.CurrentStreak -= 10
+	if Session.Streak   > 1:
+		Session.Streak -= 10
 
 
 # === UI Goal Functions ===
 def AddToGoal():
-	if Session.CurrentGoal   < Settings.GoalMax:
-		Session.CurrentGoal += 1
+	if Session.Goal   < Settings.GoalMax:
+		Session.Goal += 1
 
 
 def SubtractFromGoal():
-	if Session.CurrentGoal   > Settings.GoalMin:
-		Session.CurrentGoal -= 1
+	if Session.Goal   > Settings.GoalMin:
+		Session.Goal -= 1
 
 
 # === Unload ===
