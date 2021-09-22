@@ -6,15 +6,21 @@ Brand new feature, segmented Progressbar! This feature adds a progressbar to the
 
 As you might have guessed, this update will change a lot of things in the script. And as such a lot of things will be broken, meaning you might have to redo a lot of your settings and customizations. Though the old settings will probably still work, it is recommended to start from scratch. That way you can avoid a lot of issues that might come up.
 
-* New Variables
+* New Session Variables
+  * Added BarDisplayColors
+  * Added BarGoal
+  * Added BarSegmentCount
+  * Added BarSegmentSize
   * Added CurrentBitPoints
   * Added CurrentDonationPoints
   * Added CurrentSubPoints
 
-* New Options
-  * Added BarGoal field, amount of points needed for the bar to fill completely
-  * Added BarDisplayColors toggle, enables separate colors for each type of points within the progressbar
-  * Added BarSegmentCount field, amount of segments withing the progressbar their value will be calculated automatically
+* New Script Settings
+  * Added BarGoal field
+  * Added BarDisplayColors
+  * Added BarSegmentCount
+  * Added SoundBarGoalCompleted
+  * Added SoundBarSegmentCompleted
 
 * New Command Parameters
   * Added $tsBitPoints

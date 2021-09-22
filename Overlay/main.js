@@ -16,8 +16,9 @@ var Overlay = {
 	'CurrentTotalDonations': 0,
 
 	'BarDisplayColors': true,
-	'BarGoal': 100,
-	'BarSegmentCount': 4,
+	'BarGoal'         : 100,
+	'BarSegmentCount' : 4,
+	'BarSegmentSize'  : 25,
 
 	// Elements
 	'BitsLeft':       document.getElementById('BitsLeft'),
@@ -88,9 +89,12 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
+
 				Overlay.BarDisplayColors      = data.BarDisplayColors
 				Overlay.BarGoal               = data.BarGoal
 				Overlay.BarSegmentCount       = data.BarSegmentCount
+				Overlay.BarSegmentSize        = data.BarSegmentSize
+
 				Overlay.CurrentBitsLeft       = data.CurrentBitsLeft;
 				Overlay.CurrentBitPoints      = data.CurrentBitPoints;
 				Overlay.CurrentDonationPoints = data.CurrentDonationPoints;

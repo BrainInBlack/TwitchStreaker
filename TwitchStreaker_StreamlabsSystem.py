@@ -41,6 +41,7 @@ class ScriptSession(object):
 	BarDisplayColors      = None
 	BarGoal               = None
 	BarSegmentCount       = None
+	BarSegmentSize        = None
 
 	CurrentBitsLeft       = 0
 	CurrentBitPoints      = 0
@@ -91,6 +92,10 @@ class ScriptSession(object):
 	@staticmethod
 	def DefaultSession():
 		return {
+			"BarDisplayColors": True,
+			"BarGoal": None,
+			"BarSegmentCount": None,
+			"BarSegmentSize": None,
 			"CurrentBitsLeft": 0,
 			"CurrentBitPoints": 0,
 			"CurrentDonationPoints": 0,
@@ -283,6 +288,7 @@ def Init():
 	Session.BarDisplayColors  = Settings.BarDisplayColors
 	Session.BarGoal           = Settings.BarGoal
 	Session.BarSegmentCount   = Settings.BarSegmentCount
+	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 
 	SanityCheck()
 	StartUp()
@@ -366,7 +372,8 @@ def SocketEvent(sender, args):
 				if Settings.CountBitsCumulative:
 					BitsTemp += msg.Amount % Settings.BitsMinAmount
 
-				Session.CurrentPoints += res
+				Session.CurrentPoints    += res
+				Session.CurrentBitPoints += res
 				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
 				return
 
@@ -400,6 +407,7 @@ def SocketEvent(sender, args):
 					if msg.SubPlan == "3000": res = Settings.GiftReSub3
 
 					Session.CurrentPoints    += res
+					Session.CurrentSubPoints += res
 					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
@@ -412,6 +420,7 @@ def SocketEvent(sender, args):
 					if msg.SubPlan == "3000": res = Settings.GiftSub3
 
 					Session.CurrentPoints    += res
+					Session.CurrentSubPoints += res
 					Session.CurrentTotalSubs += 1
 					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
 					return
@@ -424,6 +433,7 @@ def SocketEvent(sender, args):
 				if msg.SubPlan == "3000": res = Settings.ReSub3
 
 				Session.CurrentPoints    += res
+				Session.CurrentSubPoints += res
 				Session.CurrentTotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
@@ -437,6 +447,7 @@ def SocketEvent(sender, args):
 				if msg.SubPlan == "3000": res = Settings.Sub3
 
 				Session.CurrentPoints    += res
+				Session.CurrentSubPoints += res
 				Session.CurrentTotalSubs += 1
 				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
 				return
@@ -454,6 +465,7 @@ def SocketEvent(sender, args):
 				return
 
 			Session.CurrentPoints    += Settings.Sub1
+			Session.CurrentSubPoints += Settings.Sub2
 			Session.CurrentTotalSubs += 1
 			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings.Sub1, msg.Name))
 			return
@@ -477,7 +489,8 @@ def SocketEvent(sender, args):
 				if Settings.CountDonationsCumulative:
 					DonationTemp += msg.Amount % Settings.DonationMinAmount
 
-				Session.CurrentPoints += res
+				Session.CurrentPoints         += res
+				Session.CurrentDonationPoints += res
 				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
 				return
 
@@ -517,7 +530,8 @@ def SocketEvent(sender, args):
 				if Settings.CountDonationsCumulative:
 					DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
-				Session.CurrentPoints += res
+				Session.CurrentPoints         += res
+				Session.CurrentDonationPoints += res
 				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
 				return
 
@@ -617,6 +631,9 @@ def UpdateTracker():  # ! Only call if a quick response is required
 				Session.CurrentGoal = Settings.GoalMax
 	Session.CurrentPointsLeft = Session.CurrentGoal - Session.CurrentPoints
 
+	# Calculate Bar Display
+	# TODO: Implentation
+
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
 
@@ -696,6 +713,24 @@ def SanityCheck():
 		Session.CurrentTotalDonations = 0
 		is_session_dirty              = True
 
+	# Prevent Bar Values
+	if Settings.BarGoal < Settings.Goal:
+		Settings.BarGoal = Settings.Goal
+		is_settings_dirty = True
+
+	if Session.BarGoal   < Settings.Goal:
+		Session.BarGoal  = Settings.Goal
+		is_session_dirty = True
+
+	if Settings.BarSegmentCount  > Settings.BarGoal:
+		Settings.BarSegmentCount = 1
+		is_settings_dirty        = True
+
+	if Session.BarSegmentCount  > Settings.BarGoal:
+		Session.BarSegmentCount = 1
+		is_session_dirty        = True
+
+
 	# Save Session/Settings if dirty
 	try:
 		if is_session_dirty:
@@ -712,6 +747,10 @@ def ResetSession():
 	Session.CurrentBitsLeft   = Settings.BitsMinAmount
 	Session.CurrentGoal       = Settings.Goal
 	Session.CurrentPointsLeft = Settings.Goal
+	Session.BarDisplayColors  = Settings.BarDisplayColors
+	Session.BarGoal           = Settings.BarGoal
+	Session.BarSegmentCount   = Settings.BarSegmentCount
+	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 
 	SanityCheck()
 	UpdateTracker()
@@ -745,6 +784,7 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 	Session.BarDisplayColors  = Settings.BarDisplayColors
 	Session.BarGoal           = Settings.BarGoal
 	Session.BarSegmentCount   = Settings.BarSegmentCount
+	Session.BarSegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 
 	SanityCheck()
 	Log("Settings saved!")
