@@ -15,20 +15,28 @@ As you might have guessed, this update will change a lot of things in the script
 * New Session Variables
   * Added BitPoints
   * Added DonationPoints
+  * Added FollowPoints
   * Added SubPoints
+  * Added TotalFollows
 
 * New Script Settings
   * Added BarGoal field
   * Added BarDisplayColors
   * Added BarSegmentCount
+  * Added CountFollows
+  * Added FollowPointValue
+  * Added SoundEnabled
   * Added SoundBarGoalCompleted
+  * Added SoundBarGoalCompletedDelay
   * Added SoundBarSegmentCompleted
+  * Added SoundBarSegmentCompletedDelay
 
 * New Command Parameters
   * Added $tsBitPoints
   * Added $tsDonationPoints
   * Added $tsSubPoints
 
+* Fixed Temp values not resetting when the session is reset
 * Added `e` prefix for the html elements in the overlay
 * Removed `Current` prefix from all Session variables
 

@@ -39,6 +39,7 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 # === Progress Bar ===
 class ScriptProgressBar(object):  # TODO: Implement follows
 
+	# ? Really needed?
 	DisplayColors = True
 	Goal          = 100
 	SegmentCount  = 4
@@ -66,18 +67,20 @@ class ScriptProgressBar(object):  # TODO: Implement follows
 
 
 # === Session Class ===
-class ScriptSession(object):  # TODO: Implement follows
+class ScriptSession(object):
 
 	BitsLeft       = 0
 	BitPoints      = 0
 	DonationPoints = 0
+	FollowPoints   = 0
 	Goal           = 10
 	Points         = 0
 	PointsLeft     = 10
 	Streak         = 1
 	SubPoints      = 0
-	TotalSubs      = 0
 	TotalBits      = 0
+	TotalFollows   = 0
+	TotalSubs      = 0
 	TotalDonations = 0
 
 	def __init__(self):
@@ -120,19 +123,21 @@ class ScriptSession(object):  # TODO: Implement follows
 			"BitsLeft": 0,
 			"BitPoints": 0,
 			"DonationPoints": 0,
+			"FollowPoints": 0,
 			"Goal": 10,
 			"Points": 0,
 			"PointsLeft": 10,
 			"Streak": 1,
 			"SubPoints": 1,
-			"TotalSubs": 0,
 			"TotalBits": 0,
+			"TotalFollows": 0,
+			"TotalSubs": 0,
 			"TotalDonations": 0
 		}
 
 
 # === Settings Class ===
-class ScriptSettings(object):  # TODO: Implement follows
+class ScriptSettings(object):
 
 	# General
 	Goal = 10
@@ -169,14 +174,21 @@ class ScriptSettings(object):  # TODO: Implement follows
 	GiftReSub2 = 1
 	GiftReSub3 = 1
 
+	# Follows
+	CountFollows = False
+	FollowPointValue = 10
+
 	# Progressbar
 	BarDisplayColors = True
 	BarGoal = 100
 	BarSegmentCount = 4
 
 	# Sounds
+	SoundEnabled = False
 	SoundBarGoalCompleted = None
+	SoundBarGoalCompletedDelay = 0
 	SoundBarSegmentCompleted = None
+	SoundBarSegmentCompletedDelay = 0
 
 	# Streamlabs
 	SocketToken = None
@@ -245,10 +257,22 @@ class ScriptSettings(object):  # TODO: Implement follows
 			"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
 			"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1,
 
+			# Follows
+			"CountFollows": False,
+			"FollowPointValue": 1,
+			"FollowsRequired": 10,
+
 			# Progressbar
 			"BarDisplayColors": True,
 			"BarGoal": 100,
 			"BarSegmentCount": 4,
+
+			# Sounds
+			"SoundEnabled": False,
+			"SoundBarGoalCompleted": None,
+			"SoundBarGoalCompletedDelay":0,
+			"SoundBarSegmentCompleted": None,
+			"SoundBarSegmentCompletedDelay": 0,
 
 			# Streamlabs
 			"SocketToken": None
@@ -266,6 +290,7 @@ Settings      = None
 # === Internal Variables ===
 BitsTemp      = 0
 DonationTemp  = 0.0
+FollowsTemp   = 0
 IsScriptReady = False
 RefreshStamp  = time.time()
 SaveStamp     = time.time()
@@ -277,24 +302,26 @@ EventIDs      = []
 FLUSH_DELAY   = 5
 REFRESH_DELAY = 5
 SAVE_DELAY    = 300
-POINT_VARS    = [  # TODO: Implement follows
+POINT_VARS    = [
 	"Sub1", "Sub2", "Sub3",
 	"ReSub1", "ReSub2", "ReSub3",
 	"GiftSub1", "GiftSub2", "GiftSub3",
 	"GiftReSub1", "GiftReSub2", "GiftReSub3",
-	"BitsPointValue", "DonationsPointValue"
+	"BitsPointValue", "DonationsPointValue", "FollowPointValue"
 ]
-PARSE_PARAMETERS = {  # TODO: Implement follows
+PARSE_PARAMETERS = {
 	"$tsBitsLeft":       "BitsLeft",
 	"$tsBitPoints":      "BitPoints",
 	"$tsDonationPoints": "DonationPoints",
+	"$tsFollowPoints":   "FollowPoints",
 	"$tsGoal":           "Goal",
 	"$tsStreak":         "Streak",
 	"$tsSubPoints":      "SubPoints",
 	"$tsPoints":         "Points",
 	"$tsPointsLeft":     "PointsLeft",
-	"$tsTotalSubs":      "TotalSubs",
 	"$tsTotalBits":      "TotalBits",
+	"$tsTotalFollows":   "TotalFollows",
+	"$tsTotalSubs":      "TotalSubs",
 	"$tsTotalDonations": "TotalDonations"
 }
 
@@ -766,7 +793,13 @@ def SanityCheck():  # TODO: Implement follows
 
 # === Reset Session ===
 def ResetSession():
-	Session.__dict__          = Session.DefaultSession()
+	global BitsTemp, DonationTemp, FollowsTemp
+
+	BitsTemp     = 0
+	DonationTemp = 0.0
+	FollowsTemp  = 0
+
+	Session.__dict__   = Session.DefaultSession()
 	Session.BitsLeft   = Settings.BitsMinAmount
 	Session.Goal       = Settings.Goal
 	Session.PointsLeft = Settings.Goal

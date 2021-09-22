@@ -30,6 +30,27 @@
 		"label": "Allow Resubs",
 		"tooltip": "Enables ReSubs to be counted as well.\n\n(Gifted-Sub will always be counted.)"
 	},
+	"CountFollows": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Count Follows",
+		"tooltip": "Enables Follows to be counted as well.",
+		"group": "Follows"
+	},
+	"FollowsRequired": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Follows Required",
+		"tooltip": "Amount of Follows required to be awarded the specified amount of Points.",
+		"group": "Follows"
+	},
+	"FollowPointValue": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Follow Point Value",
+		"tooltip": "Amount of Points awarded for the completion of a Follow segment.",
+		"group": "Follows"
+	},
 	"BitsMinAmount": {
 		"type": "numberbox",
 		"value": 500,
@@ -121,6 +142,13 @@
 		"tooltip": "Display Point types with separate colors.",
 		"group": "Progress Bar"
 	},
+	"SoundEnabled": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Enable Sounds",
+		"tooltip": "Enables the completion sounds.",
+		"group": "Progress Bar"
+	},
 	"SoundBarGoalCompleted": {
 		"type": "textbox",
 		"value": "Something!",
@@ -128,11 +156,25 @@
 		"tooltip": "Sound that will be played when the bar is completely filled.",
 		"group": "Progress Bar"
 	},
+	"SoundBarGoalCompletedDelay": {
+		"type": "numberbox",
+		"value": 0,
+		"label": "Completion Sound Delay",
+		"tooltip": "Amount of seconds that the Completion Sound is delayed.",
+		"group": "Progress Bar"
+	},
 	"SoundBarSegmentCompleted": {
 		"type": "textbox",
 		"value": "Something!",
 		"label": "Segment Sound",
 		"tooltip": "Sound that will be played when a segment within the bar is completely filled.",
+		"group": "Progress Bar"
+	},
+	"SoundBarSegmentCompletedDelay": {
+		"type": "numberbox",
+		"value": 0,
+		"label": "Segment Sound Delay",
+		"tooltip": "Amount of seconds that the Segment Sound is delayed.",
 		"group": "Progress Bar"
 	},
 	"Sub1": {
