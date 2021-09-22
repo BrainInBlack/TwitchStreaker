@@ -37,7 +37,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
 
 ## Disclaimer
 
-**We are not responsible for the misuse of this script!** It is up to YOU to apply the scripts functionality according to your platforms Terms of Service. For example, Twitch does NOT allow you to give away Subscriptions for Bits (see [Bits Acceptable Use Policy](https://www.twitch.tv/p/en/legal/bits-acceptable-use/)). Please make sure that you use the Script in a way that does not violate any Terms of Your the platform that you are using.
+**We are not responsible for the misuse of this script!** It is up to YOU to apply the scripts functionality according to your platforms Terms of Service. For example, Twitch does NOT allow you to give away Subscriptions for Bits (see [Bits Acceptable Use Policy](https://www.twitch.tv/p/en/legal/bits-acceptable-use/)). Please make sure that you use the Script in a way that does not violate any Terms of the platform that you are using.
 
 ## Installation
 
@@ -151,6 +151,7 @@ You can use the following Parameters in your Commands and Timers:
 
 Parameter         | Description
 ------------------|------------
+$tsBitsLeft       | Amount of `Bits` needed to get the next `Point`
 $tsGoal           | Amount of `Points` needed per Streak
 $tsPoints         | Current amount of `Points` in the current Streak
 $tsPointsLeft     | Amount of `Points` needed to complete the current Streak
@@ -201,6 +202,7 @@ The following element ID's are available for use in your design:
 
 ID             | Description
 ---------------|------------
+BitsLeft       | Amount of `Bits` needed to get the next `Point`
 Goal           | Amount of `Points` needed per Streak
 Points         | Current amount of `Points` in the current Streak
 PointsLeft     | Amount of `Points` needed to complete the current Streak
@@ -253,6 +255,7 @@ The following variables are available for your custom script.
 
 Variable                      | Description
 ------------------------------|------------
+Overlay.CurrentBitsLeft       | Amount of `Bits` needed to get the next `Point`
 Overlay.CurrentGoal           | Amount of `Points` needed to complete a Streak (min: 1)
 Overlay.CurrentStreak         | Current amount Streaks (min: 1)
 Overlay.CurrentPoints         | Current amount of `Points` in the Streak (min: 0)
