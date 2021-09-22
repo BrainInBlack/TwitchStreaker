@@ -31,18 +31,25 @@ from StreamlabsEventReceiver import StreamlabsEventClient
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "2.8.2"
+Version     = "3.0.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
 # === Session Class ===
 class ScriptSession(object):
 
+	BarDisplayColors      = None
+	BarGoal               = None
+	BarSegmentCount       = None
+
 	CurrentBitsLeft       = 0
+	CurrentBitPoints      = 0
+	CurrentDonationPoints = 0
 	CurrentGoal           = 10
 	CurrentPoints         = 0
 	CurrentPointsLeft     = 10
 	CurrentStreak         = 1
+	CurrentSubPoints      = 0
 	CurrentTotalSubs      = 0
 	CurrentTotalBits      = 0
 	CurrentTotalDonations = 0
@@ -85,10 +92,13 @@ class ScriptSession(object):
 	def DefaultSession():
 		return {
 			"CurrentBitsLeft": 0,
+			"CurrentBitPoints": 0,
+			"CurrentDonationPoints": 0,
 			"CurrentGoal": 10,
 			"CurrentPoints": 0,
 			"CurrentPointsLeft": 10,
 			"CurrentStreak": 1,
+			"CurrentSubPoints": 1,
 			"CurrentTotalSubs": 0,
 			"CurrentTotalBits": 0,
 			"CurrentTotalDonations": 0
@@ -132,6 +142,15 @@ class ScriptSettings(object):
 	GiftReSub1 = 1
 	GiftReSub2 = 1
 	GiftReSub3 = 1
+
+	# Progressbar
+	BarDisplayColors = True
+	BarGoal = 100
+	BarSegmentCount = 4
+
+	# Sounds
+	SoundBarGoalCompleted = None
+	SoundBarSegmentCompleted = None
 
 	# Streamlabs
 	SocketToken = None
@@ -254,6 +273,14 @@ def Init():
 	except Exception as e:
 		Log(e.message)
 		return
+
+	Session.CurrentBitsLeft   = Settings.BitsMinAmount
+	Session.CurrentGoal       = Settings.Goal
+	Session.CurrentPointsLeft = Settings.Goal
+	Session.BarDisplayColors  = Settings.BarDisplayColors
+	Session.BarGoal           = Settings.BarGoal
+	Session.BarSegmentCount   = Settings.BarSegmentCount
+
 	SanityCheck()
 	StartUp()
 
@@ -708,6 +735,13 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 			Socket = None
 		Connect()
 		if not IsScriptReady: IsScriptReady = True
+
+	Session.CurrentBitsLeft   = Settings.BitsMinAmount
+	Session.CurrentGoal       = Settings.Goal
+	Session.CurrentPointsLeft = Settings.Goal
+	Session.BarDisplayColors  = Settings.BarDisplayColors
+	Session.BarGoal           = Settings.BarGoal
+	Session.BarSegmentCount   = Settings.BarSegmentCount
 
 	SanityCheck()
 	Log("Settings saved!")

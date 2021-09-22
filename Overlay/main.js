@@ -4,20 +4,30 @@
 var Overlay = {
 
 	'CurrentBitsLeft':       0,
+	'CurrentBitPoints':      0,
+	'CurrentDonationPoints': 0,
 	'CurrentGoal':          10,
 	'CurrentStreak':         1,
+	'CurrentSubPoints':      1,
 	'CurrentPoints':         0,
 	'CurrentPointsLeft':    10,
 	'CurrentTotalSubs':      0,
 	'CurrentTotalBits':      0,
 	'CurrentTotalDonations': 0,
 
+	'BarDisplayColors': true,
+	'BarGoal': 100,
+	'BarSegmentCount': 4,
+
 	// Elements
 	'BitsLeft':       document.getElementById('BitsLeft'),
+	'BitPoints':      document.getElementById('BitPoints'),
+	'DonationPoints': document.getElementById('DonationPoints'),
 	'Goal':           document.getElementById('Goal'),
 	'Points':         document.getElementById('Points'),
 	'PointsLeft':     document.getElementById('PointsLeft'),
 	'Streak':         document.getElementById('Streak'),
+	'SubPoints':      document.getElementById('SubPoints'),
 	'TotalSubs':      document.getElementById('TotalSubs'),
 	'TotalBits':      document.getElementById('TotalBits'),
 	'TotalDonations': document.getElementById('TotalDonations'),
@@ -25,7 +35,8 @@ var Overlay = {
 
 	// Refresh, gets called for each Event coming through the EventBus
 	'refresh': function() {
-		if (this.BitsLeft)       this.BitsLeft.innerText       = this.BitsLeft;
+		if (this.BitsLeft)       this.BitsLeft.innerText       = this.CurrentBitsLeft;
+		if (this.BitPoints)      this.BitPoints.innerText      = this.CurrentBitPoints;
 		if (this.Goal)           this.Goal.innerText           = this.CurrentGoal;
 		if (this.Points)         this.Points.innerText         = this.CurrentPoints;
 		if (this.PointsLeft)     this.PointsLeft.innerText     = this.CurrentPointsLeft;
@@ -77,9 +88,15 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
-				Overlay.BitsLeft              = data.CurrentBitsLeft;
+				Overlay.BarDisplayColors      = data.BarDisplayColors
+				Overlay.BarGoal               = data.BarGoal
+				Overlay.BarSegmentCount       = data.BarSegmentCount
+				Overlay.CurrentBitsLeft       = data.CurrentBitsLeft;
+				Overlay.CurrentBitPoints      = data.CurrentBitPoints;
+				Overlay.CurrentDonationPoints = data.CurrentDonationPoints;
 				Overlay.CurrentGoal           = data.CurrentGoal;
 				Overlay.CurrentStreak         = data.CurrentStreak;
+				Overlay.CurrentSubPoints      = data.CurrentSubPoints;
 				Overlay.CurrentPoints         = data.CurrentPoints;
 				Overlay.CurrentPointsLeft     = data.CurrentPointsLeft;
 				Overlay.CurrentTotalSubs      = data.CurrentTotalSubs;

@@ -1,5 +1,21 @@
 # Changelog
 
+## 3.0.0 - Segmented Progressbar
+
+Brand new feature, segmented Progressbar! This feature adds a progressbar to the script, that will display the progress of the current streak in a bar format. In addition, you can segment the progressbar to allow for intermediate goals. Each type of Points has their own color and can be displayed in the progressbar.
+
+As you might have guessed, this update will change a lot of things in the script. And as such a lot of things will be broken, meaning you might have to redo a lot of your settings and customizations. Though the old settings will probably still work, it is recommended to start from scratch. That way you can avoid a lot of issues that might come up.
+
+* New Variables
+  * Added CurrentBitPoints
+  * Added CurrentDonationPoints
+  * Added CurrentSubPoints
+
+* New Options
+  * Added BarGoal field, amount of points needed for the bar to fill completely
+  * Added BarDisplayColors toggle, enables separate colors for each type of points within the progressbar
+  * Added BarSegmentCount field, amount of segments withing the progressbar their value will be calculated automatically
+
 ## 2.8.2 - More Fixes
 
 * Fixed typo in README.md

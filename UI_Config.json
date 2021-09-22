@@ -100,6 +100,41 @@
 		"tooltip": "Allows Donations that are below the minimum amount to pile up until they exceed the minimum amount and then will be counted as a normal Donation together.",
 		"group": "Donations"
 	},
+	"BarGoal": {
+		"type": "numberbox",
+		"value": 100,
+		"label:": "Goal",
+		"tooltip": "Amount of Points needed to fill the bar.",
+		"group": "Progress Bar"
+	},
+	"BarSegmentCount": {
+		"type": "numberbox",
+		"value": 4,
+		"label": "Segment Count",
+		"tooltip": "Amount of segments within the bar. Their value will be calculated automatically depending on the amount of segments needed.",
+		"group": "Progress Bar"
+	},
+	"BarDisplayColors": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Display Colors",
+		"tooltip": "Display Point types with separate colors.",
+		"group": "Progress Bar"
+	},
+	"SoundBarGoalCompleted": {
+		"type": "textbox",
+		"value": "Something!",
+		"label": "Completion Sound",
+		"tooltip": "Sound that will be played when the bar is completely filled.",
+		"group": "Progress Bar"
+	},
+	"SoundBarSegmentCompleted": {
+		"type": "textbox",
+		"value": "Something!",
+		"label": "Segment Sound",
+		"tooltip": "Sound that will be played when a segment within the bar is completely filled.",
+		"group": "Progress Bar"
+	},
 	"Sub1": {
 		"type": "numberbox",
 		"value": 1,
