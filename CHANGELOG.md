@@ -4,7 +4,7 @@
 
 Brand new feature, segmented Progressbar! This feature adds a progressbar to the script, that will display the progress of the current streak in a bar format. In addition, you can segment the progressbar to allow for intermediate goals. Each type of Points has their own color and can be displayed in the progressbar.
 
-As you might have guessed, this update will change a lot of things in the script. And as such a lot of things will be broken, meaning you might have to redo a lot of your settings and customizations. Though the old settings will probably still work, it is recommended to start from scratch. That way you can avoid a lot of issues that might come up.
+As you might have guessed, this update will pretty much break everything. Please Backup the script folder before updating to the latest version! There are detailed instructions for updating from 2.x to 3.x in the README.md file.
 
 * New ProgressBar Class
   * Added BarDisplayColors
@@ -36,9 +36,10 @@ As you might have guessed, this update will change a lot of things in the script
   * Added $tsDonationPoints
   * Added $tsSubPoints
 
-* Fixed Temp values not resetting when the session is reset
 * Added `e` prefix for the html elements in the overlay
 * Removed `Current` prefix from all Session variables
+* Fixed Temp values not resetting when the session is reset
+* Fixed Command parameter parsing
 
 ## 2.8.2 - More Fixes
 

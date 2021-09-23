@@ -11,11 +11,16 @@ SETTINGS_FILE        = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
 # TODO: Implement follows
 BITS_LEFT_FILE       = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
+BIT_POINTS_FILE      = os.path.join(TEXT_FOLDER, "BitPoints.txt")
+DONATION_POINTS_FILE = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
+FOLLOW_POINTS_FILE   = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
 GOAL_FILE            = os.path.join(TEXT_FOLDER, "Goal.txt")
 POINTS_FILE          = os.path.join(TEXT_FOLDER, "Points.txt")
 POINTS_LEFT_FILE     = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
 STREAK_FILE          = os.path.join(TEXT_FOLDER, "Streak.txt")
+SUB_POINTS_FILE      = os.path.join(TEXT_FOLDER, "SubPoints.txt")
 TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
+TOTAL_FOLLOWS_FILE   = os.path.join(TEXT_FOLDER, "TotalFollows.txt")
 TOTAL_SUBS_FILE      = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
 TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 
@@ -34,36 +39,6 @@ Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
 Version     = "3.0.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
-
-
-# === Progress Bar ===
-class ScriptProgressBar(object):  # TODO: Implement follows
-
-	# ? Really needed?
-	DisplayColors = True
-	Goal          = 100
-	SegmentCount  = 4
-	SegmentSize   = 25
-
-	BitPoints      = 0
-	DonationPoints = 0
-	SubPoints      = 0
-
-	def __init__(self):
-		pass
-
-	@staticmethod
-	def DefaultBar():
-		return {
-			"DisplayColors": True,
-			"Goal": 100,
-			"SegmentCount": 4,
-			"SegmentSize": 25,
-
-			"BitPoints": 0,
-			"DonationPoints": 0,
-			"SubPoints": 0
-		}
 
 
 # === Session Class ===
@@ -176,7 +151,8 @@ class ScriptSettings(object):
 
 	# Follows
 	CountFollows = False
-	FollowPointValue = 10
+	FollowsRequired = 10
+	FollowPointValue = 1
 
 	# Progressbar
 	BarDisplayColors = True
@@ -281,7 +257,6 @@ class ScriptSettings(object):
 
 # === Global Variables ===
 ChannelName   = None
-ProgressBar   = None
 Socket        = None
 Session       = None
 Settings      = None
@@ -328,11 +303,10 @@ PARSE_PARAMETERS = {
 
 # === Initiation ===
 def Init():
-	global Progressbar, Session, Settings
+	global Session, Settings
 	try:
 		Session     = ScriptSession()
 		Settings    = ScriptSettings()
-		Progressbar = ScriptProgressBar()
 	except Exception as e:
 		Log(e.message)
 		return
@@ -376,8 +350,8 @@ def Connect():
 
 
 # === Event Bus ===
-def SocketEvent(sender, args):  # TODO: Implement follows
-	global BitsTemp, DonationTemp, EventIDs, FlushStamp
+def SocketEvent(sender, args):
+	global BitsTemp, DonationTemp, FollowsTemp, EventIDs, FlushStamp
 
 	# Get Data
 	data = args.Data
@@ -434,6 +408,20 @@ def SocketEvent(sender, args):  # TODO: Implement follows
 			else:
 				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
 			return
+
+		# === Follows ===
+		if data.Type == "follow" and Settings.CountFollows:
+
+			# Ignore TestFollows for the total amount of follows
+			if not msg.IsTest:
+				Session.TotalFollows += 1
+
+			FollowsTemp += 1
+			if FollowsTemp > Settings.FollowsRequired:
+				Session.Points       += Settings.FollowPointValue
+				Session.FollowPoints += Settings.FollowPointValue
+				FollowsTemp = FollowsTemp - Settings.FollowsRequired
+				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, msg.Name))
 
 		# === Subscriptions ===
 		if data.Type == "subscription":
@@ -679,33 +667,40 @@ def UpdateTracker():  # ! Only call if a quick response is required
 				Session.Goal = Settings.GoalMax
 	Session.PointsLeft = Session.Goal - Session.Points
 
-	# Calculate Progress Bar
-	# TODO: Implement follows
-	Progressbar.DisplayColors  = Settings.BarDisplayColors
-	Progressbar.Goal           = Settings.BarGoal
-	Progressbar.SegmentCount   = Settings.BarSegmentCount
-	Progressbar.SegmentSize    = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
-
-	Progressbar.BitPoints      = Session.BitPoints
-	Progressbar.DonationPoints = Session.DonationPoints
-	Progressbar.SubPoints      = Session.SubPoints
-	# TODO: Implement sound system
-
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
-	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps(Progressbar.__dict__)))
+
+	
+	# TODO: Implement sound system
+
+	# Update Progress Bar
+	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps({
+		"DisplayColors": Settings.BarDisplayColors,
+		"Goal": Settings.BarGoal,
+		"SegmentCount": Settings.BarSegmentCount,
+		"SegmentSize": math.trunc(Settings.BarGoal / Settings.BarSegmentCount),
+
+		"BitPoints": Session.BitPoints,
+		"DonationPoints": Session.DonationPoints,
+		"FollowPoints": Session.FollowPoints,
+		"SubPoints": Session.SubPoints
+	})))
 
 	# Update Text Files
 	if not os.path.isdir(TEXT_FOLDER): os.mkdir(TEXT_FOLDER)
 
-	# TODO: Add type values and follows
 	SimpleWrite(BITS_LEFT_FILE,       Session.BitsLeft)
+	SimpleWrite(BIT_POINTS_FILE,      Session.BitPoints)
+	SimpleWrite(DONATION_POINTS_FILE, Session.DonationPoints)
+	SimpleWrite(FOLLOW_POINTS_FILE,   Session.FollowPoints)
 	SimpleWrite(GOAL_FILE,            Session.Goal)
 	SimpleWrite(POINTS_FILE,          Session.Points)
 	SimpleWrite(POINTS_LEFT_FILE,     Session.PointsLeft)
 	SimpleWrite(STREAK_FILE,          Session.Streak)
-	SimpleWrite(TOTAL_SUBS_FILE,      Session.TotalSubs)
+	SimpleWrite(SUB_POINTS_FILE,      Session.SubPoints)
 	SimpleWrite(TOTAL_BITS_FILE,      Session.TotalBits)
+	SimpleWrite(TOTAL_FOLLOWS_FILE,   Session.TotalFollows)
+	SimpleWrite(TOTAL_SUBS_FILE,      Session.TotalSubs)
 	SimpleWrite(TOTAL_DONATIONS_FILE, Session.TotalDonations)
 
 	# Update Refresh Stamp
@@ -713,7 +708,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 
 
 # === Sanity Check ===
-def SanityCheck():  # TODO: Implement follows
+def SanityCheck():
 
 	is_session_dirty  = False
 	is_settings_dirty = False
@@ -733,17 +728,17 @@ def SanityCheck():  # TODO: Implement follows
 		Settings.GoalMax  = Settings.Goal
 		is_settings_dirty = True
 
-	# Prevent CurrentGoal from being lower than GoalMin
+	# Prevent Goal from being lower than GoalMin
 	if Session.Goal  < Settings.GoalMin:
 		Session.Goal = Settings.GoalMin
 		is_session_dirty    = True
 
-	# Prevent CurrentGoal from being higher than GoalMax
+	# Prevent Goal from being higher than GoalMax
 	if Session.Goal  > Settings.GoalMax:
 		Session.Goal = Settings.GoalMax
 		is_session_dirty    = True
 
-	# Prevent CurrentPointsLeft de-sync
+	# Prevent PointsLeft de-sync
 	if Session.Goal != (Session.PointsLeft + Session.Points):
 		Session.PointsLeft = Session.Goal - Session.Points
 		is_session_dirty = True
@@ -760,25 +755,38 @@ def SanityCheck():  # TODO: Implement follows
 		is_settings_dirty      = True
 
 	# Prevent Totals from being less than 0
-	if Session.TotalSubs  < 0:
-		Session.TotalSubs = 0
-		is_session_dirty         = True
-
 	if Session.TotalBits  < 0:
 		Session.TotalBits = 0
-		is_session_dirty         = True
+		is_session_dirty  = True
+
+	if Session.TotalFollows  < 0:
+		Session.TotalFollows = 0
+		is_session_dirty     = True
+
+	if Session.TotalSubs  < 0:
+		Session.TotalSubs = 0
+		is_session_dirty  = True
 
 	if Session.TotalDonations  < 0:
 		Session.TotalDonations = 0
-		is_session_dirty              = True
+		is_session_dirty       = True
 
-	# Prevent Bar Values
-	if Settings.BarGoal < Settings.Goal:
-		Settings.BarGoal = Settings.Goal
+	# Check Bar Settings
+	if Settings.BarGoal   < Settings.Goal:
+		Settings.BarGoal  = Settings.Goal
 		is_settings_dirty = True
 
 	if Settings.BarSegmentCount  > Settings.BarGoal:
 		Settings.BarSegmentCount = 1
+		is_settings_dirty        = True
+
+	# Check Follow Settings
+	if Settings.FollowPointValue  < 1:
+		Settings.FollowPointValue = 1
+		is_settings_dirty         = True
+
+	if Settings.FollowsRequired  < 1:
+		Settings.FollowsRequired = 1
 		is_settings_dirty        = True
 
 	# Save Session/Settings if dirty
@@ -899,9 +907,9 @@ def Unload():
 
 # === Parse Parameters ===
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-	for key in PARSE_PARAMETERS:
+	for key, val in PARSE_PARAMETERS:
 		if key in parse_string:
-			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[key]))
+			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[val]))
 	return parse_string
 
 

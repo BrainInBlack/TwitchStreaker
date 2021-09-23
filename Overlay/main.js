@@ -8,42 +8,47 @@ var Overlay = {
 		'BitsLeft'      : 0,
 		'BitPoints'     : 0,
 		'DonationPoints': 0,
+		'FollowPoints'  : 0,
 		'Goal'          : 10,
 		'Streak'        : 1,
 		'SubPoints'     : 1,
 		'Points'        : 0,
 		'PointsLeft'    : 10,
-		'TotalSubs'     : 0,
 		'TotalBits'     : 0,
 		'TotalDonations': 0,
+		'TotalFollows'  : 0,
+		'TotalSubs'     : 0,
 	
 		// Elements
-		// TODO: Implement follows
 		'eBitsLeft'      : document.getElementById('BitsLeft'),
 		'eBitPoints'     : document.getElementById('BitPoints'),
 		'eDonationPoints': document.getElementById('DonationPoints'),
+		'eFollowPoints'  : document.getElementById('FollowPoints'),
 		'eGoal'          : document.getElementById('Goal'),
 		'ePoints'        : document.getElementById('Points'),
 		'ePointsLeft'    : document.getElementById('PointsLeft'),
 		'eStreak'        : document.getElementById('Streak'),
 		'eSubPoints'     : document.getElementById('SubPoints'),
-		'eTotalSubs'     : document.getElementById('TotalSubs'),
 		'eTotalBits'     : document.getElementById('TotalBits'),
 		'eTotalDonations': document.getElementById('TotalDonations'),
+		'eTotalFollows'  : document.getElementById('TotalFollows'),
+		'eTotalSubs'     : document.getElementById('TotalSubs'),
 		'eTracker'       : document.getElementById('Tracker'),          // ! Outline Hack!
 	
 		// Refresh, gets called for each Event coming through the EventBus
-		// TODO: Implement follows
 		'refresh': function() {
 			if (this.eBitsLeft)       this.eBitsLeft.innerText       = this.BitsLeft;
 			if (this.eBitPoints)      this.eBitPoints.innerText      = this.BitPoints;
+			if (this.eDonationPoints) this.eDonationPoints.innerText = this.DonationPoints;
+			if (this.eFollowPoints)   this.eFollowPoints.innerText   = this.FollowPoints;
 			if (this.eGoal)           this.eGoal.innerText           = this.Goal;
 			if (this.ePoints)         this.ePoints.innerText         = this.Points;
 			if (this.ePointsLeft)     this.ePointsLeft.innerText     = this.PointsLeft;
 			if (this.eStreak)         this.eStreak.innerText         = this.Streak;
-			if (this.eTotalSubs)      this.eTotalSubs.innerText      = this.TotalSubs;
 			if (this.eTotalBits)      this.eTotalBits.innerText      = this.TotalBits;
 			if (this.eTotalDonations) this.eTotalDonations.innerText = this.TotalDonations;
+			if (this.eTotalFollows)   this.eTotalFollows.innerText   = this.TotalFollows;
+			if (this.eTotalSubs)      this.eTotalSubs.innerText      = this.TotalSubs;
 			if (this.eTracker)        this.eTracker.title            = this.eTracker.innerText;     // ! Outline Hack!
 		},
 
@@ -59,6 +64,7 @@ var Overlay = {
 		'SegmentSize'   : 25,
 		'BitPoints'     : 0,
 		'DonationPoints': 0,
+		'FollowPoints'  : 0,
 		'SubPoints'     : 0,
 	
 		'refresh': function() {
@@ -105,7 +111,7 @@ function connectWebsocket() {
 		var socketMessage = JSON.parse(message.data);
 
 		switch (socketMessage.event) {
-			case 'EVENT_UPDATE_BAR':  // TODO: Complete separation
+			case 'EVENT_UPDATE_BAR':
 				var data = JSON.parse(socketMessage.data);
 				Overlay.Bar.DisplayColors  = data.DisplayColors;
 				Overlay.Bar.Goal           = data.Goal;
@@ -114,24 +120,27 @@ function connectWebsocket() {
 
 				Overlay.Bar.BitPoints      = data.BitPoints;
 				Overlay.Bar.DonationPoints = data.DonationPoints;
+				Overlay.Bar.FollowPoints   = data.FollowPoints;
 				Overlay.Bar.SubPoints      = data.SubPoints;
 
 				Overlay.Bar.refresh();
 				Overlay.Bar.onrefresh();
 				break
-			case 'EVENT_UPDATE_OVERLAY':  // TODO: Implement follows
+			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
 				Overlay.Text.BitsLeft       = data.BitsLeft;
 				Overlay.Text.BitPoints      = data.BitPoints;
 				Overlay.Text.DonationPoints = data.DonationPoints;
+				Overlay.Text.FollowPoints   = data.FollowPoints;
 				Overlay.Text.Goal           = data.Goal;
 				Overlay.Text.Streak         = data.Streak;
 				Overlay.Text.SubPoints      = data.SubPoints;
 				Overlay.Text.Points         = data.Points;
 				Overlay.Text.PointsLeft     = data.PointsLeft;
-				Overlay.Text.TotalSubs      = data.TotalSubs;
 				Overlay.Text.TotalBits      = data.TotalBits;
 				Overlay.Text.TotalDonations = data.TotalDonations;
+				Overlay.Text.TotalFollows   = data.TotalFollows;
+				Overlay.Text.TotalSubs      = data.TotalSubs;
 				Overlay.Text.refresh();
 				Overlay.Text.onrefresh();
 				break;
