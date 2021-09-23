@@ -5,30 +5,41 @@ var Overlay = {
 
 	// === Text Overlay ===
 	'Text': {
+		// Base Values
 		'BitsLeft'      : 0,
+		'FollowsLeft'   : 10,
+		'Goal'          : 10,
+		'Points'        : 0,
+		'PointsLeft'    : 10,
+		'Streak'        : 1,
+		
+		// Point Values
 		'BitPoints'     : 0,
 		'DonationPoints': 0,
 		'FollowPoints'  : 0,
-		'Goal'          : 10,
-		'Streak'        : 1,
 		'SubPoints'     : 1,
-		'Points'        : 0,
-		'PointsLeft'    : 10,
+		
+		// Totals Values
 		'TotalBits'     : 0,
 		'TotalDonations': 0,
 		'TotalFollows'  : 0,
 		'TotalSubs'     : 0,
 	
-		// Elements
+		// Base Elements
 		'eBitsLeft'      : document.getElementById('BitsLeft'),
-		'eBitPoints'     : document.getElementById('BitPoints'),
-		'eDonationPoints': document.getElementById('DonationPoints'),
-		'eFollowPoints'  : document.getElementById('FollowPoints'),
+		'eFollowsLeft'   : document.getElementById('FollowsLeft'),
 		'eGoal'          : document.getElementById('Goal'),
 		'ePoints'        : document.getElementById('Points'),
 		'ePointsLeft'    : document.getElementById('PointsLeft'),
 		'eStreak'        : document.getElementById('Streak'),
+
+		// Point Elements
+		'eBitPoints'     : document.getElementById('BitPoints'),
+		'eDonationPoints': document.getElementById('DonationPoints'),
+		'eFollowPoints'  : document.getElementById('FollowPoints'),
 		'eSubPoints'     : document.getElementById('SubPoints'),
+
+		// Totals Elements
 		'eTotalBits'     : document.getElementById('TotalBits'),
 		'eTotalDonations': document.getElementById('TotalDonations'),
 		'eTotalFollows'  : document.getElementById('TotalFollows'),
@@ -37,14 +48,21 @@ var Overlay = {
 	
 		// Refresh, gets called for each Event coming through the EventBus
 		'refresh': function() {
+			// Base
 			if (this.eBitsLeft)       this.eBitsLeft.innerText       = this.BitsLeft;
-			if (this.eBitPoints)      this.eBitPoints.innerText      = this.BitPoints;
-			if (this.eDonationPoints) this.eDonationPoints.innerText = this.DonationPoints;
-			if (this.eFollowPoints)   this.eFollowPoints.innerText   = this.FollowPoints;
+			if (this.eFollowsLeft)    this.eFollowsLeft.innerText    = this.FollowsLeft;
 			if (this.eGoal)           this.eGoal.innerText           = this.Goal;
 			if (this.ePoints)         this.ePoints.innerText         = this.Points;
 			if (this.ePointsLeft)     this.ePointsLeft.innerText     = this.PointsLeft;
 			if (this.eStreak)         this.eStreak.innerText         = this.Streak;
+
+			// Points
+			if (this.eBitPoints)      this.eBitPoints.innerText      = this.BitPoints;
+			if (this.eDonationPoints) this.eDonationPoints.innerText = this.DonationPoints;
+			if (this.eFollowPoints)   this.eFollowPoints.innerText   = this.FollowPoints;
+			if (this.eSubPoints)      this.eSubPoints.innerText      = this.SubPoints;
+
+			// Totals
 			if (this.eTotalBits)      this.eTotalBits.innerText      = this.TotalBits;
 			if (this.eTotalDonations) this.eTotalDonations.innerText = this.TotalDonations;
 			if (this.eTotalFollows)   this.eTotalFollows.innerText   = this.TotalFollows;
@@ -58,10 +76,13 @@ var Overlay = {
 
 	// === Progress Bar ===
 	'Bar': {
+		// Base
 		'DisplayColors' : true,
 		'Goal'          : 100,
 		'SegmentCount'  : 4,
 		'SegmentSize'   : 25,
+
+		// Points
 		'BitPoints'     : 0,
 		'DonationPoints': 0,
 		'FollowPoints'  : 0,
@@ -105,49 +126,61 @@ function connectWebsocket() {
 	socket.onerror = function(error) {
 		console.error('Error: ' + error + ' (System)');
 	}
-
+	
 	// EventBus
 	socket.onmessage = function (message) {
 		var socketMessage = JSON.parse(message.data);
-
+		
 		switch (socketMessage.event) {
-			case 'EVENT_UPDATE_BAR':
-				var data = JSON.parse(socketMessage.data);
-				Overlay.Bar.DisplayColors  = data.DisplayColors;
-				Overlay.Bar.Goal           = data.Goal;
-				Overlay.Bar.SegmentCount   = data.SegmentCount;
-				Overlay.Bar.SegmentSize    = data.SegmentSize;
-
-				Overlay.Bar.BitPoints      = data.BitPoints;
-				Overlay.Bar.DonationPoints = data.DonationPoints;
-				Overlay.Bar.FollowPoints   = data.FollowPoints;
-				Overlay.Bar.SubPoints      = data.SubPoints;
-
-				Overlay.Bar.refresh();
-				Overlay.Bar.onrefresh();
-				break
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
+				// Base
 				Overlay.Text.BitsLeft       = data.BitsLeft;
+				Overlay.Text.FollowsLeft    = data.FollowsLeft;
+				Overlay.Text.Goal           = data.Goal;
+				Overlay.Text.Streak         = data.Streak;
+				Overlay.Text.Points         = data.Points;
+				Overlay.Text.PointsLeft     = data.PointsLeft;
+		
+				// Points
 				Overlay.Text.BitPoints      = data.BitPoints;
 				Overlay.Text.DonationPoints = data.DonationPoints;
 				Overlay.Text.FollowPoints   = data.FollowPoints;
-				Overlay.Text.Goal           = data.Goal;
-				Overlay.Text.Streak         = data.Streak;
 				Overlay.Text.SubPoints      = data.SubPoints;
-				Overlay.Text.Points         = data.Points;
-				Overlay.Text.PointsLeft     = data.PointsLeft;
+		
+				// Totals
 				Overlay.Text.TotalBits      = data.TotalBits;
 				Overlay.Text.TotalDonations = data.TotalDonations;
 				Overlay.Text.TotalFollows   = data.TotalFollows;
 				Overlay.Text.TotalSubs      = data.TotalSubs;
+		
+				// Refresh
 				Overlay.Text.refresh();
 				Overlay.Text.onrefresh();
 				break;
 
-			default:
-				if(socketMessage.event, ['EVENT_CONNECTED']) { return; }
-				console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
+			case 'EVENT_UPDATE_BAR':
+				var data = JSON.parse(socketMessage.data);
+				// Base
+				Overlay.Bar.DisplayColors  = data.DisplayColors;
+				Overlay.Bar.Goal           = data.Goal;
+				Overlay.Bar.SegmentCount   = data.SegmentCount;
+				Overlay.Bar.SegmentSize    = data.SegmentSize;
+				
+				// Points
+				Overlay.Bar.BitPoints      = data.BitPoints;
+				Overlay.Bar.DonationPoints = data.DonationPoints;
+				Overlay.Bar.FollowPoints   = data.FollowPoints;
+				Overlay.Bar.SubPoints      = data.SubPoints;
+				
+				// Refresh
+				Overlay.Bar.refresh();
+				Overlay.Bar.onrefresh();
+				break
+
+				default:
+					if(socketMessage.event, ['EVENT_CONNECTED']) { return; }
+					console.warn('TwitchStreaker: Unknown Event "' + socketMessage.event + '" (System)');
 				return;
 		}
 	}

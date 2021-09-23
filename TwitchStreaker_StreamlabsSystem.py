@@ -5,24 +5,30 @@ import codecs, json, math, os, time
 SCRIPT_FOLDER        = os.path.realpath(os.path.dirname(__file__))
 TEXT_FOLDER          = os.path.join(SCRIPT_FOLDER, "Text\\")
 
+# === System Files ===
 LOG_FILE             = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
 SESSION_FILE         = os.path.join(SCRIPT_FOLDER, "Session.json")
 SETTINGS_FILE        = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
-# TODO: Implement follows
+# === Base Files ===
 BITS_LEFT_FILE       = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
-BIT_POINTS_FILE      = os.path.join(TEXT_FOLDER, "BitPoints.txt")
-DONATION_POINTS_FILE = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
-FOLLOW_POINTS_FILE   = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
+FOLLOWS_LEFT_FILE    = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
 GOAL_FILE            = os.path.join(TEXT_FOLDER, "Goal.txt")
 POINTS_FILE          = os.path.join(TEXT_FOLDER, "Points.txt")
 POINTS_LEFT_FILE     = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
 STREAK_FILE          = os.path.join(TEXT_FOLDER, "Streak.txt")
+
+# === Point Files ===
+BIT_POINTS_FILE      = os.path.join(TEXT_FOLDER, "BitPoints.txt")
+DONATION_POINTS_FILE = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
+FOLLOW_POINTS_FILE   = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
 SUB_POINTS_FILE      = os.path.join(TEXT_FOLDER, "SubPoints.txt")
+
+# === Totals Files ===
 TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
+TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 TOTAL_FOLLOWS_FILE   = os.path.join(TEXT_FOLDER, "TotalFollows.txt")
 TOTAL_SUBS_FILE      = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
-TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
 
 # === External References ===
 import clr
@@ -44,15 +50,21 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 # === Session Class ===
 class ScriptSession(object):
 
-	BitsLeft       = 0
-	BitPoints      = 0
-	DonationPoints = 0
-	FollowPoints   = 0
+	# Base Values
+	BitsLeft       = 500
+	FollowsLeft    = 10
 	Goal           = 10
 	Points         = 0
 	PointsLeft     = 10
 	Streak         = 1
+
+	# Point Values
+	BitPoints      = 0
+	DonationPoints = 0
+	FollowPoints   = 0
 	SubPoints      = 0
+
+	# Totals Values
 	TotalBits      = 0
 	TotalFollows   = 0
 	TotalSubs      = 0
@@ -95,15 +107,21 @@ class ScriptSession(object):
 	@staticmethod
 	def DefaultSession():
 		return {
-			"BitsLeft": 0,
-			"BitPoints": 0,
-			"DonationPoints": 0,
-			"FollowPoints": 0,
+			# Base Values
+			"BitsLeft": 500,
+			"FollowsLeft": 0,
 			"Goal": 10,
 			"Points": 0,
 			"PointsLeft": 10,
 			"Streak": 1,
-			"SubPoints": 1,
+
+			# Point Values
+			"BitPoints": 0,
+			"DonationPoints": 0,
+			"FollowPoints": 0,
+			"SubPoints": 10,
+
+			# Totals Values
 			"TotalBits": 0,
 			"TotalFollows": 0,
 			"TotalSubs": 0,
@@ -158,6 +176,7 @@ class ScriptSettings(object):
 	BarDisplayColors = True
 	BarGoal = 100
 	BarSegmentCount = 4
+	# TODO: Add toggles for each type value
 
 	# Sounds
 	SoundEnabled = False
@@ -242,6 +261,7 @@ class ScriptSettings(object):
 			"BarDisplayColors": True,
 			"BarGoal": 100,
 			"BarSegmentCount": 4,
+			# TODO: Add toggles for each type value
 
 			# Sounds
 			"SoundEnabled": False,
@@ -285,15 +305,21 @@ POINT_VARS    = [
 	"BitsPointValue", "DonationsPointValue", "FollowPointValue"
 ]
 PARSE_PARAMETERS = {
+	# Base Values
 	"$tsBitsLeft":       "BitsLeft",
+	"$tsFollowsLeft":    "FollowsLeft",
+	"$tsGoal":           "Goal",
+	"$tsStreak":         "Streak",
+	"$tsPoints":         "Points",
+	"$tsPointsLeft":     "PointsLeft",
+
+	# Point Values
 	"$tsBitPoints":      "BitPoints",
 	"$tsDonationPoints": "DonationPoints",
 	"$tsFollowPoints":   "FollowPoints",
-	"$tsGoal":           "Goal",
-	"$tsStreak":         "Streak",
 	"$tsSubPoints":      "SubPoints",
-	"$tsPoints":         "Points",
-	"$tsPointsLeft":     "PointsLeft",
+
+	# Totals Values
 	"$tsTotalBits":      "TotalBits",
 	"$tsTotalFollows":   "TotalFollows",
 	"$tsTotalSubs":      "TotalSubs",
@@ -665,7 +691,9 @@ def UpdateTracker():  # ! Only call if a quick response is required
 			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
 			if Session.Goal  > Settings.GoalMax:
 				Session.Goal = Settings.GoalMax
-	Session.PointsLeft = Session.Goal - Session.Points
+
+	Session.PointsLeft  = Session.Goal - Session.Points
+	Session.FollowsLeft = Settings.FollowsRequired - FollowsTemp
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
@@ -693,6 +721,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	SimpleWrite(BIT_POINTS_FILE,      Session.BitPoints)
 	SimpleWrite(DONATION_POINTS_FILE, Session.DonationPoints)
 	SimpleWrite(FOLLOW_POINTS_FILE,   Session.FollowPoints)
+	SimpleWrite(FOLLOWS_LEFT_FILE,    Session.FollowsLeft)
 	SimpleWrite(GOAL_FILE,            Session.Goal)
 	SimpleWrite(POINTS_FILE,          Session.Points)
 	SimpleWrite(POINTS_LEFT_FILE,     Session.PointsLeft)
@@ -807,10 +836,11 @@ def ResetSession():
 	DonationTemp = 0.0
 	FollowsTemp  = 0
 
-	Session.__dict__   = Session.DefaultSession()
-	Session.BitsLeft   = Settings.BitsMinAmount
-	Session.Goal       = Settings.Goal
-	Session.PointsLeft = Settings.Goal
+	Session.__dict__    = Session.DefaultSession()
+	Session.BitsLeft    = Settings.BitsMinAmount
+	Session.FollowsLeft = Settings.FollowsRequired
+	Session.Goal        = Settings.Goal
+	Session.PointsLeft  = Settings.Goal
 
 	SanityCheck()
 	UpdateTracker()

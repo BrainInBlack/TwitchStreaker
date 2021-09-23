@@ -2,7 +2,7 @@
 
 ## 3.0.0 - Segmented Progressbar
 
-Brand new feature, segmented Progressbar! This feature adds a progressbar to the script, that will display the progress of the current streak in a bar format. In addition, you can segment the progressbar to allow for intermediate goals. Each type of Points has their own color and can be displayed in the progressbar.
+**IMPORTANT CHANGES!** Brand new feature, segmented Progressbar! This feature adds a progressbar to the script, that will display the progress of the current streak in a bar format. In addition, you can segment the progressbar to allow for intermediate goals. Each type of Points has their own color and can be displayed in the progressbar.
 
 As you might have guessed, this update will pretty much break everything. Please Backup the script folder before updating to the latest version! There are detailed instructions for updating from 2.x to 3.x in the README.md file.
 
@@ -16,6 +16,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added BitPoints
   * Added DonationPoints
   * Added FollowPoints
+  * Added FollowsLeft
   * Added SubPoints
   * Added TotalFollows
 
@@ -34,12 +35,15 @@ As you might have guessed, this update will pretty much break everything. Please
 * New Command Parameters
   * Added $tsBitPoints
   * Added $tsDonationPoints
+  * Added $tsFollowPoints
+  * Added $tsFollowsLeft
   * Added $tsSubPoints
+  * Added $tsTotalFollows
 
 * Added `e` prefix for the html elements in the overlay
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
-* Fixed Command parameter parsing
+* Fixed Command parameter not parsing the right values
 
 ## 2.8.2 - More Fixes
 
