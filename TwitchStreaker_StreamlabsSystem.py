@@ -178,7 +178,10 @@ class ScriptSettings(object):
 	BarDisplayColors = True
 	BarGoal = 100
 	BarSegmentCount = 4
-	# TODO: Add toggles for each type value
+	BarBitsEnabled = True
+	BarDonationsEnabled = True
+	BarFollowsEnabled = True
+	BarSubsEnabled = True
 
 	# Sounds
 	SoundEnabled = False
@@ -263,7 +266,10 @@ class ScriptSettings(object):
 			"BarDisplayColors": True,
 			"BarGoal": 100,
 			"BarSegmentCount": 4,
-			# TODO: Add toggles for each type value
+			"BarBitsEnabled": True,
+			"BarDonationsEnabled": True,
+			"BarFollowsEnabled": True,
+			"BarSubsEnabled": True,
 
 			# Sounds
 			"SoundEnabled": False,
@@ -724,7 +730,12 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	Session.FollowsLeft = Settings.FollowsRequired - FollowsTemp
 
 	# Update Progress Bar
-	pointsSum = Session.BitPoints + Session.DonationPoints + Session.FollowPoints + Session.SubPoints
+	pointsSum = 0
+	if Settings.BarBitsEnabled:      pointsSum += Session.BitPoints
+	if Settings.BarDonationsEnabled: pointsSum += Session.DonationPoints
+	if Settings.BarFollowsEnabled:   pointsSum += Session.FollowPoints
+	if Settings.BarSubsEnabled:      pointsSum += Session.SubPoints
+
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 	if pointsSum >= Settings.BarGoal:
 		GoalCued  = True
@@ -736,15 +747,18 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
 	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps({
-		"DisplayColors":  Settings.BarDisplayColors,
-		"Goal":           Settings.BarGoal,
-		"SegmentCount":   Settings.BarSegmentCount,
-		"SegmentSize":    segmentSize,
-
-		"BitPoints":      Session.BitPoints,
-		"DonationPoints": Session.DonationPoints,
-		"FollowPoints":   Session.FollowPoints,
-		"SubPoints":      Session.SubPoints
+		"DisplayColors":    Settings.BarDisplayColors,
+		"Goal":             Settings.BarGoal,
+		"SegmentCount":     Settings.BarSegmentCount,
+		"SegmentSize":      segmentSize,
+		"BitPoints":        Session.BitPoints,
+		"BitsEnabled":      Settings.BarBitsEnabled,
+		"DonationPoints":   Session.DonationPoints,
+		"DonationsEnabled": Settings.BarDonationsEnabled,
+		"FollowPoints":     Session.FollowPoints,
+		"FollowsEnabled":   Settings.BarFollowsEnabled,
+		"SubPoints":        Session.SubPoints,
+		"SubsEnabled":      Settings.BarSubsEnabled
 	})))
 
 	# Update Text Files

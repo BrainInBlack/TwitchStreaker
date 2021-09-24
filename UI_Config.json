@@ -142,6 +142,34 @@
 		"tooltip": "Display Point types with separate colors.",
 		"group": "Progress Bar"
 	},
+	"BarBitsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Bits",
+		"tooltip": "Enable Bits for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarDonationsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Donations",
+		"tooltip": "Enable Donations for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarFollowsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Follows",
+		"tooltip": "Enable Follows for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarSubsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Subs",
+		"tooltip": "Enable Subs for the Progress Bar.",
+		"group": "Progress Bar"
+	},
 	"SoundEnabled": {
 		"type": "checkbox",
 		"value": false,

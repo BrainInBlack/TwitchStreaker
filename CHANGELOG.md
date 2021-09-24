@@ -22,9 +22,13 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added TotalFollows
 
 * New Script Settings
+  * Added BarBitsEnabled
+  * Added BarDonationsEnabled
+  * Added BarFollowsEnabled
   * Added BarGoal field
   * Added BarDisplayColors
   * Added BarSegmentCount
+  * Added BarSubsEnabled
   * Added CountFollows
   * Added FollowPointValue
   * Added SoundEnabled
@@ -42,7 +46,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added $tsTotalFollows
 
 * Added `e` prefix for the html elements in the overlay
-* Added sound system
+* Added sound system, MP3 only
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
 * Fixed Command parameter not parsing the right values

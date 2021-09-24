@@ -83,10 +83,14 @@ var Overlay = {
 		'SegmentSize'   : 25,
 
 		// Points
-		'BitPoints'     : 0,
-		'DonationPoints': 0,
-		'FollowPoints'  : 0,
-		'SubPoints'     : 0,
+		'BitPoints'       : 0,
+		'BitsEnabled'     : true,
+		'DonationPoints'  : 0,
+		'DonationsEnabled': true,
+		'FollowPoints'    : 0,
+		'FollowsEnabled'  : true,
+		'SubPoints'       : 0,
+		'SubsEnabled'     : true,
 	
 		'refresh': function() {
 			// TODO: Implement
@@ -162,16 +166,20 @@ function connectWebsocket() {
 			case 'EVENT_UPDATE_BAR':
 				var data = JSON.parse(socketMessage.data);
 				// Base
-				Overlay.Bar.DisplayColors  = data.DisplayColors;
-				Overlay.Bar.Goal           = data.Goal;
-				Overlay.Bar.SegmentCount   = data.SegmentCount;
-				Overlay.Bar.SegmentSize    = data.SegmentSize;
+				Overlay.Bar.DisplayColors    = data.DisplayColors;
+				Overlay.Bar.Goal             = data.Goal;
+				Overlay.Bar.SegmentCount     = data.SegmentCount;
+				Overlay.Bar.SegmentSize      = data.SegmentSize;
 				
 				// Points
-				Overlay.Bar.BitPoints      = data.BitPoints;
-				Overlay.Bar.DonationPoints = data.DonationPoints;
-				Overlay.Bar.FollowPoints   = data.FollowPoints;
-				Overlay.Bar.SubPoints      = data.SubPoints;
+				Overlay.Bar.BitPoints        = data.BitPoints;
+				Overlay.Bar.BitsEnabled      = data.BitEnabled;
+				Overlay.Bar.DonationPoints   = data.DonationPoints;
+				Overlay.Bar.DonationsEnabled = data.DonationsEnabled;
+				Overlay.Bar.FollowPoints     = data.FollowPoints;
+				Overlay.Bar.FollowsEnabled   = data.FollowsEnabled;
+				Overlay.Bar.SubPoints        = data.SubPoints;
+				Overlay.Bar.SubsEnabled      = data.SubsEnabled;
 				
 				// Refresh
 				Overlay.Bar.refresh();
