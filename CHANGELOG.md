@@ -17,6 +17,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added DonationPoints
   * Added FollowPoints
   * Added FollowsLeft
+  * Added SegmentsCompleted
   * Added SubPoints
   * Added TotalFollows
 
@@ -41,6 +42,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added $tsTotalFollows
 
 * Added `e` prefix for the html elements in the overlay
+* Added sound system
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
 * Fixed Command parameter not parsing the right values

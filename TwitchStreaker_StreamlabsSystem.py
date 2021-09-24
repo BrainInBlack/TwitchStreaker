@@ -4,6 +4,7 @@ import codecs, json, math, os, time
 # === Paths ===
 SCRIPT_FOLDER        = os.path.realpath(os.path.dirname(__file__))
 TEXT_FOLDER          = os.path.join(SCRIPT_FOLDER, "Text\\")
+SOUNDS_FOLDER        = os.path.join(SCRIPT_FOLDER, "Sounds\\")
 
 # === System Files ===
 LOG_FILE             = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
@@ -51,18 +52,19 @@ Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 class ScriptSession(object):
 
 	# Base Values
-	BitsLeft       = 500
-	FollowsLeft    = 10
-	Goal           = 10
-	Points         = 0
-	PointsLeft     = 10
-	Streak         = 1
+	BitsLeft    = 500
+	FollowsLeft = 10
+	Goal        = 10
+	Points      = 0
+	PointsLeft  = 10
+	Streak      = 1
 
 	# Point Values
-	BitPoints      = 0
-	DonationPoints = 0
-	FollowPoints   = 0
-	SubPoints      = 0
+	BitPoints         = 0
+	DonationPoints    = 0
+	FollowPoints      = 0
+	SubPoints         = 0
+	SegmentsCompleted = 0
 
 	# Totals Values
 	TotalBits      = 0
@@ -287,10 +289,17 @@ BitsTemp      = 0
 DonationTemp  = 0.0
 FollowsTemp   = 0
 IsScriptReady = False
+FlushStamp    = time.time()
 RefreshStamp  = time.time()
 SaveStamp     = time.time()
-FlushStamp    = time.time()
 EventIDs      = []
+
+
+# === Sound System ===
+GoalCued      = False
+GoalStamp     = time.time()
+SegmentCued   = False
+SegmentStamp  = time.time()
 
 
 # === Constants ===
@@ -623,7 +632,7 @@ def SocketDisconnected(sender, args): Log("Disconnected")
 
 # === Tick ===
 def Tick():
-	global EventIDs, FlushStamp, SaveStamp
+	global EventIDs, FlushStamp, SaveStamp, GoalCued, SegmentCued
 
 	now = time.time()
 
@@ -655,10 +664,29 @@ def Tick():
 			Log(e.message)
 		SaveStamp = now
 
+	# GoalSound Timer
+	if Settings.SoundBarGoalCompleted is not None or Settings.SoundBarGoalCompleted != "":
+		if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay and GoalCued:
+			if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)):
+				Log("Sound {} not found!".format(Settings.SoundBarGoalCompleted))
+			elif not PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted), 1.0):
+				Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
+			GoalCued = False
+
+	# SegmentSound Timer
+	if Settings.SoundBarSegmentCompleted is not None or Settings.SoundBarSegmentCompleted != "":
+		if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay and SegmentCued:
+			if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)):
+				Log("Sound {} not found!".format(Settings.SoundBarSegmentCompleted))
+			elif not PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted), 1.0):
+				Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
+			SegmentCued = False
+
+
 
 # === Update Tracker ===
 def UpdateTracker():  # ! Only call if a quick response is required
-	global BitsTemp, DonationTemp, RefreshStamp
+	global BitsTemp, DonationTemp, RefreshStamp, GoalCued, SegmentCued, GoalStamp, SegmentStamp
 
 	# Calculate Bits
 	if Settings.CountBitsCumulative and BitsTemp >= Settings.BitsMinAmount:
@@ -695,23 +723,28 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	Session.PointsLeft  = Session.Goal - Session.Points
 	Session.FollowsLeft = Settings.FollowsRequired - FollowsTemp
 
+	# Update Progress Bar
+	pointsSum = Session.BitPoints + Session.DonationPoints + Session.FollowPoints + Session.SubPoints
+	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
+	if pointsSum >= Settings.BarGoal:
+		GoalCued  = True
+		GoalStamp = time.time()
+	elif pointsSum >= segmentSize and Session.SegmentsCompleted < math.trunc(pointsSum / segmentSize):
+		SegmentCued  = True
+		SegmentStamp = time.time()
+
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
-
-	
-	# TODO: Implement sound system
-
-	# Update Progress Bar
 	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps({
-		"DisplayColors": Settings.BarDisplayColors,
-		"Goal": Settings.BarGoal,
-		"SegmentCount": Settings.BarSegmentCount,
-		"SegmentSize": math.trunc(Settings.BarGoal / Settings.BarSegmentCount),
+		"DisplayColors":  Settings.BarDisplayColors,
+		"Goal":           Settings.BarGoal,
+		"SegmentCount":   Settings.BarSegmentCount,
+		"SegmentSize":    segmentSize,
 
-		"BitPoints": Session.BitPoints,
+		"BitPoints":      Session.BitPoints,
 		"DonationPoints": Session.DonationPoints,
-		"FollowPoints": Session.FollowPoints,
-		"SubPoints": Session.SubPoints
+		"FollowPoints":   Session.FollowPoints,
+		"SubPoints":      Session.SubPoints
 	})))
 
 	# Update Text Files
