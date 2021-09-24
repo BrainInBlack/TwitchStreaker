@@ -124,7 +124,7 @@
 	"BarGoal": {
 		"type": "numberbox",
 		"value": 100,
-		"label:": "Goal",
+		"label": "Goal",
 		"tooltip": "Amount of Points needed to fill the bar.",
 		"group": "Progress Bar"
 	},
@@ -179,7 +179,7 @@
 	},
 	"SoundBarGoalCompleted": {
 		"type": "textbox",
-		"value": "Something!",
+		"value": "GoalCompleted.mp3",
 		"label": "Completion Sound",
 		"tooltip": "Sound that will be played when the bar is completely filled.",
 		"group": "Progress Bar"
@@ -193,7 +193,7 @@
 	},
 	"SoundBarSegmentCompleted": {
 		"type": "textbox",
-		"value": "Something!",
+		"value": "SegmentCompleted.mp3",
 		"label": "Segment Sound",
 		"tooltip": "Sound that will be played when a segment within the bar is completely filled.",
 		"group": "Progress Bar"
