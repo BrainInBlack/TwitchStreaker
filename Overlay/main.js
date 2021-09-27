@@ -205,6 +205,6 @@ connectWebsocket();
 
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
-	Overlay.refreshText();
+	Overlay.Text.refresh();
 	console.log('TwitchStreaker: Loaded (Init)');
 }, 500);

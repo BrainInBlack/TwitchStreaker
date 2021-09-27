@@ -27,3 +27,43 @@ html, body {
   -webkit-text-stroke: 0.12em #6441a4;
   z-index: -1;
 }
+
+#Bar {
+  width: 100%;
+  height: 100%;
+  background: #2a2b2d;
+  z-index: 0;
+}
+
+#Bar #BarSubs {
+  background-color: #ff642d;
+}
+
+#Bar #BarFollows {
+  background: #50b437;
+}
+
+#Bar #BarBits {
+  background: #c800b4;
+}
+
+#Bar #BarDonations {
+  background: #00b4c8;
+}
+
+#Bar .Segment {
+  height: 100%;
+  width: 10%;
+  float: left;
+  z-index: 1;
+  background: #6441a4;
+}
+
+#Bar .Indicator {
+  height: 100%;
+  float: left;
+  z-index: 2;
+  width: 5px;
+  background: white;
+  position: absolute;
+}

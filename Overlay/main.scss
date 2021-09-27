@@ -5,6 +5,12 @@ $color: rgba(255, 255, 255, 1);
 $glow: rgba(100, 65, 164, 1);
 $shadow: rgba(0, 0, 0, .35);
 
+$barBackground: rgba(42, 43, 45, 1);
+$barSubs: rgba(255, 100, 45, 1);
+$barFollows: rgba(80, 180, 55, 1);
+$barBits: rgba(200, 0, 180, 1);
+$barDonations: rgba(0, 180, 200, 1);
+
 html, body {
 	margin: 0;
 	padding: 0;
@@ -31,5 +37,42 @@ html, body {
 		position: absolute;
 		-webkit-text-stroke: 0.12em $glow;
 		z-index: -1;
+	}
+}
+
+#Bar{
+	width: 100%;
+	height: 100%;
+	background: $barBackground;
+	z-index: 0;
+
+	#BarSubs {
+		background-color: $barSubs;
+	}
+	#BarFollows {
+		background: $barFollows;
+	}
+	#BarBits {
+		background: $barBits;
+	}
+	#BarDonations {
+		background: $barDonations;
+	}
+
+	.Segment {
+		height: 100%;
+		width: 10%;
+		float: left;
+		z-index: 1;
+		background: $glow;
+	}
+
+	.Indicator {
+		height: 100%;
+		float: left;
+		z-index: 2;
+		width: 5px;
+		background: rgba(255, 255, 255, 1);
+		position: absolute;
 	}
 }
