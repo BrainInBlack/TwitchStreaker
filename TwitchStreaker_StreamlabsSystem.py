@@ -121,7 +121,7 @@ class ScriptSession(object):
 			"BitPoints": 0,
 			"DonationPoints": 0,
 			"FollowPoints": 0,
-			"SubPoints": 10,
+			"SubPoints": 0,
 
 			# Totals Values
 			"TotalBits": 0,
@@ -888,6 +888,8 @@ def ResetSession():
 	Session.FollowsLeft = Settings.FollowsRequired
 	Session.Goal        = Settings.Goal
 	Session.PointsLeft  = Settings.Goal
+
+	Session.Save()
 
 	SanityCheck()
 	UpdateTracker()

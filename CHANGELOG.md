@@ -45,6 +45,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added $tsSubPoints
   * Added $tsTotalFollows
 
+* Session now saves upon reset
 * Added `e` prefix for the html elements in the overlay
 * Added sound system, MP3 only
 * Removed `Current` prefix from all Session variables

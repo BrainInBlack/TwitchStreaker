@@ -10,6 +10,7 @@ $barSubs: rgba(255, 100, 45, 1);
 $barFollows: rgba(80, 180, 55, 1);
 $barBits: rgba(200, 0, 180, 1);
 $barDonations: rgba(0, 180, 200, 1);
+$barIndicator: rgba(255, 255, 255, 1);
 
 html, body {
 	margin: 0;
@@ -40,7 +41,7 @@ html, body {
 	}
 }
 
-#Bar{
+#Bar {
 	width: 100%;
 	height: 100%;
 	background: $barBackground;
@@ -61,10 +62,8 @@ html, body {
 
 	.Segment {
 		height: 100%;
-		width: 10%;
 		float: left;
 		z-index: 1;
-		background: $glow;
 	}
 
 	.Indicator {
@@ -72,7 +71,8 @@ html, body {
 		float: left;
 		z-index: 2;
 		width: 5px;
-		background: rgba(255, 255, 255, 1);
+		background: $barIndicator;
+		transform: translate(-50%, 0);
 		position: absolute;
 	}
 }

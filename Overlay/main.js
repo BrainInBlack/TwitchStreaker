@@ -91,9 +91,50 @@ var Overlay = {
 		'FollowsEnabled'  : true,
 		'SubPoints'       : 0,
 		'SubsEnabled'     : true,
-	
+
+		'_width': '0px',
+		'_pointWidth': '0px',
+		'_finished': false,
+
+		'init': function() {
+			this._width          = getContentWidth(document.getElementById('Bar'));
+			this._pointWidth     = this._width / this.Goal;
+			document.getElementById('Bar').innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
+
+			var indicators   = document.getElementsByClassName('Indicator');
+			var segmentWidth = this._width / this.SegmentCount;
+			var iter         = 1;
+
+			for (var indicator of indicators) {
+				_w = getContentWidth(indicator);
+				indicator.style.cssText = 'Left:' + Math.floor(segmentWidth * iter) + 'px;';
+				iter++;
+			}
+		},
+
 		'refresh': function() {
-			// TODO: Implement
+			if (this._finished === true) {return};
+
+			var sum = 0;
+
+			if (this.SubsEnabled) {
+				document.getElementById('BarSubs').style.width = Math.floor(this._pointWidth * this.SubPoints) + 'px';
+				sum += this.SubPoints;
+			}
+			if (this.FollowsEnabled) {
+				document.getElementById('BarFollows').style.width = Math.floor(this._pointWidth * this.FollowPoints) + 'px';
+				sum += this.FollowPoints;
+			}
+			if (this.BitsEnabled) {
+				document.getElementById('BarBits').style.width = Math.floor(this._pointWidth * this.BitPoints) + 'px';
+				sum += this.BitPoints;
+			}
+			if (this.DonationsEnabled) {
+				document.getElementById('BarDonations').style.width = Math.floor(this._pointWidth * this.DonationPoints) + 'px';
+				sum += this.DonationPoints;
+			}
+
+			this._finished = (sum >= this.Goal);
 		},
 
 		// User Refresh
@@ -173,7 +214,7 @@ function connectWebsocket() {
 				
 				// Points
 				Overlay.Bar.BitPoints        = data.BitPoints;
-				Overlay.Bar.BitsEnabled      = data.BitEnabled;
+				Overlay.Bar.BitsEnabled      = data.BitsEnabled;
 				Overlay.Bar.DonationPoints   = data.DonationPoints;
 				Overlay.Bar.DonationsEnabled = data.DonationsEnabled;
 				Overlay.Bar.FollowPoints     = data.FollowPoints;
@@ -206,5 +247,13 @@ connectWebsocket();
 // Workaround for some browser plugins having issues with the initial draw
 setTimeout(function() {
 	Overlay.Text.refresh();
+	Overlay.Bar.refresh();
 	console.log('TwitchStreaker: Loaded (Init)');
 }, 500);
+
+function getContentWidth(element) {
+	styles = getComputedStyle(element);
+	return element.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingLeft)
+}
+
+Overlay.Bar.init();
