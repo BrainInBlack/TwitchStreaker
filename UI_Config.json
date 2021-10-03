@@ -135,13 +135,6 @@
 		"tooltip": "Amount of segments within the bar. Their value will be calculated automatically depending on the amount of segments needed.",
 		"group": "Progress Bar"
 	},
-	"BarDisplayColors": {
-		"type": "checkbox",
-		"value": true,
-		"label": "Display Colors",
-		"tooltip": "Display Point types with separate colors.",
-		"group": "Progress Bar"
-	},
 	"BarBitsEnabled": {
 		"type": "checkbox",
 		"value": true,

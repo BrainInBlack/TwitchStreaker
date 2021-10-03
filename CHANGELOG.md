@@ -25,8 +25,7 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added BarBitsEnabled
   * Added BarDonationsEnabled
   * Added BarFollowsEnabled
-  * Added BarGoal field
-  * Added BarDisplayColors
+  * Added BarGoal
   * Added BarSegmentCount
   * Added BarSubsEnabled
   * Added CountFollows
@@ -48,6 +47,7 @@ As you might have guessed, this update will pretty much break everything. Please
 * Session now saves upon reset
 * Added `e` prefix for the html elements in the overlay
 * Added sound system, MP3 only
+* Moved folder creation into the initialization
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
 * Fixed Command parameter not parsing the right values

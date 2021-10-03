@@ -79,22 +79,11 @@ class ScriptSession(object):
 	def Load(self):
 		try:
 			with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
-				_new = json.load(f, encoding="utf-8-sig")
+				self.__dict__ = json.load(f, encoding="utf-8-sig")
 				f.close()
 		except:
 			self.Save()
 			return
-
-		# Remove old data and update the loaded file
-		_dirty = False
-		diff = set(_new) ^ set(self.__dict__)
-		if len(diff) > 0:
-			for k in diff:
-				if k in _new:
-					del _new[k]
-					_dirty = True
-		self.__dict__ = _new
-		if _dirty: self.Save()
 
 	def Save(self):
 		try:
@@ -175,7 +164,6 @@ class ScriptSettings(object):
 	FollowPointValue = 1
 
 	# Progressbar
-	BarDisplayColors = True
 	BarGoal = 100
 	BarSegmentCount = 4
 	BarBitsEnabled = True
@@ -200,22 +188,11 @@ class ScriptSettings(object):
 	def Load(self):
 		try:
 			with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
-				_new = json.load(f, encoding="utf-8-sig")
+				self.__dict__ = json.load(f, encoding="utf-8-sig")
 				f.close()
 		except:
 			self.Save()
 			return
-
-		# Remove old options and update the loaded file
-		_dirty = False
-		diff = set(_new) ^ set(self.__dict__)
-		if len(diff) > 0:
-			for k in diff:
-				if k in _new:
-					del _new[k]
-					_dirty = True
-		self.__dict__ = _new
-		if _dirty: self.Save()
 
 	def Save(self):
 		try:
@@ -346,11 +323,15 @@ PARSE_PARAMETERS = {
 def Init():
 	global Session, Settings
 	try:
-		Session     = ScriptSession()
-		Settings    = ScriptSettings()
+		Session  = ScriptSession()
+		Settings = ScriptSettings()
 	except Exception as e:
 		Log(e.message)
 		return
+
+	# Create missing folders
+	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
+	if not os.path.exists(SOUNDS_FOLDER): os.mkdir(SOUNDS_FOLDER)
 
 	SanityCheck()
 	StartUp()
@@ -458,7 +439,7 @@ def SocketEvent(sender, args):
 				Session.TotalFollows += 1
 
 			FollowsTemp += 1
-			if FollowsTemp > Settings.FollowsRequired:
+			if FollowsTemp >= Settings.FollowsRequired:
 				Session.Points       += Settings.FollowPointValue
 				Session.FollowPoints += Settings.FollowPointValue
 				FollowsTemp = FollowsTemp - Settings.FollowsRequired
@@ -598,6 +579,7 @@ def SocketEvent(sender, args):
 
 				if Settings.CountDonationsOnce:
 					Session.Points += Settings.DonationPointValue
+					Session.DonationPoints += Settings.DonationPointValue
 					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.FromName))
 					return
 
@@ -671,22 +653,23 @@ def Tick():
 		SaveStamp = now
 
 	# GoalSound Timer
-	if Settings.SoundBarGoalCompleted is not None or Settings.SoundBarGoalCompleted != "":
-		if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay and GoalCued:
-			if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)):
-				Log("Sound {} not found!".format(Settings.SoundBarGoalCompleted))
-			elif not PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted), 1.0):
-				Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
-			GoalCued = False
+	if Settings.SoundEnabled:
+		if Settings.SoundBarGoalCompleted is not None or Settings.SoundBarGoalCompleted != "":
+			if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay and GoalCued:
+				if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)):
+					Log("Sound {} not found!".format(Settings.SoundBarGoalCompleted))
+				elif not Parent.PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted), 1.0):
+					Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
+				GoalCued = False
 
-	# SegmentSound Timer
-	if Settings.SoundBarSegmentCompleted is not None or Settings.SoundBarSegmentCompleted != "":
-		if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay and SegmentCued:
-			if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)):
-				Log("Sound {} not found!".format(Settings.SoundBarSegmentCompleted))
-			elif not PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted), 1.0):
-				Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
-			SegmentCued = False
+		# SegmentSound Timer
+		if Settings.SoundBarSegmentCompleted is not None or Settings.SoundBarSegmentCompleted != "":
+			if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay and SegmentCued:
+				if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)):
+					Log("Sound {} not found!".format(Settings.SoundBarSegmentCompleted))
+				elif not Parent.PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted), 1.0):
+					Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
+				SegmentCued = False
 
 
 
@@ -698,6 +681,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if Settings.CountBitsCumulative and BitsTemp >= Settings.BitsMinAmount:
 		res = math.trunc(BitsTemp / Settings.BitsMinAmount)
 		Session.Points += Settings.BitsPointValue * res
+		Session.BitPoints += Settings.BitsPointValue
 		BitsTemp -= Settings.BitsMinAmount * res
 		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
 		Session.BitsLeft = Settings.BitsMinAmount - BitsTemp
@@ -707,6 +691,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if Settings.CountDonationsCumulative and DonationTemp >= Settings.DonationMinAmount:
 		res = math.trunc(DonationTemp / Settings.DonationMinAmount)
 		Session.Points += Settings.DonationPointValue
+		Session.DonationPoints += Settings.DonationPointValue
 		DonationTemp -= Settings.DonationMinAmount * res
 		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings.DonationPointValue * res))
 		del res
@@ -762,8 +747,6 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	})))
 
 	# Update Text Files
-	if not os.path.isdir(TEXT_FOLDER): os.mkdir(TEXT_FOLDER)
-
 	SimpleWrite(BITS_LEFT_FILE,       Session.BitsLeft)
 	SimpleWrite(BIT_POINTS_FILE,      Session.BitPoints)
 	SimpleWrite(DONATION_POINTS_FILE, Session.DonationPoints)
@@ -902,11 +885,7 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	# Backup old token for comparison
 	old_token = Settings.SocketToken
-	try:
-		Settings.Load()
-	except Exception as e:
-		Log(e.message)
-		return
+	Settings.__dict__ = json.loads(json_data)
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
@@ -986,9 +965,9 @@ def Unload():
 
 # === Parse Parameters ===
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-	for key, val in PARSE_PARAMETERS:
+	for key in PARSE_PARAMETERS:
 		if key in parse_string:
-			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[val]))
+			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[key]))
 	return parse_string
 
 

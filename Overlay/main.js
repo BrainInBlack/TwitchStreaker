@@ -96,9 +96,7 @@ var Overlay = {
 		'_pointWidth': '0px',
 		'_finished': false,
 
-		'init': function() {
-			this._width          = getContentWidth(document.getElementById('Bar'));
-			this._pointWidth     = this._width / this.Goal;
+		'updateIndicators': function() {
 			document.getElementById('Bar').innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
 
 			var indicators   = document.getElementsByClassName('Indicator');
@@ -113,6 +111,9 @@ var Overlay = {
 		},
 
 		'refresh': function() {
+			this._width          = getContentWidth(document.getElementById('Bar'));
+			this._pointWidth     = this._width / this.Goal;
+
 			if (this._finished === true) {return};
 
 			var sum = 0;
@@ -209,7 +210,12 @@ function connectWebsocket() {
 				// Base
 				Overlay.Bar.DisplayColors    = data.DisplayColors;
 				Overlay.Bar.Goal             = data.Goal;
-				Overlay.Bar.SegmentCount     = data.SegmentCount;
+				if (data.SegmentCount != Overlay.Bar.SegmentCount) {
+					Overlay.Bar.SegmentCount = data.SegmentCount;
+					Overlay.Bar.updateIndicators();
+				} else {
+					Overlay.Bar.SegmentCount = data.SegmentCount;
+				}
 				Overlay.Bar.SegmentSize      = data.SegmentSize;
 				
 				// Points
@@ -255,5 +261,3 @@ function getContentWidth(element) {
 	styles = getComputedStyle(element);
 	return element.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingLeft)
 }
-
-Overlay.Bar.init();
