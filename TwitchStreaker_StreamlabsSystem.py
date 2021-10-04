@@ -263,29 +263,36 @@ class ScriptSettings(object):
 		}
 
 
+# === Internal Class ===
+class ScriptInternals(object):
+	
+	# BaseVars
+	ScriptReady = False
+	EventIDs    = []
+
+	# SoundVars
+	SoundGoalCued    = False
+	SoundSegmentCued = False
+
+	# StampVars
+	StampFlush        = time.time()
+	StampRefresh      = time.time()
+	StampSave         = time.time()
+	StampSoundGoal    = time.time()
+	StampSoundSegment = time.time()
+
+	# TempVars
+	TempBits      = 0
+	TempDonations = 0.0
+	TempFollows   = 0
+
+
 # === Global Variables ===
 ChannelName   = None
+Internal      = None
 Socket        = None
 Session       = None
 Settings      = None
-
-
-# === Internal Variables ===
-BitsTemp      = 0
-DonationTemp  = 0.0
-FollowsTemp   = 0
-IsScriptReady = False
-FlushStamp    = time.time()
-RefreshStamp  = time.time()
-SaveStamp     = time.time()
-EventIDs      = []
-
-
-# === Sound System ===
-GoalCued      = False
-GoalStamp     = time.time()
-SegmentCued   = False
-SegmentStamp  = time.time()
 
 
 # === Constants ===
@@ -324,8 +331,9 @@ PARSE_PARAMETERS = {
 
 # === Initiation ===
 def Init():
-	global Session, Settings
+	global Internal, Session, Settings
 	try:
+		Internal = ScriptInternals()
 		Session  = ScriptSession()
 		Settings = ScriptSettings()
 	except Exception as e:
@@ -342,9 +350,9 @@ def Init():
 
 # === StartUp ===
 def StartUp():
-	global ChannelName, IsScriptReady
+	global ChannelName
 
-	IsScriptReady = False
+	Internal.ScriptReady = False
 
 	# Check Token
 	if Settings.SocketToken is None or len(Settings.SocketToken) < 50:
@@ -359,7 +367,7 @@ def StartUp():
 
 	# Finish and Connect
 	ChannelName = ChannelName.lower()
-	IsScriptReady = True
+	Internal.ScriptReady = True
 	Connect()
 
 
@@ -376,17 +384,16 @@ def Connect():
 
 # === Event Bus ===
 def SocketEvent(sender, args):
-	global BitsTemp, DonationTemp, FollowsTemp, EventIDs, FlushStamp
 
 	# Get Data
 	data = args.Data
 	msg  = data.Message[0]  # Messages come in as single events, no need for a loop
 
 	# Event Filtering
-	FlushStamp = time.time()
-	if msg.Id in EventIDs:
+	Internal.StampFlush = time.time()
+	if msg.Id in Internal.EventIDs:
 		return
-	EventIDs.append(msg.Id)
+	Internal.EventIDs.append(msg.Id)
 
 	# Skip on Repeat and NotLive
 	if msg.IsRepeat:
@@ -417,7 +424,7 @@ def SocketEvent(sender, args):
 
 				# Add remainder to BitsTemp, if cumulative Bits are enabled
 				if Settings.CountBitsCumulative:
-					BitsTemp += msg.Amount % Settings.BitsMinAmount
+					Internal.TempBits += msg.Amount % Settings.BitsMinAmount
 
 				Session.Points    += res
 				Session.BitPoints += res
@@ -427,7 +434,7 @@ def SocketEvent(sender, args):
 			# Cumulative Bits
 			elif Settings.CountBitsCumulative:
 
-				BitsTemp += msg.Amount
+				Internal.TempBits += msg.Amount
 				Log("Added {} Bit(s) from {} to the cumulative amount".format(msg.Amount, msg.Name))
 
 			else:
@@ -441,11 +448,11 @@ def SocketEvent(sender, args):
 			if not msg.IsTest:
 				Session.TotalFollows += 1
 
-			FollowsTemp += 1
-			if FollowsTemp >= Settings.FollowsRequired:
+			Internal.TempFollows += 1
+			if Internal.TempFollows >= Settings.FollowsRequired:
 				Session.Points       += Settings.FollowPointValue
 				Session.FollowPoints += Settings.FollowPointValue
-				FollowsTemp = FollowsTemp - Settings.FollowsRequired
+				Internal.TempFollows -= Settings.FollowsRequired
 				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, msg.Name))
 
 		# === Subscriptions ===
@@ -548,7 +555,7 @@ def SocketEvent(sender, args):
 
 				# Add remainder to DonationTemp, if cumulative Donations are enabled
 				if Settings.CountDonationsCumulative:
-					DonationTemp += msg.Amount % Settings.DonationMinAmount
+					Internal.TempDonations += msg.Amount % Settings.DonationMinAmount
 
 				Session.Points         += res
 				Session.DonationPoints += res
@@ -557,7 +564,7 @@ def SocketEvent(sender, args):
 
 			elif Settings.CountDonationsCumulative:
 
-				DonationTemp += msg.Amount
+				Internal.TempDonations += msg.Amount
 				Log("Added Superchat of {} {} from {} to the cumulative Amount.".format())
 				return
 
@@ -590,7 +597,7 @@ def SocketEvent(sender, args):
 
 				# Add remainder to DonationTemp, if cumulative Donations are enabled
 				if Settings.CountDonationsCumulative:
-					DonationTemp += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
+					Internal.TempDonations += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
 
 				Session.Points         += res
 				Session.DonationPoints += res
@@ -600,7 +607,7 @@ def SocketEvent(sender, args):
 			# Cumulative Donation
 			elif Settings.CountDonationsCumulative:
 
-				DonationTemp += msg.Amount
+				Internal.TempDonations += msg.Amount
 				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(msg.Amount, msg.Currency, msg.FromName))
 				return
 
@@ -623,20 +630,18 @@ def SocketDisconnected(sender, args): Log("Disconnected")
 
 # === Tick ===
 def Tick():
-	global EventIDs, FlushStamp, SaveStamp, GoalCued, SegmentCued
-
 	now = time.time()
 
 	# Flush EventIDs, executed every 5 seconds
-	if(now - FlushStamp) > FLUSH_DELAY and len(EventIDs) > 0:
-		EventIDs = []
-		FlushStamp = now
+	if(now - Internal.StampFlush) > FLUSH_DELAY and len(Internal.EventIDs) > 0:
+		Internal.EventIDs = []
+		Internal.StampFlush = now
 
 	# Main Refresh, executed every 5 seconds
-	if (now - RefreshStamp) > REFRESH_DELAY:
+	if (now - Internal.StampRefresh) > REFRESH_DELAY:
 
 		# Attempt Startup
-		if not IsScriptReady:
+		if not Internal.ScriptReady:
 			StartUp()
 
 		# Reconnect
@@ -647,60 +652,64 @@ def Tick():
 		UpdateTracker()  # Updates RefreshStamp
 
 	# Save Timer
-	if (now - SaveStamp) > SAVE_DELAY:
-		if not IsScriptReady: return
+	if (now - Internal.StampSave) > SAVE_DELAY:
+		if not Internal.ScriptReady: return
 		try:
 			Session.Save()
 		except Exception as e:
 			Log(e.message)
-		SaveStamp = now
+		Internal.StampSave = now
 
 	# Sound System
-	if Settings.SoundEnabled and (GoalCued or SegmentCued):
+	if Settings.SoundEnabled and (Internal.SoundGoalCued or Internal.SoundSegmentCued):
+		if not Internal.ScriptReady: return
 
-		if GoalCued and SegmentCued:  # ! Only play goal sound
-			SegmentCued = False
+		if Internal.SoundGoalCued and Internal.SoundSegmentCued:  # ! Only play goal sound
+			Internal.SoundSegmentCued = False
 
 		# Goal Sound
-		if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay:
+		if (now - Internal.StampSoundGoal) > Settings.SoundBarGoalCompletedDelay:
 			snd = os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted))
 			if not os.path.exists(snd):
 				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.SoundBarGoalCompleted))
 			if not Parent.PlaySound(snd, 1.0):
 				Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
-			GoalCued = False
+			Internal.StampSoundGoal = now
+			Internal.SoundGoalCued = False
 
 		# Segment Sound
-		if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay:
+		if (now - Internal.StampSoundSegment) > Settings.SoundBarSegmentCompletedDelay:
 			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)
 			if not os.path.exists(snd):
 				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SoundBarSegmentCompleted))
 			if not Parent.PlaySound(snd, 1.0):
 				Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
-			SegmentCued = False
+			Internal.StampSoundSegment = now
+			Internal.SoundSegmentCued = False
 
 
 
 # === Update Tracker ===
 def UpdateTracker():  # ! Only call if a quick response is required
-	global BitsTemp, DonationTemp, RefreshStamp, GoalCued, SegmentCued, GoalStamp, SegmentStamp
+
+	now = time.time()
 
 	# Calculate Bits
-	if Settings.CountBitsCumulative and BitsTemp >= Settings.BitsMinAmount:
-		res = math.trunc(BitsTemp / Settings.BitsMinAmount)
+	if Settings.CountBitsCumulative and Internal.TempBits >= Settings.BitsMinAmount:
+		res = math.trunc(Internal.TempBits / Settings.BitsMinAmount)
 		Session.Points += Settings.BitsPointValue * res
 		Session.BitPoints += Settings.BitsPointValue
-		BitsTemp -= Settings.BitsMinAmount * res
+		Internal.TempBits -= Settings.BitsMinAmount * res
 		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
-		Session.BitsLeft = Settings.BitsMinAmount - BitsTemp
+		Session.BitsLeft = Settings.BitsMinAmount - Internal.TempBits
 		del res
 
 	# Calculate Donations
-	if Settings.CountDonationsCumulative and DonationTemp >= Settings.DonationMinAmount:
-		res = math.trunc(DonationTemp / Settings.DonationMinAmount)
+	if Settings.CountDonationsCumulative and Internal.TempDonations >= Settings.DonationMinAmount:
+		res = math.trunc(Internal.TempDonations / Settings.DonationMinAmount)
 		Session.Points += Settings.DonationPointValue
 		Session.DonationPoints += Settings.DonationPointValue
-		DonationTemp -= Settings.DonationMinAmount * res
+		Internal.TempDonations -= Settings.DonationMinAmount * res
 		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings.DonationPointValue * res))
 		del res
 
@@ -720,7 +729,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 				Session.Goal = Settings.GoalMax
 
 	Session.PointsLeft  = Session.Goal - Session.Points
-	Session.FollowsLeft = Settings.FollowsRequired - FollowsTemp
+	Session.FollowsLeft = Settings.FollowsRequired - Internal.TempFollows
 
 	# Update Progress Bar
 	pointsSum = 0
@@ -732,12 +741,13 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 	if pointsSum >= Settings.BarGoal and not Session.GoalCompleted:
 		Session.GoalCompleted = True
-		GoalCued  = True
-		GoalStamp = time.time()
+		Internal.SoundGoalCued  = True
+		Internal.StampSoundGoal = now
 	elif pointsSum >= segmentSize and Session.SegmentsCompleted < math.trunc(pointsSum / segmentSize):
 		Session.SegmentsCompleted += 1
-		SegmentCued  = True
-		SegmentStamp = time.time()
+		Internal.SoundSegmentCued  = True
+		Internal.StampSoundSegment = now
+	# TODO: Add calculation for BarGoalPointsLeft and BarSegmentPointsLeft
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
@@ -773,7 +783,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	SimpleWrite(TOTAL_DONATIONS_FILE, Session.TotalDonations)
 
 	# Update Refresh Stamp
-	RefreshStamp = time.time()
+	Internal.StampRefresh = now
 
 
 # === Sanity Check ===
@@ -870,11 +880,10 @@ def SanityCheck():
 
 # === Reset Session ===
 def ResetSession():
-	global BitsTemp, DonationTemp, FollowsTemp
 
-	BitsTemp     = 0
-	DonationTemp = 0.0
-	FollowsTemp  = 0
+	Internal.TempBits      = 0
+	Internal.TempDonations = 0
+	Internal.TempFollows   = 0
 
 	Session.__dict__    = Session.DefaultSession()
 	Session.BitsLeft    = Settings.BitsMinAmount
@@ -891,7 +900,7 @@ def ResetSession():
 
 # === Reload Settings ===
 def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
-	global Socket, IsScriptReady
+	global Socket
 
 	# Backup old token for comparison
 	old_token = Settings.SocketToken
@@ -904,7 +913,8 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 				Socket.Disconnect()
 			Socket = None
 		Connect()
-		if not IsScriptReady: IsScriptReady = True
+		if not Internal.ScriptReady:
+			Internal.ScriptReady = True
 
 	SanityCheck()
 	Log("Settings saved!")
@@ -961,11 +971,11 @@ def SubtractFromGoal():
 
 # === Unload ===
 def Unload():
-	global Socket, IsScriptReady
+	global Socket
 	if Socket and Socket.IsConnected:
 		Socket.Disconnect()
 	Socket = None
-	IsScriptReady = False
+	Internal.ScriptReady = False
 	UpdateTracker()
 	try:
 		Session.Save()
