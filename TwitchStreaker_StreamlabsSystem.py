@@ -65,6 +65,7 @@ class ScriptSession(object):
 	FollowPoints      = 0
 	SubPoints         = 0
 	SegmentsCompleted = 0
+	GoalCompleted     = False
 
 	# Totals Values
 	TotalBits      = 0
@@ -111,6 +112,8 @@ class ScriptSession(object):
 			"DonationPoints": 0,
 			"FollowPoints": 0,
 			"SubPoints": 0,
+			"SegmentsCompleted": 0,
+			"GoalCompleted": False,
 
 			# Totals Values
 			"TotalBits": 0,
@@ -652,24 +655,29 @@ def Tick():
 			Log(e.message)
 		SaveStamp = now
 
-	# GoalSound Timer
-	if Settings.SoundEnabled:
-		if Settings.SoundBarGoalCompleted is not None or Settings.SoundBarGoalCompleted != "":
-			if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay and GoalCued:
-				if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)):
-					Log("Sound {} not found!".format(Settings.SoundBarGoalCompleted))
-				elif not Parent.PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted), 1.0):
-					Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
-				GoalCued = False
+	# Sound System
+	if Settings.SoundEnabled and (GoalCued or SegmentCued):
 
-		# SegmentSound Timer
-		if Settings.SoundBarSegmentCompleted is not None or Settings.SoundBarSegmentCompleted != "":
-			if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay and SegmentCued:
-				if not os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)):
-					Log("Sound {} not found!".format(Settings.SoundBarSegmentCompleted))
-				elif not Parent.PlaySound(os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted), 1.0):
-					Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
-				SegmentCued = False
+		if GoalCued and SegmentCued:  # ! Only play goal sound
+			SegmentCued = False
+
+		# Goal Sound
+		if (now - GoalStamp) > Settings.SoundBarGoalCompletedDelay:
+			snd = os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted))
+			if not os.path.exists(snd):
+				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.SoundBarGoalCompleted))
+			if not Parent.PlaySound(snd, 1.0):
+				Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
+			GoalCued = False
+
+		# Segment Sound
+		if (now - SegmentStamp) > Settings.SoundBarSegmentCompletedDelay:
+			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)
+			if not os.path.exists(snd):
+				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SoundBarSegmentCompleted))
+			if not Parent.PlaySound(snd, 1.0):
+				Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
+			SegmentCued = False
 
 
 
@@ -722,10 +730,12 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if Settings.BarSubsEnabled:      pointsSum += Session.SubPoints
 
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
-	if pointsSum >= Settings.BarGoal:
+	if pointsSum >= Settings.BarGoal and not Session.GoalCompleted:
+		Session.GoalCompleted = True
 		GoalCued  = True
 		GoalStamp = time.time()
 	elif pointsSum >= segmentSize and Session.SegmentsCompleted < math.trunc(pointsSum / segmentSize):
+		Session.SegmentsCompleted += 1
 		SegmentCued  = True
 		SegmentStamp = time.time()
 
