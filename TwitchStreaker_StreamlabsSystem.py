@@ -2,28 +2,34 @@
 import codecs, json, math, os, time
 
 # === Paths ===
-SCRIPT_FOLDER        = os.path.realpath(os.path.dirname(__file__))
-TEXT_FOLDER          = os.path.join(SCRIPT_FOLDER, "Text\\")
-SOUNDS_FOLDER        = os.path.join(SCRIPT_FOLDER, "Sounds\\")
+SCRIPT_FOLDER = os.path.realpath(os.path.dirname(__file__))
+TEXT_FOLDER   = os.path.join(SCRIPT_FOLDER, "Text\\")
+SOUNDS_FOLDER = os.path.join(SCRIPT_FOLDER, "Sounds\\")
 
 # === System Files ===
-LOG_FILE             = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
-SESSION_FILE         = os.path.join(SCRIPT_FOLDER, "Session.json")
-SETTINGS_FILE        = os.path.join(SCRIPT_FOLDER, "Settings.json")
+LOG_FILE      = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
+SESSION_FILE  = os.path.join(SCRIPT_FOLDER, "Session.json")
+SETTINGS_FILE = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
 # === Base Files ===
-BITS_LEFT_FILE       = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
-FOLLOWS_LEFT_FILE    = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
-GOAL_FILE            = os.path.join(TEXT_FOLDER, "Goal.txt")
-POINTS_FILE          = os.path.join(TEXT_FOLDER, "Points.txt")
-POINTS_LEFT_FILE     = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
-STREAK_FILE          = os.path.join(TEXT_FOLDER, "Streak.txt")
+BITS_LEFT_FILE    = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
+FOLLOWS_LEFT_FILE = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
+GOAL_FILE         = os.path.join(TEXT_FOLDER, "Goal.txt")
+POINTS_FILE       = os.path.join(TEXT_FOLDER, "Points.txt")
+POINTS_LEFT_FILE  = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
+STREAK_FILE       = os.path.join(TEXT_FOLDER, "Streak.txt")
 
 # === Point Files ===
 BIT_POINTS_FILE      = os.path.join(TEXT_FOLDER, "BitPoints.txt")
 DONATION_POINTS_FILE = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
 FOLLOW_POINTS_FILE   = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
 SUB_POINTS_FILE      = os.path.join(TEXT_FOLDER, "SubPoints.txt")
+
+# === Bar Files ===
+BAR_GOAL_FILE               = os.path.join(TEXT_FOLDER, "BarGoal.txt")
+BAR_POINTS_LEFT_FILE        = os.path.join(TEXT_FOLDER, "BarPointsLeft.txt")
+BAR_SEGMENT_POINTS_LEFT     = os.path.join(TEXT_FOLDER, "BarSegmentPointsLeft.txt")
+BAR_SEGMENTS_COMPLETED_FILE = os.path.join(TEXT_FOLDER, "BarSegmentsCompleted.txt")
 
 # === Totals Files ===
 TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
@@ -64,8 +70,13 @@ class ScriptSession(object):
 	DonationPoints    = 0
 	FollowPoints      = 0
 	SubPoints         = 0
-	SegmentsCompleted = 0
-	GoalCompleted     = False
+
+	# Bar Values
+	BarGoal              = 100
+	BarGoalCompleted     = False
+	BarPointsLeft        = 0
+	BarSegmentPointsLeft = 0
+	BarSegmentsCompleted = 0
 
 	# Totals Values
 	TotalBits      = 0
@@ -112,8 +123,13 @@ class ScriptSession(object):
 			"DonationPoints": 0,
 			"FollowPoints": 0,
 			"SubPoints": 0,
-			"SegmentsCompleted": 0,
-			"GoalCompleted": False,
+
+			# Bar Values
+			"BarGoal": 100,
+			"BarGoalCompleted": False,
+			"BarPointsLeft": 0,
+			"BarSegmentPointsLeft": 0,
+			"BarSegmentsCompleted": 0,
 
 			# Totals Values
 			"TotalBits": 0,
@@ -320,6 +336,12 @@ PARSE_PARAMETERS = {
 	"$tsDonationPoints": "DonationPoints",
 	"$tsFollowPoints":   "FollowPoints",
 	"$tsSubPoints":      "SubPoints",
+
+	# BarValues
+	"$tsBarGoal":              "BarGoal",
+	"$tsBarPointsLeft":        "BarPointsLeft",
+	"$tsBarSegmentPointsLeft": "BarSegmentPointsLeft",
+	"$tsBarSegmentsCompleted": "BarSegmentsCompleted",
 
 	# Totals Values
 	"$tsTotalBits":      "TotalBits",
@@ -739,15 +761,20 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if Settings.BarSubsEnabled:      pointsSum += Session.SubPoints
 
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
-	if pointsSum >= Settings.BarGoal and not Session.GoalCompleted:
-		Session.GoalCompleted = True
+	if pointsSum >= Settings.BarGoal and not Session.BarGoalCompleted:
+		Session.BarGoalCompleted = True
 		Internal.SoundGoalCued  = True
 		Internal.StampSoundGoal = now
-	elif pointsSum >= segmentSize and Session.SegmentsCompleted < math.trunc(pointsSum / segmentSize):
-		Session.SegmentsCompleted += 1
+	elif pointsSum >= segmentSize and Session.BarSegmentsCompleted < math.trunc(pointsSum / segmentSize):
+		Session.BarSegmentsCompleted += 1
 		Internal.SoundSegmentCued  = True
 		Internal.StampSoundSegment = now
-	# TODO: Add calculation for BarGoalPointsLeft and BarSegmentPointsLeft
+
+	Session.BarPointsLeft = Settings.BarGoal - pointsSum
+	if Session.BarPointsLeft < 0: Session.BarPointsLeft = 0
+
+	Session.SegmentPointsLeft = pointsSum - (segmentSize * Session.BarSegmentsCompleted)
+	if Session.SegmentPointsLeft < 0: Session.SegmentPointsLeft = 0
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
@@ -767,20 +794,24 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	})))
 
 	# Update Text Files
-	SimpleWrite(BITS_LEFT_FILE,       Session.BitsLeft)
-	SimpleWrite(BIT_POINTS_FILE,      Session.BitPoints)
-	SimpleWrite(DONATION_POINTS_FILE, Session.DonationPoints)
-	SimpleWrite(FOLLOW_POINTS_FILE,   Session.FollowPoints)
-	SimpleWrite(FOLLOWS_LEFT_FILE,    Session.FollowsLeft)
-	SimpleWrite(GOAL_FILE,            Session.Goal)
-	SimpleWrite(POINTS_FILE,          Session.Points)
-	SimpleWrite(POINTS_LEFT_FILE,     Session.PointsLeft)
-	SimpleWrite(STREAK_FILE,          Session.Streak)
-	SimpleWrite(SUB_POINTS_FILE,      Session.SubPoints)
-	SimpleWrite(TOTAL_BITS_FILE,      Session.TotalBits)
-	SimpleWrite(TOTAL_FOLLOWS_FILE,   Session.TotalFollows)
-	SimpleWrite(TOTAL_SUBS_FILE,      Session.TotalSubs)
-	SimpleWrite(TOTAL_DONATIONS_FILE, Session.TotalDonations)
+	SimpleWrite(BAR_GOAL_FILE,               Session.BarGoal)
+	SimpleWrite(BAR_POINTS_LEFT_FILE,        Session.BarPointsLeft)
+	SimpleWrite(BAR_SEGMENT_POINTS_LEFT,     Session.BarSegmentPointsLeft)
+	SimpleWrite(BAR_SEGMENTS_COMPLETED_FILE, Session.BarSegmentsCompleted)
+	SimpleWrite(BITS_LEFT_FILE,              Session.BitsLeft)
+	SimpleWrite(BIT_POINTS_FILE,             Session.BitPoints)
+	SimpleWrite(DONATION_POINTS_FILE,        Session.DonationPoints)
+	SimpleWrite(FOLLOW_POINTS_FILE,          Session.FollowPoints)
+	SimpleWrite(FOLLOWS_LEFT_FILE,           Session.FollowsLeft)
+	SimpleWrite(GOAL_FILE,                   Session.Goal)
+	SimpleWrite(POINTS_FILE,                 Session.Points)
+	SimpleWrite(POINTS_LEFT_FILE,            Session.PointsLeft)
+	SimpleWrite(STREAK_FILE,                 Session.Streak)
+	SimpleWrite(SUB_POINTS_FILE,             Session.SubPoints)
+	SimpleWrite(TOTAL_BITS_FILE,             Session.TotalBits)
+	SimpleWrite(TOTAL_FOLLOWS_FILE,          Session.TotalFollows)
+	SimpleWrite(TOTAL_SUBS_FILE,             Session.TotalSubs)
+	SimpleWrite(TOTAL_DONATIONS_FILE,        Session.TotalDonations)
 
 	# Update Refresh Stamp
 	Internal.StampRefresh = now
@@ -821,6 +852,9 @@ def SanityCheck():
 	if Session.Goal != (Session.PointsLeft + Session.Points):
 		Session.PointsLeft = Session.Goal - Session.Points
 		is_session_dirty = True
+
+	if Session.BarGoal != Settings.BarGoal:
+		Session.BarGoal = Settings.BarGoal
 
 	# Prevent Points from being below 1
 	for var in POINT_VARS:
@@ -886,6 +920,7 @@ def ResetSession():
 	Internal.TempFollows   = 0
 
 	Session.__dict__    = Session.DefaultSession()
+	Session.BarGoal     = Settings.BarGoal
 	Session.BitsLeft    = Settings.BitsMinAmount
 	Session.FollowsLeft = Settings.FollowsRequired
 	Session.Goal        = Settings.Goal

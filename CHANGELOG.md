@@ -48,6 +48,7 @@ As you might have guessed, this update will pretty much break everything. Please
 * Added `e` prefix for the html elements in the overlay
 * Added sound system, MP3 only
 * Added internals class
+* Added text files for the bar variables
 * Moved folder creation into the initialization
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
