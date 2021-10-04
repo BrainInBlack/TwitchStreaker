@@ -45,6 +45,8 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added $tsTotalFollows
 
 * Session now saves upon reset
+* Session and Settings no longer auto-load upon creation and use default values until Load() is called
+* Simplified parameter parsing
 * Added `e` prefix for the html elements in the overlay
 * Added sound system, MP3 only
 * Added internals class

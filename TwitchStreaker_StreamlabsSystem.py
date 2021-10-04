@@ -86,7 +86,6 @@ class ScriptSession(object):
 
 	def __init__(self):
 		self.__dict__ = self.DefaultSession()
-		self.Load()
 
 	def Load(self):
 		try:
@@ -202,7 +201,6 @@ class ScriptSettings(object):
 
 	def __init__(self):
 		self.__dict__ = self.DefaultSettings()
-		self.Load()
 
 	def Load(self):
 		try:
@@ -305,10 +303,10 @@ class ScriptInternals(object):
 
 # === Global Variables ===
 ChannelName   = None
-Internal      = None
+Internal      = ScriptInternals()
 Socket        = None
-Session       = None
-Settings      = None
+Session       = ScriptSession()
+Settings      = ScriptSettings()
 
 
 # === Constants ===
@@ -353,11 +351,9 @@ PARSE_PARAMETERS = {
 
 # === Initiation ===
 def Init():
-	global Internal, Session, Settings
 	try:
-		Internal = ScriptInternals()
-		Session  = ScriptSession()
-		Settings = ScriptSettings()
+		Session.Load()
+		Settings.Load()
 	except Exception as e:
 		Log(e.message)
 		return
@@ -1020,9 +1016,9 @@ def Unload():
 
 # === Parse Parameters ===
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-	for key in PARSE_PARAMETERS:
+	for key, val in PARSE_PARAMETERS:
 		if key in parse_string:
-			parse_string = parse_string.replace(key, getattr(Session, PARSE_PARAMETERS[key]))
+			parse_string = parse_string.replace(key, getattr(Session, val))
 	return parse_string
 
 
