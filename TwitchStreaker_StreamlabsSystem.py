@@ -687,7 +687,7 @@ def Tick():
 
 		# Goal Sound
 		if (now - Internal.StampSoundGoal) > Settings.SoundBarGoalCompletedDelay:
-			snd = os.path.exists(os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted))
+			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)
 			if not os.path.exists(snd):
 				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.SoundBarGoalCompleted))
 			if not Parent.PlaySound(snd, 1.0):
@@ -769,8 +769,8 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	Session.BarPointsLeft = Settings.BarGoal - pointsSum
 	if Session.BarPointsLeft < 0: Session.BarPointsLeft = 0
 
-	Session.SegmentPointsLeft = pointsSum - (segmentSize * Session.BarSegmentsCompleted)
-	if Session.SegmentPointsLeft < 0: Session.SegmentPointsLeft = 0
+	Session.BarSegmentPointsLeft = pointsSum - (segmentSize * Session.BarSegmentsCompleted)
+	if Session.BarSegmentPointsLeft < 0: Session.SegmentPointsLeft = 0
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
@@ -1016,9 +1016,10 @@ def Unload():
 
 # === Parse Parameters ===
 def Parse(parse_string, user_id, username, target_id, target_name, message):
-	for key, val in PARSE_PARAMETERS:
-		if key in parse_string:
-			parse_string = parse_string.replace(key, getattr(Session, val))
+	if parse_string.contains("$ts"):
+		for key, val in PARSE_PARAMETERS:
+			if key in parse_string:
+				parse_string = parse_string.replace(key, getattr(Session, val))
 	return parse_string
 
 

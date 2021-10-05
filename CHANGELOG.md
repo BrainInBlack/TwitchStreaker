@@ -51,6 +51,7 @@ As you might have guessed, this update will pretty much break everything. Please
 * Added sound system, MP3 only
 * Added internals class
 * Added text files for the bar variables
+* Added prefix check to the parse function
 * Moved folder creation into the initialization
 * Removed `Current` prefix from all Session variables
 * Fixed Temp values not resetting when the session is reset
