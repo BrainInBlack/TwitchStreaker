@@ -650,13 +650,13 @@ def SocketDisconnected(sender, args): Log("Disconnected")
 def Tick():
 	now = time.time()
 
-	# Flush EventIDs, executed every 5 seconds
-	if(now - Internal.StampFlush) > FLUSH_DELAY and len(Internal.EventIDs) > 0:
+	# Flush EventIDs
+	if(now - Internal.StampFlush) >= FLUSH_DELAY and len(Internal.EventIDs) > 0:
 		Internal.EventIDs = []
 		Internal.StampFlush = now
 
-	# Main Refresh, executed every 5 seconds
-	if (now - Internal.StampRefresh) > REFRESH_DELAY:
+	# Main Refresh
+	if (now - Internal.StampRefresh) >= REFRESH_DELAY:
 
 		# Attempt Startup
 		if not Internal.ScriptReady:
@@ -667,10 +667,10 @@ def Tick():
 			Connect()
 			return
 
-		UpdateTracker()  # Updates RefreshStamp
+		UpdateTracker()  # Updates StampRefresh
 
 	# Save Timer
-	if (now - Internal.StampSave) > SAVE_DELAY:
+	if (now - Internal.StampSave) >= SAVE_DELAY:
 		if not Internal.ScriptReady: return
 		try:
 			Session.Save()
@@ -686,7 +686,7 @@ def Tick():
 			Internal.SoundSegmentCued = False
 
 		# Goal Sound
-		if (now - Internal.StampSoundGoal) > Settings.SoundBarGoalCompletedDelay:
+		if (now - Internal.StampSoundGoal) >= Settings.SoundBarGoalCompletedDelay:
 			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)
 			if not os.path.exists(snd):
 				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.SoundBarGoalCompleted))
@@ -696,7 +696,7 @@ def Tick():
 			Internal.SoundGoalCued = False
 
 		# Segment Sound
-		if (now - Internal.StampSoundSegment) > Settings.SoundBarSegmentCompletedDelay:
+		if (now - Internal.StampSoundSegment) >= Settings.SoundBarSegmentCompletedDelay:
 			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)
 			if not os.path.exists(snd):
 				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SoundBarSegmentCompleted))
@@ -755,22 +755,24 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if Settings.BarDonationsEnabled: pointsSum += Session.DonationPoints
 	if Settings.BarFollowsEnabled:   pointsSum += Session.FollowPoints
 	if Settings.BarSubsEnabled:      pointsSum += Session.SubPoints
-
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
-	if pointsSum >= Settings.BarGoal and not Session.BarGoalCompleted:
-		Session.BarGoalCompleted = True
-		Internal.SoundGoalCued  = True
-		Internal.StampSoundGoal = now
-	elif pointsSum >= segmentSize and Session.BarSegmentsCompleted < math.trunc(pointsSum / segmentSize):
-		Session.BarSegmentsCompleted += 1
-		Internal.SoundSegmentCued  = True
-		Internal.StampSoundSegment = now
 
 	Session.BarPointsLeft = Settings.BarGoal - pointsSum
 	if Session.BarPointsLeft < 0: Session.BarPointsLeft = 0
 
-	Session.BarSegmentPointsLeft = pointsSum - (segmentSize * Session.BarSegmentsCompleted)
+	Session.BarSegmentPointsLeft = (segmentSize * (Session.BarSegmentsCompleted + 1)) - pointsSum
 	if Session.BarSegmentPointsLeft < 0: Session.SegmentPointsLeft = 0
+
+	# Cue Sounds
+	if not Session.BarGoalCompleted:
+		if pointsSum >= Settings.BarGoal:
+			Session.BarGoalCompleted = True
+			Internal.SoundGoalCued  = True
+			Internal.StampSoundGoal = now
+		elif pointsSum >= segmentSize and Session.BarSegmentsCompleted < math.floor(pointsSum / segmentSize) and not Internal.SoundGoalCued:
+			Session.BarSegmentsCompleted += 1
+			Internal.SoundSegmentCued  = True
+			Internal.StampSoundSegment = now
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
