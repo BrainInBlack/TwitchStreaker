@@ -2,9 +2,9 @@
 
 ## 3.0.0 - Segmented Progressbar
 
-**IMPORTANT CHANGES!** Brand new feature, segmented Progressbar! This feature adds a progressbar to the script, that will display the progress of the current streak in a bar format. In addition, you can segment the progressbar to allow for intermediate goals. Each type of Points has their own color and can be displayed in the progressbar.
+**IMPORTANT CHANGES!** Brand new feature, a Progressbar! We added a separate Progressbar to the script, that allows you to have additional Goals within the same Script. The Bar is completely separate, has it's own settings and can even make sounds. Huge thanks to [TheLevelUpShow](https://www.twitch.tv/thelevelupshow), for the Idea and the great help while developing this new feature.
 
-As you might have guessed, this update will pretty much break everything. Please Backup the script folder before updating to the latest version! There are detailed instructions for updating from 2.x to 3.x in the README.md file.
+As you might have guessed, this update will pretty much break (almost) everything. Please Backup the script folder before updating to the latest version! There are detailed instructions for updating from 2.x to 3.x in the README.md file.
 
 * New ProgressBar Class
   * Added BarDisplayColors
@@ -31,10 +31,10 @@ As you might have guessed, this update will pretty much break everything. Please
   * Added CountFollows
   * Added FollowPointValue
   * Added SoundEnabled
-  * Added SoundBarGoalCompleted
-  * Added SoundBarGoalCompletedDelay
-  * Added SoundBarSegmentCompleted
-  * Added SoundBarSegmentCompletedDelay
+  * Added GoalCompletedSound
+  * Added GoalCompletedSoundDelay
+  * Added SegmentCompletedSound
+  * Added SegmentCompletedSoundDelay
 
 * New Command Parameters
   * Added $tsBitPoints

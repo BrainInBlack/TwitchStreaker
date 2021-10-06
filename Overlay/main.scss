@@ -64,6 +64,7 @@ html, body {
 		height: 100%;
 		float: left;
 		z-index: 1;
+		transition: width 1s;
 	}
 
 	.Indicator {

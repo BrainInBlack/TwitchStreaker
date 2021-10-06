@@ -77,7 +77,6 @@ var Overlay = {
 	// === Progress Bar ===
 	'Bar': {
 		// Base
-		'DisplayColors' : true,
 		'Goal'          : 100,
 		'SegmentCount'  : 4,
 		'SegmentSize'   : 25,
@@ -208,7 +207,6 @@ function connectWebsocket() {
 			case 'EVENT_UPDATE_BAR':
 				var data = JSON.parse(socketMessage.data);
 				// Base
-				Overlay.Bar.DisplayColors    = data.DisplayColors;
 				Overlay.Bar.Goal             = data.Goal;
 				if (data.SegmentCount != Overlay.Bar.SegmentCount) {
 					Overlay.Bar.SegmentCount = data.SegmentCount;

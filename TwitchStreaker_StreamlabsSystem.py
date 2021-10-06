@@ -2,40 +2,40 @@
 import codecs, json, math, os, time
 
 # === Paths ===
-SCRIPT_FOLDER = os.path.realpath(os.path.dirname(__file__))
-TEXT_FOLDER   = os.path.join(SCRIPT_FOLDER, "Text\\")
-SOUNDS_FOLDER = os.path.join(SCRIPT_FOLDER, "Sounds\\")
+SCRIPT_FOLDER           = os.path.realpath(os.path.dirname(__file__))
+TEXT_FOLDER             = os.path.join(SCRIPT_FOLDER, "Text\\")
+SOUNDS_FOLDER           = os.path.join(SCRIPT_FOLDER, "Sounds\\")
 
 # === System Files ===
-LOG_FILE      = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
-SESSION_FILE  = os.path.join(SCRIPT_FOLDER, "Session.json")
-SETTINGS_FILE = os.path.join(SCRIPT_FOLDER, "Settings.json")
+LOG_FILE                = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
+SESSION_FILE            = os.path.join(SCRIPT_FOLDER, "Session.json")
+SETTINGS_FILE           = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
 # === Base Files ===
-BITS_LEFT_FILE    = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
-FOLLOWS_LEFT_FILE = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
-GOAL_FILE         = os.path.join(TEXT_FOLDER, "Goal.txt")
-POINTS_FILE       = os.path.join(TEXT_FOLDER, "Points.txt")
-POINTS_LEFT_FILE  = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
-STREAK_FILE       = os.path.join(TEXT_FOLDER, "Streak.txt")
+BITS_LEFT               = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
+FOLLOWS_LEFT            = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
+GOAL                    = os.path.join(TEXT_FOLDER, "Goal.txt")
+POINTS                  = os.path.join(TEXT_FOLDER, "Points.txt")
+POINTS_LEFT             = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
+STREAK                  = os.path.join(TEXT_FOLDER, "Streak.txt")
 
 # === Point Files ===
-BIT_POINTS_FILE      = os.path.join(TEXT_FOLDER, "BitPoints.txt")
-DONATION_POINTS_FILE = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
-FOLLOW_POINTS_FILE   = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
-SUB_POINTS_FILE      = os.path.join(TEXT_FOLDER, "SubPoints.txt")
+BIT_POINTS              = os.path.join(TEXT_FOLDER, "BitPoints.txt")
+DONATION_POINTS         = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
+FOLLOW_POINTS           = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
+SUB_POINTS              = os.path.join(TEXT_FOLDER, "SubPoints.txt")
 
 # === Bar Files ===
-BAR_GOAL_FILE               = os.path.join(TEXT_FOLDER, "BarGoal.txt")
-BAR_POINTS_LEFT_FILE        = os.path.join(TEXT_FOLDER, "BarPointsLeft.txt")
-BAR_SEGMENT_POINTS_LEFT     = os.path.join(TEXT_FOLDER, "BarSegmentPointsLeft.txt")
-BAR_SEGMENTS_COMPLETED_FILE = os.path.join(TEXT_FOLDER, "BarSegmentsCompleted.txt")
+BAR_GOAL                = os.path.join(TEXT_FOLDER, "BarGoal.txt")
+BAR_POINTS_LEFT         = os.path.join(TEXT_FOLDER, "BarPointsLeft.txt")
+BAR_SEGMENT_POINTS_LEFT = os.path.join(TEXT_FOLDER, "BarSegmentPointsLeft.txt")
+BAR_SEGMENTS_COMPLETED  = os.path.join(TEXT_FOLDER, "BarSegmentsCompleted.txt")
 
 # === Totals Files ===
-TOTAL_BITS_FILE      = os.path.join(TEXT_FOLDER, "TotalBits.txt")
-TOTAL_DONATIONS_FILE = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
-TOTAL_FOLLOWS_FILE   = os.path.join(TEXT_FOLDER, "TotalFollows.txt")
-TOTAL_SUBS_FILE      = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
+TOTAL_BITS              = os.path.join(TEXT_FOLDER, "TotalBits.txt")
+TOTAL_DONATIONS         = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
+TOTAL_FOLLOWS           = os.path.join(TEXT_FOLDER, "TotalFollows.txt")
+TOTAL_SUBS              = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
 
 # === External References ===
 import clr
@@ -191,10 +191,10 @@ class ScriptSettings(object):
 
 	# Sounds
 	SoundEnabled = False
-	SoundBarGoalCompleted = None
-	SoundBarGoalCompletedDelay = 0
-	SoundBarSegmentCompleted = None
-	SoundBarSegmentCompletedDelay = 0
+	GoalCompletedSound = None
+	GoalCompletedSoundDelay = 0
+	SegmentCompletedSound = None
+	SegmentCompletedSoundDelay = 0
 
 	# Streamlabs
 	SocketToken = None
@@ -257,7 +257,6 @@ class ScriptSettings(object):
 			"FollowsRequired": 10,
 
 			# Progressbar
-			"BarDisplayColors": True,
 			"BarGoal": 100,
 			"BarSegmentCount": 4,
 			"BarBitsEnabled": True,
@@ -267,10 +266,10 @@ class ScriptSettings(object):
 
 			# Sounds
 			"SoundEnabled": False,
-			"SoundBarGoalCompleted": None,
-			"SoundBarGoalCompletedDelay":0,
-			"SoundBarSegmentCompleted": None,
-			"SoundBarSegmentCompletedDelay": 0,
+			"GoalCompletedSound": None,
+			"GoalCompletedSoundDelay":0,
+			"SegmentCompletedSound": None,
+			"SegmentCompletedSoundDelay": 0,
 
 			# Streamlabs
 			"SocketToken": None
@@ -285,15 +284,15 @@ class ScriptInternals(object):
 	EventIDs    = []
 
 	# SoundVars
-	SoundGoalCued    = False
-	SoundSegmentCued = False
+	GoalSoundCued    = False
+	SegmentSoundCued = False
 
 	# StampVars
-	StampFlush        = time.time()
-	StampRefresh      = time.time()
-	StampSave         = time.time()
-	StampSoundGoal    = time.time()
-	StampSoundSegment = time.time()
+	FlushStamp        = time.time()
+	RefreshStamp      = time.time()
+	SaveStamp         = time.time()
+	GoalSoundStamp    = time.time()
+	SegmentSoundStamp = time.time()
 
 	# TempVars
 	TempBits      = 0
@@ -408,7 +407,7 @@ def SocketEvent(sender, args):
 	msg  = data.Message[0]  # Messages come in as single events, no need for a loop
 
 	# Event Filtering
-	Internal.StampFlush = time.time()
+	Internal.FlushStamp = time.time()
 	if msg.Id in Internal.EventIDs:
 		return
 	Internal.EventIDs.append(msg.Id)
@@ -651,12 +650,12 @@ def Tick():
 	now = time.time()
 
 	# Flush EventIDs
-	if(now - Internal.StampFlush) >= FLUSH_DELAY and len(Internal.EventIDs) > 0:
+	if (now - Internal.FlushStamp) >= FLUSH_DELAY and len(Internal.EventIDs) > 0:
 		Internal.EventIDs = []
-		Internal.StampFlush = now
+		Internal.FlushStamp = now
 
 	# Main Refresh
-	if (now - Internal.StampRefresh) >= REFRESH_DELAY:
+	if (now - Internal.RefreshStamp) >= REFRESH_DELAY:
 
 		# Attempt Startup
 		if not Internal.ScriptReady:
@@ -665,46 +664,47 @@ def Tick():
 		# Reconnect
 		if Socket is None or not Socket.IsConnected:
 			Connect()
+			Internal.RefreshStamp = now
 			return
 
-		UpdateTracker()  # Updates StampRefresh
+		UpdateTracker()
+		Internal.RefreshStamp = now
 
 	# Save Timer
-	if (now - Internal.StampSave) >= SAVE_DELAY:
+	if (now - Internal.SaveStamp) >= SAVE_DELAY:
 		if not Internal.ScriptReady: return
 		try:
 			Session.Save()
 		except Exception as e:
 			Log(e.message)
-		Internal.StampSave = now
+		Internal.SaveStamp = now
 
 	# Sound System
-	if Settings.SoundEnabled and (Internal.SoundGoalCued or Internal.SoundSegmentCued):
+	if Settings.SoundEnabled and (Internal.GoalSoundCued or Internal.SegmentSoundCued):
 		if not Internal.ScriptReady: return
 
-		if Internal.SoundGoalCued and Internal.SoundSegmentCued:  # ! Only play goal sound
-			Internal.SoundSegmentCued = False
+		if Internal.GoalSoundCued and Internal.SegmentSoundCued:  # ! Only play goal sound
+			Internal.SegmentSoundCued = False
 
 		# Goal Sound
-		if (now - Internal.StampSoundGoal) >= Settings.SoundBarGoalCompletedDelay:
-			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarGoalCompleted)
+		if (now - Internal.GoalSoundStamp) >= Settings.GoalCompletedSoundDelay and Internal.GoalSoundCued:
+			snd = os.path.join(SOUNDS_FOLDER, Settings.GoalCompletedSound)
 			if not os.path.exists(snd):
-				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.SoundBarGoalCompleted))
-			if not Parent.PlaySound(snd, 1.0):
-				Log("Unable to play sound {}".format(Settings.SoundBarGoalCompleted))
-			Internal.StampSoundGoal = now
-			Internal.SoundGoalCued = False
+				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.GoalCompletedSound))
+			if not PlaySound(snd):
+				Log("Unable to play sound {}".format(Settings.GoalCompletedSound))
+			Internal.GoalSoundStamp = now
+			Internal.GoalSoundCued = False
 
 		# Segment Sound
-		if (now - Internal.StampSoundSegment) >= Settings.SoundBarSegmentCompletedDelay:
-			snd = os.path.join(SOUNDS_FOLDER, Settings.SoundBarSegmentCompleted)
+		if (now - Internal.SegmentSoundStamp) >= Settings.SegmentCompletedSoundDelay and Internal.SegmentSoundCued:
+			snd = os.path.join(SOUNDS_FOLDER, Settings.SegmentCompletedSound)
 			if not os.path.exists(snd):
-				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SoundBarSegmentCompleted))
-			if not Parent.PlaySound(snd, 1.0):
-				Log("Unable to play sound {}".format(Settings.SoundBarSegmentCompleted))
-			Internal.StampSoundSegment = now
-			Internal.SoundSegmentCued = False
-
+				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SegmentCompletedSound))
+			if not PlaySound(snd):
+				Log("Unable to play sound {}".format(Settings.SegmentCompletedSound))
+			Internal.SegmentSoundStamp = now
+			Internal.SegmentSoundCued = False
 
 
 # === Update Tracker ===
@@ -715,7 +715,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	# Calculate Bits
 	if Settings.CountBitsCumulative and Internal.TempBits >= Settings.BitsMinAmount:
 		res = math.trunc(Internal.TempBits / Settings.BitsMinAmount)
-		Session.Points += Settings.BitsPointValue * res
+		Session.Points    += Settings.BitsPointValue * res
 		Session.BitPoints += Settings.BitsPointValue
 		Internal.TempBits -= Settings.BitsMinAmount * res
 		Log("Added {} Point(s), because the cumulative Bits amount exceeded the minimum Bits Amount.".format(Settings.BitsPointValue * res))
@@ -725,7 +725,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	# Calculate Donations
 	if Settings.CountDonationsCumulative and Internal.TempDonations >= Settings.DonationMinAmount:
 		res = math.trunc(Internal.TempDonations / Settings.DonationMinAmount)
-		Session.Points += Settings.DonationPointValue
+		Session.Points         += Settings.DonationPointValue
 		Session.DonationPoints += Settings.DonationPointValue
 		Internal.TempDonations -= Settings.DonationMinAmount * res
 		Log("Added {} Point(s) because the cumulative Donation amount exceeded the minimum donation amount.".format(Settings.DonationPointValue * res))
@@ -767,17 +767,16 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	if not Session.BarGoalCompleted:
 		if pointsSum >= Settings.BarGoal:
 			Session.BarGoalCompleted = True
-			Internal.SoundGoalCued  = True
-			Internal.StampSoundGoal = now
-		elif pointsSum >= segmentSize and Session.BarSegmentsCompleted < math.floor(pointsSum / segmentSize) and not Internal.SoundGoalCued:
+			Internal.GoalSoundCued   = True
+			Internal.GoalSoundStamp  = now
+		elif pointsSum >= segmentSize and Session.BarSegmentsCompleted < math.floor(pointsSum / segmentSize):
 			Session.BarSegmentsCompleted += 1
-			Internal.SoundSegmentCued  = True
-			Internal.StampSoundSegment = now
+			Internal.SegmentSoundCued     = True
+			Internal.SegmentSoundStamp    = now
 
 	# Update Overlay
 	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
 	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps({
-		"DisplayColors":    Settings.BarDisplayColors,
 		"Goal":             Settings.BarGoal,
 		"SegmentCount":     Settings.BarSegmentCount,
 		"SegmentSize":      segmentSize,
@@ -792,27 +791,24 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	})))
 
 	# Update Text Files
-	SimpleWrite(BAR_GOAL_FILE,               Session.BarGoal)
-	SimpleWrite(BAR_POINTS_LEFT_FILE,        Session.BarPointsLeft)
-	SimpleWrite(BAR_SEGMENT_POINTS_LEFT,     Session.BarSegmentPointsLeft)
-	SimpleWrite(BAR_SEGMENTS_COMPLETED_FILE, Session.BarSegmentsCompleted)
-	SimpleWrite(BITS_LEFT_FILE,              Session.BitsLeft)
-	SimpleWrite(BIT_POINTS_FILE,             Session.BitPoints)
-	SimpleWrite(DONATION_POINTS_FILE,        Session.DonationPoints)
-	SimpleWrite(FOLLOW_POINTS_FILE,          Session.FollowPoints)
-	SimpleWrite(FOLLOWS_LEFT_FILE,           Session.FollowsLeft)
-	SimpleWrite(GOAL_FILE,                   Session.Goal)
-	SimpleWrite(POINTS_FILE,                 Session.Points)
-	SimpleWrite(POINTS_LEFT_FILE,            Session.PointsLeft)
-	SimpleWrite(STREAK_FILE,                 Session.Streak)
-	SimpleWrite(SUB_POINTS_FILE,             Session.SubPoints)
-	SimpleWrite(TOTAL_BITS_FILE,             Session.TotalBits)
-	SimpleWrite(TOTAL_FOLLOWS_FILE,          Session.TotalFollows)
-	SimpleWrite(TOTAL_SUBS_FILE,             Session.TotalSubs)
-	SimpleWrite(TOTAL_DONATIONS_FILE,        Session.TotalDonations)
-
-	# Update Refresh Stamp
-	Internal.StampRefresh = now
+	SimpleWrite(BAR_GOAL,                Session.BarGoal)
+	SimpleWrite(BAR_POINTS_LEFT,         Session.BarPointsLeft)
+	SimpleWrite(BAR_SEGMENT_POINTS_LEFT, Session.BarSegmentPointsLeft)
+	SimpleWrite(BAR_SEGMENTS_COMPLETED,  Session.BarSegmentsCompleted)
+	SimpleWrite(BITS_LEFT,               Session.BitsLeft)
+	SimpleWrite(BIT_POINTS,              Session.BitPoints)
+	SimpleWrite(DONATION_POINTS,         Session.DonationPoints)
+	SimpleWrite(FOLLOW_POINTS,           Session.FollowPoints)
+	SimpleWrite(FOLLOWS_LEFT,            Session.FollowsLeft)
+	SimpleWrite(GOAL,                    Session.Goal)
+	SimpleWrite(POINTS,                  Session.Points)
+	SimpleWrite(POINTS_LEFT,             Session.PointsLeft)
+	SimpleWrite(STREAK,                  Session.Streak)
+	SimpleWrite(SUB_POINTS,              Session.SubPoints)
+	SimpleWrite(TOTAL_BITS,              Session.TotalBits)
+	SimpleWrite(TOTAL_FOLLOWS,           Session.TotalFollows)
+	SimpleWrite(TOTAL_SUBS,              Session.TotalSubs)
+	SimpleWrite(TOTAL_DONATIONS,         Session.TotalDonations)
 
 
 # === Sanity Check ===
@@ -837,19 +833,19 @@ def SanityCheck():
 		is_settings_dirty = True
 
 	# Prevent Goal from being lower than GoalMin
-	if Session.Goal  < Settings.GoalMin:
-		Session.Goal = Settings.GoalMin
-		is_session_dirty    = True
+	if Session.Goal      < Settings.GoalMin:
+		Session.Goal     = Settings.GoalMin
+		is_session_dirty = True
 
 	# Prevent Goal from being higher than GoalMax
-	if Session.Goal  > Settings.GoalMax:
-		Session.Goal = Settings.GoalMax
-		is_session_dirty    = True
+	if Session.Goal      > Settings.GoalMax:
+		Session.Goal     = Settings.GoalMax
+		is_session_dirty = True
 
 	# Prevent PointsLeft de-sync
 	if Session.Goal != (Session.PointsLeft + Session.Points):
 		Session.PointsLeft = Session.Goal - Session.Points
-		is_session_dirty = True
+		is_session_dirty   = True
 
 	if Session.BarGoal != Settings.BarGoal:
 		Session.BarGoal = Settings.BarGoal
@@ -1053,3 +1049,7 @@ def SimpleWrite(path, content):
 		Log("Unable to write file \"{}\" ({})".format(path, e.message))
 	except:
 		Log("Unable to write file \"{}\"".format(path))
+
+# === PlaySound Wrapper ===
+def PlaySound(path, level = 1.0):
+	return Parent.PlaySound(path, level)

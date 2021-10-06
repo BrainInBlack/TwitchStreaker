@@ -170,28 +170,28 @@
 		"tooltip": "Enables the completion sounds.",
 		"group": "Progress Bar"
 	},
-	"SoundBarGoalCompleted": {
+	"GoalCompletedSound": {
 		"type": "textbox",
 		"value": "GoalCompleted.mp3",
 		"label": "Completion Sound",
 		"tooltip": "Sound that will be played when the bar is completely filled.",
 		"group": "Progress Bar"
 	},
-	"SoundBarGoalCompletedDelay": {
+	"GoalCompletedSoundDelay": {
 		"type": "numberbox",
 		"value": 0,
 		"label": "Completion Sound Delay",
 		"tooltip": "Amount of seconds that the Completion Sound is delayed.",
 		"group": "Progress Bar"
 	},
-	"SoundBarSegmentCompleted": {
+	"SegmentCompletedSound": {
 		"type": "textbox",
 		"value": "SegmentCompleted.mp3",
 		"label": "Segment Sound",
 		"tooltip": "Sound that will be played when a segment within the bar is completely filled.",
 		"group": "Progress Bar"
 	},
-	"SoundBarSegmentCompletedDelay": {
+	"SegmentCompletedSoundDelay": {
 		"type": "numberbox",
 		"value": 0,
 		"label": "Segment Sound Delay",

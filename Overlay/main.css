@@ -55,6 +55,8 @@ html, body {
   height: 100%;
   float: left;
   z-index: 1;
+  -webkit-transition: width 1s;
+  transition: width 1s;
 }
 
 #Bar .Indicator {
