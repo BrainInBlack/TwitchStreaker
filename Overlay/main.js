@@ -7,7 +7,6 @@ var Overlay = {
 	'Text': {
 		// Base Values
 		'BitsLeft'      : 0,
-		'FollowsLeft'   : 10,
 		'Goal'          : 10,
 		'Points'        : 0,
 		'PointsLeft'    : 10,
@@ -27,7 +26,6 @@ var Overlay = {
 	
 		// Base Elements
 		'eBitsLeft'      : document.getElementById('BitsLeft'),
-		'eFollowsLeft'   : document.getElementById('FollowsLeft'),
 		'eGoal'          : document.getElementById('Goal'),
 		'ePoints'        : document.getElementById('Points'),
 		'ePointsLeft'    : document.getElementById('PointsLeft'),
@@ -50,7 +48,6 @@ var Overlay = {
 		'refresh': function() {
 			// Base
 			if (this.eBitsLeft)       this.eBitsLeft.innerText       = this.BitsLeft;
-			if (this.eFollowsLeft)    this.eFollowsLeft.innerText    = this.FollowsLeft;
 			if (this.eGoal)           this.eGoal.innerText           = this.Goal;
 			if (this.ePoints)         this.ePoints.innerText         = this.Points;
 			if (this.ePointsLeft)     this.ePointsLeft.innerText     = this.PointsLeft;
@@ -181,7 +178,6 @@ function connectWebsocket() {
 				var data = JSON.parse(socketMessage.data);
 				// Base
 				Overlay.Text.BitsLeft       = data.BitsLeft;
-				Overlay.Text.FollowsLeft    = data.FollowsLeft;
 				Overlay.Text.Goal           = data.Goal;
 				Overlay.Text.Streak         = data.Streak;
 				Overlay.Text.Points         = data.Points;

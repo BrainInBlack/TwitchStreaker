@@ -30,27 +30,6 @@
 		"label": "Allow Resubs",
 		"tooltip": "Enables ReSubs to be counted as well.\n\n(Gifted-Sub will always be counted.)"
 	},
-	"CountFollows": {
-		"type": "checkbox",
-		"value": false,
-		"label": "Count Follows",
-		"tooltip": "Enables Follows to be counted as well.",
-		"group": "Follows"
-	},
-	"FollowsRequired": {
-		"type": "numberbox",
-		"value": 10,
-		"label": "Follows Required",
-		"tooltip": "Amount of Follows required to be awarded the specified amount of Points.",
-		"group": "Follows"
-	},
-	"FollowPointValue": {
-		"type": "numberbox",
-		"value": 1,
-		"label": "Follow Point Value",
-		"tooltip": "Amount of Points awarded for the completion of a Follow segment.",
-		"group": "Follows"
-	},
 	"BitsMinAmount": {
 		"type": "numberbox",
 		"value": 500,
@@ -120,6 +99,27 @@
 		"label": "Cumulative Donations",
 		"tooltip": "Allows Donations that are below the minimum amount to pile up until they exceed the minimum amount and then will be counted as a normal Donation together.",
 		"group": "Donations"
+	},
+	"FollowsRequired": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Follows Required",
+		"tooltip": "Amount of Follows required to be awarded the specified amount of Points.",
+		"group": "Follows"
+	},
+	"FollowPointValue": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Follow Point Value",
+		"tooltip": "Amount of Points awarded for the completion of a Follow segment.",
+		"group": "Follows"
+	},
+	"CountFollows": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Allow Follows",
+		"tooltip": "Enables Follows to be counted as well.",
+		"group": "Follows"
 	},
 	"BarGoal": {
 		"type": "numberbox",
