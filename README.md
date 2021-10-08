@@ -270,7 +270,7 @@ The Overlay object has an additional field with an anonymous function that is ca
 ### Setup
 
 ```javascript
-Overlay.UserRefresh = function() {
+Overlay.Text.UserRefresh = function() {
 
   // Your stuff here
 

@@ -31,24 +31,24 @@ html, body {
 #Bar {
   width: 100%;
   height: 100%;
-  background: #2a2b2d;
+  background: rgba(0, 0, 0, 0.85);
   z-index: 0;
 }
 
 #Bar #BarSubs {
-  background-color: #ff642d;
+  background-color: #6441a4;
 }
 
 #Bar #BarFollows {
-  background: #50b437;
+  background: #46a441;
 }
 
 #Bar #BarBits {
-  background: #c800b4;
+  background: #a041a4;
 }
 
 #Bar #BarDonations {
-  background: #00b4c8;
+  background: #e19628;
 }
 
 #Bar .Segment {
@@ -63,7 +63,7 @@ html, body {
   height: 100%;
   float: left;
   z-index: 2;
-  width: 5px;
+  width: 3px;
   background: white;
   -webkit-transform: translate(-50%, 0);
           transform: translate(-50%, 0);

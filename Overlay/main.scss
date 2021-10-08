@@ -5,11 +5,11 @@ $color: rgba(255, 255, 255, 1);
 $glow: rgba(100, 65, 164, 1);
 $shadow: rgba(0, 0, 0, .35);
 
-$barBackground: rgba(42, 43, 45, 1);
-$barSubs: rgba(255, 100, 45, 1);
-$barFollows: rgba(80, 180, 55, 1);
-$barBits: rgba(200, 0, 180, 1);
-$barDonations: rgba(0, 180, 200, 1);
+$barBackground: rgba(0, 0, 0, 0.85);
+$barSubs: rgba(100, 65, 164, 1);
+$barFollows: rgba(70, 164, 65, 1);
+$barBits: rgba(160, 65, 164, 1);
+$barDonations: rgba(225, 150, 40, 1);
 $barIndicator: rgba(255, 255, 255, 1);
 
 html, body {
@@ -71,7 +71,7 @@ html, body {
 		height: 100%;
 		float: left;
 		z-index: 2;
-		width: 5px;
+		width: 3px;
 		background: $barIndicator;
 		transform: translate(-50%, 0);
 		position: absolute;
