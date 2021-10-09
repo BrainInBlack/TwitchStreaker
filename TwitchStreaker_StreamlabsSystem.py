@@ -356,6 +356,8 @@ def Init():
 	except Exception as e:
 		Log(e.message)
 		return
+	Session.BarGoal     = Settings.BarGoal
+	Session.Goal        = Settings.Goal
 
 	# Create missing folders
 	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
@@ -945,7 +947,11 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 		if not Internal.ScriptReady:
 			Internal.ScriptReady = True
 
+	Session.BarGoal     = Settings.BarGoal
+	Session.Goal        = Settings.Goal
+
 	SanityCheck()
+	Session.Save()
 	Log("Settings saved!")
 
 

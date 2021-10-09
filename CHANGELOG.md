@@ -1,6 +1,9 @@
 # Changelog
 
-## 3.0.1 - Something!
+## 3.0.1 - Something
+
+* Fixed new Settings not being applied to the current Session
+* Fixed Settings not being applied to the Session when the script loads
 
 ## 3.0.0 - Segmented Progressbar
 
