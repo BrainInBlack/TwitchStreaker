@@ -93,7 +93,8 @@ var Overlay = {
 		'_finished': false,
 
 		'updateIndicators': function() {
-			document.getElementById('Bar').innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
+			if (!(tmp = document.getElementById('Bar'))) { return; }
+			tmp.innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
 
 			var indicators   = document.getElementsByClassName('Indicator');
 			var segmentWidth = this._width / this.SegmentCount;
@@ -107,10 +108,11 @@ var Overlay = {
 		},
 
 		'refresh': function() {
-			this._width          = getContentWidth(document.getElementById('Bar'));
+			if (!(tmp = document.getElementById('Bar'))) { return; }
+			this._width          = getContentWidth(tmp);
 			this._pointWidth     = this._width / this.Goal;
 
-			if (this._finished === true) {return};
+			if (this._finished === true) { return} ;
 
 			var sum = 0;
 
