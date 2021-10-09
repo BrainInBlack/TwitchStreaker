@@ -1,5 +1,7 @@
 # Changelog
 
+## 3.0.1 - Something!
+
 ## 3.0.0 - Segmented Progressbar
 
 **IMPORTANT CHANGES!** Brand new feature, a Progressbar! We added a separate Progressbar to the script, that allows you to have additional Goals within the same Script. The Bar is completely separate, has it's own settings and can even make sounds. Huge thanks to [TheLevelUpShow](https://www.twitch.tv/thelevelupshow), for the Idea and the great help while developing this new feature.
