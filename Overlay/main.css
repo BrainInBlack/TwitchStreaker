@@ -35,20 +35,20 @@ html, body {
   z-index: 0;
 }
 
-#Bar #BarSubs {
-  background-color: #6441a4;
+#Bar #BarBits {
+  background: #a041a4;
 }
 
 #Bar #BarFollows {
   background: #46a441;
 }
 
-#Bar #BarBits {
-  background: #a041a4;
-}
-
 #Bar #BarDonations {
   background: #e19628;
+}
+
+#Bar #BarSubs {
+  background: #6441a4;
 }
 
 #Bar .Segment {
