@@ -100,6 +100,104 @@
 		"tooltip": "Allows Donations that are below the minimum amount to pile up until they exceed the minimum amount and then will be counted as a normal Donation together.",
 		"group": "Donations"
 	},
+	"FollowsRequired": {
+		"type": "numberbox",
+		"value": 10,
+		"label": "Follows Required",
+		"tooltip": "Amount of Follows required to be awarded the specified amount of Points.",
+		"group": "Follows"
+	},
+	"FollowPointValue": {
+		"type": "numberbox",
+		"value": 1,
+		"label": "Follow Point Value",
+		"tooltip": "Amount of Points awarded for the completion of a Follow segment.",
+		"group": "Follows"
+	},
+	"CountFollows": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Allow Follows",
+		"tooltip": "Enables Follows to be counted as well.",
+		"group": "Follows"
+	},
+	"BarGoal": {
+		"type": "numberbox",
+		"value": 100,
+		"label": "Goal",
+		"tooltip": "Amount of Points needed to fill the bar.",
+		"group": "Progress Bar"
+	},
+	"BarSegmentCount": {
+		"type": "numberbox",
+		"value": 4,
+		"label": "Segment Count",
+		"tooltip": "Amount of segments within the bar. Their value will be calculated automatically depending on the amount of segments needed.",
+		"group": "Progress Bar"
+	},
+	"BarBitsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Bits",
+		"tooltip": "Enable Bits for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarDonationsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Donations",
+		"tooltip": "Enable Donations for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarFollowsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Follows",
+		"tooltip": "Enable Follows for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"BarSubsEnabled": {
+		"type": "checkbox",
+		"value": true,
+		"label": "Enable Subs",
+		"tooltip": "Enable Subs for the Progress Bar.",
+		"group": "Progress Bar"
+	},
+	"SoundEnabled": {
+		"type": "checkbox",
+		"value": false,
+		"label": "Enable Sounds",
+		"tooltip": "Enables the completion sounds.",
+		"group": "Progress Bar"
+	},
+	"GoalCompletedSound": {
+		"type": "textbox",
+		"value": "GoalCompleted.mp3",
+		"label": "Completion Sound",
+		"tooltip": "Sound that will be played when the bar is completely filled.",
+		"group": "Progress Bar"
+	},
+	"GoalCompletedSoundDelay": {
+		"type": "numberbox",
+		"value": 0,
+		"label": "Completion Sound Delay",
+		"tooltip": "Amount of seconds that the Completion Sound is delayed.",
+		"group": "Progress Bar"
+	},
+	"SegmentCompletedSound": {
+		"type": "textbox",
+		"value": "SegmentCompleted.mp3",
+		"label": "Segment Sound",
+		"tooltip": "Sound that will be played when a segment within the bar is completely filled.",
+		"group": "Progress Bar"
+	},
+	"SegmentCompletedSoundDelay": {
+		"type": "numberbox",
+		"value": 0,
+		"label": "Segment Sound Delay",
+		"tooltip": "Amount of seconds that the Segment Sound is delayed.",
+		"group": "Progress Bar"
+	},
 	"Sub1": {
 		"type": "numberbox",
 		"value": 1,

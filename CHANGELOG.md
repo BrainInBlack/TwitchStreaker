@@ -1,5 +1,62 @@
 # Changelog
 
+## 3.0.0 - Segmented Progressbar
+
+**IMPORTANT CHANGES!** Brand new feature, a Progressbar! We added a separate Progressbar to the script, that allows you to have additional Goals within the same Script. The Bar is completely separate, has it's own settings and can even make sounds. Huge thanks to [TheLevelUpShow](https://www.twitch.tv/thelevelupshow), for the Idea and the great help while developing this new feature.
+
+As you might have guessed, this update will pretty much break (almost) everything. Please Backup the script folder before updating to the latest version! There are detailed instructions for updating from 2.x to 3.x in the README.md file.
+
+* New ProgressBar Class
+  * Added BarDisplayColors
+  * Added BarGoal
+  * Added BarSegmentCount
+  * Added BarSegmentSize
+
+* New Session Variables
+  * Added BitPoints
+  * Added DonationPoints
+  * Added FollowPoints
+  * Added FollowsLeft
+  * Added SegmentsCompleted
+  * Added SubPoints
+  * Added TotalFollows
+
+* New Script Settings
+  * Added BarBitsEnabled
+  * Added BarDonationsEnabled
+  * Added BarFollowsEnabled
+  * Added BarGoal
+  * Added BarSegmentCount
+  * Added BarSubsEnabled
+  * Added CountFollows
+  * Added FollowPointValue
+  * Added SoundEnabled
+  * Added GoalCompletedSound
+  * Added GoalCompletedSoundDelay
+  * Added SegmentCompletedSound
+  * Added SegmentCompletedSoundDelay
+
+* New Command Parameters
+  * Added $tsBitPoints
+  * Added $tsDonationPoints
+  * Added $tsFollowPoints
+  * Added $tsFollowsLeft
+  * Added $tsSubPoints
+  * Added $tsTotalFollows
+
+* Session now saves upon reset
+* Session and Settings no longer auto-load upon creation and use default values until Load() is called
+* Simplified parameter parsing
+* Added `e` prefix for the html elements in the overlay
+* Added sound system, MP3 only
+* Added internals class
+* Added text files for the bar variables
+* Added prefix check to the parse function
+* Moved folder creation into the initialization
+* Removed `Current` prefix from all Session variables
+* Fixed Temp values not resetting when the session is reset
+* Fixed Command parameter not parsing the right values
+
 ## 2.8.2 - More Fixes
 
 * Fixed typo in README.md
