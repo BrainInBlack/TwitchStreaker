@@ -3,11 +3,11 @@ import codecs, json, math, os, time
 
 # === Paths ===
 SCRIPT_FOLDER           = os.path.realpath(os.path.dirname(__file__))
-TEXT_FOLDER             = os.path.join(SCRIPT_FOLDER, "Text\\")
+LOG_FOLDER              = os.path.join(SCRIPT_FOLDER, "Logs\\")
 SOUNDS_FOLDER           = os.path.join(SCRIPT_FOLDER, "Sounds\\")
+TEXT_FOLDER             = os.path.join(SCRIPT_FOLDER, "Text\\")
 
 # === System Files ===
-LOG_FILE                = os.path.join(SCRIPT_FOLDER, "TwitchStreaker.log")
 SESSION_FILE            = os.path.join(SCRIPT_FOLDER, "Session.json")
 SETTINGS_FILE           = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
@@ -84,10 +84,16 @@ class ScriptSession(object):
 	TotalSubs      = 0
 	TotalDonations = 0
 
+	# Internal
+	LogFile = None
+
+	def __init__(self):
+		self.LogFile = "{}.log".format(time.strftime("%m-%d-%y_%H-%M-%S"))
+
 	def Load(self):
 		try:
 			with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
-				self.__dict__ = json.load(f, encoding="utf-8-sig")
+				self.__dict__.update(json.load(f, encoding="utf-8-sig"))
 				f.close()
 		except:
 			self.Save()
@@ -168,7 +174,7 @@ class ScriptSettings(object):
 	def Load(self):
 		try:
 			with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
-				self.__dict__ = json.load(f, encoding="utf-8-sig")
+				self.__dict__.update(json.load(f, encoding="utf-8-sig"))
 				f.close()
 		except:
 			self.Save()
@@ -269,8 +275,9 @@ def Init():
 	Session.Goal    = Settings.Goal
 
 	# Create missing folders
-	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
+	if not os.path.exists(LOG_FOLDER):    os.mkdir(LOG_FOLDER)
 	if not os.path.exists(SOUNDS_FOLDER): os.mkdir(SOUNDS_FOLDER)
+	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
 
 	SanityCheck()
 	StartUp()
@@ -838,7 +845,7 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	# Backup old token for comparison
 	old_token = Settings.SocketToken
-	Settings.__dict__ = json.loads(json_data)
+	Settings.__dict__.update(json.loads(json_data))
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
@@ -937,7 +944,7 @@ def Execute(data): pass
 # === Log Wrapper ===
 def Log(message):
 	try:
-		with codecs.open(LOG_FILE, encoding="utf-8", mode="a+") as f:
+		with codecs.open(os.path.join(LOG_FOLDER, Session.LogFile), encoding="utf-8", mode="a+") as f:
 			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
 			f.close()
 	except IOError as e:
