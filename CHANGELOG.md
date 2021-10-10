@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.1 - Something
+## 3.0.1 - Bug Fixes and Improvements
 
 * Added Session based logs
   * Uses the time when the session was started
