@@ -5,10 +5,14 @@
 * Added Session based logs
   * Uses the time when the session was started
 * Updated README.md
-  * Still needs some additional work
+  * Added troubleshoot information
+  * Added compensation information
 * Improved Session and Settings classes
+  * Removed Default method
 * Improved event data structure
+  * Compressed everything into a single event
 * Improved both Overlays
+* Changed `Reset Tracker` into `Reset Session` in the UI
 * Fixed loading Settings and Sessions
 * Fixed new Settings not being applied to the current Session
 * Fixed Settings not being applied to the Session when the script loads

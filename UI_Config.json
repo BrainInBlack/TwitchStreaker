@@ -376,10 +376,10 @@
 		"function": "UpdateTracker",
 		"wsevent": ""
 	},
-	"ResetTracker": {
+	"ResetSession": {
 		"type": "button",
-		"label": "Reset Tracker",
-		"tooltip": "Resets the Tracker to zero.",
+		"label": "Reset Session",
+		"tooltip": "Resets the current Session.",
 		"function": "ResetSession",
 		"wsevent": ""
 	}

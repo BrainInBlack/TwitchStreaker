@@ -12,6 +12,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Updates](#updates)
   - [Updating from 2.x to 3.x](#updating-from-2x-to-3x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
+  - [Troubleshooting](#troubleshooting)
   - [Settings](#settings)
     - [General](#general)
     - [Bits](#bits)
@@ -86,6 +87,38 @@ With version 3.0.0 we added a progressbar that runs separate to the classic over
 2. Click on `API Tokens`
 3. Click the `Copy` Button next to the `Your Socket API Token` field
 4. Insert the Token under `Streamlabs > Socket Token` in the Script Settings
+
+## Troubleshooting
+
+### Check your Account Connections
+
+In most cases it is as simple as reconnecting your Accounts to the bot.
+
+1. Go to connections :bust_in_silhouette:
+2. Generate new Tokens for both the `Twitch Bot` and `Twitch Streamer`
+3. Reload the script and reset the session
+
+### Check your Python Installation
+
+Another common issue is a problem with the Python 2.7.x installation.
+
+- Make sure [python 2.7.13](https://www.python.org/downloads/release/python-2713/)  x86 is installed. Don't use newer versions of python or x64
+- Make sure the lib folder path found in `scripts tab` -> `settings` :gear: leads to the lib folder located inside the python folder that was created when installing python. By default this would look like [THIS](https://i.imgur.com/5mtHoNL.png)
+- Make sure you installed [python 2.7.13](https://www.python.org/downloads/release/python-2713/) x86 and NOT python 3.X
+
+### Reset the current Session, reset the Settings
+
+Some rare cases involve a corrupted Session, or a corrupted Settings file.
+
+1. Delete `Session.json` from the script folder.
+2. Reload the Script and continue with step 3 if the issue persists.
+3. Delete `Settings.json` and `Settings.js` from the script folder.
+4. Redo your settings, incl. the [Socket Token](#streamlabs-sockettoken).
+5. Reload the Script.
+
+### Get Support on Discord
+
+If all that fails, then there is [Discord](https://discord.gg/HWTaady), where we can help you resolve the issue you're having.
 
 ## Settings
 
