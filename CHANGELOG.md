@@ -7,6 +7,7 @@
 * Updated README.md
   * Added troubleshoot information
   * Added compensation information
+  * Added back the known issue with the script not showing up because of missing dependencies
 * Improved Session and Settings classes
   * Removed Default method
 * Improved event data structure
