@@ -1,5 +1,24 @@
 # Changelog
 
+## 3.0.1 - Bug Fixes and Improvements
+
+* Added Session based logs
+  * Uses the time when the session was started
+* Updated README.md
+  * Added troubleshoot information
+  * Added compensation information
+  * Added back the known issue with the script not showing up because of missing dependencies
+* Improved Session and Settings classes
+  * Removed Default method
+* Improved event data structure
+  * Compressed everything into a single event
+* Improved both Overlays
+* Changed `Reset Tracker` into `Reset Session` in the UI
+* Fixed loading Settings and Sessions
+* Fixed new Settings not being applied to the current Session
+* Fixed Settings not being applied to the Session when the script loads
+* Fixed typo in README.md
+
 ## 3.0.0 - Segmented Progressbar
 
 **IMPORTANT CHANGES!** Brand new feature, a Progressbar! We added a separate Progressbar to the script, that allows you to have additional Goals within the same Script. The Bar is completely separate, has it's own settings and can even make sounds. Huge thanks to [TheLevelUpShow](https://www.twitch.tv/thelevelupshow), for the Idea and the great help while developing this new feature.

@@ -12,6 +12,8 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Updates](#updates)
   - [Updating from 2.x to 3.x](#updating-from-2x-to-3x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
+  - [Known Issues](#known-issues)
+  - [Troubleshooting](#troubleshooting)
   - [Settings](#settings)
     - [General](#general)
     - [Bits](#bits)
@@ -32,6 +34,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Streamers using TwitchStreaker](#streamers-using-twitchstreaker)
   - [Contributing](#contributing)
   - [Contributor's](#contributors)
+  - [Compensation](#compensation)
   - [Project Info](#project-info)
 
 ## Disclaimer
@@ -85,6 +88,49 @@ With version 3.0.0 we added a progressbar that runs separate to the classic over
 2. Click on `API Tokens`
 3. Click the `Copy` Button next to the `Your Socket API Token` field
 4. Insert the Token under `Streamlabs > Socket Token` in the Script Settings
+
+## Known Issues
+
+### Script not showing up after Installation/Update
+
+1. Open `Streamlabs Chatbot.exe.config` in Chatbot main folder, with a Text Editor
+   - `Right click` > `Open file location` on the Chatbot shortcut brings you right to the Chatbot main folder
+2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`
+3. Save and Start/Restart the Chatbot
+
+Additional information available [here](https://github.com/BrainInBlack/TwitchStreaker/issues/38)
+
+## Troubleshooting
+
+### Check your Account Connections
+
+In most cases it is as simple as reconnecting your Accounts to the bot.
+
+1. Go to connections :bust_in_silhouette:
+2. Generate new Tokens for both the `Twitch Bot` and `Twitch Streamer`
+3. Reload the script and reset the session
+
+### Check your Python Installation
+
+Another common issue is a problem with the Python 2.7.x installation.
+
+- Make sure [python 2.7.13](https://www.python.org/downloads/release/python-2713/)  x86 is installed. Don't use newer versions of python or x64
+- Make sure the lib folder path found in `scripts tab` -> `settings` :gear: leads to the lib folder located inside the python folder that was created when installing python. By default this would look like [THIS](https://i.imgur.com/5mtHoNL.png)
+- Make sure you installed [python 2.7.13](https://www.python.org/downloads/release/python-2713/) x86 and NOT python 3.X
+
+### Reset the current Session, reset the Settings
+
+Some rare cases involve a corrupted Session, or a corrupted Settings file.
+
+1. Delete `Session.json` from the script folder.
+2. Reload the Script and continue with step 3 if the issue persists.
+3. Delete `Settings.json` and `Settings.js` from the script folder.
+4. Redo your settings, incl. the [Socket Token](#streamlabs-sockettoken).
+5. Reload the Script.
+
+### Get Support on Discord
+
+If all that fails, then there is [Discord](https://discord.gg/HWTaady), where we can help you resolve the issue you're having.
 
 ## Settings
 
@@ -180,7 +226,7 @@ $tsGoal                 | Amount of `Points` needed per Streak
 $tsPoints               | Current amount of `Points` in the current Streak
 $tsPointsLeft           | Amount of `Points` needed to complete the current Streak
 $tsStreak               | Current Streak
-%tsSubPoints            | Amount of `Points` acquired via `Subscriptions`
+$tsSubPoints            | Amount of `Points` acquired via `Subscriptions`
 $tsTotalBits            | Amount of Bits accumulated in the current Session
 $tsTotalDonations       | Donation amount accumulated in the current Session
 $tsTotalFollows         | Amount of Follows accumulated in the current Session
@@ -231,13 +277,18 @@ The following element ID's are available for use in your design:
 ID             | Description
 ---------------|------------
 BitsLeft       | Amount of `Bits` needed to get the next `Point`
+BitPoints      | Amount of `Points` acquired via `Bits`
+DonationPoints | Amount of `Points` acquired via `Donations`
+FollowPoints   | Amount of `Points` acquired via `Follows`
 Goal           | Amount of `Points` needed per Streak
 Points         | Current amount of `Points` in the current Streak
 PointsLeft     | Amount of `Points` needed to complete the current Streak
 Streak         | Current Streaks
-TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+SubPoints      | Amount of `Points` acquired via `Subscriptions`
 TotalBits      | Amount of `Bits` accumulated in the current Session
 TotalDonations | Donation amount accumulated in the current Session
+TotalFollows   | Amount of total Follows accumulated in the current Session
+TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
 
 None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Points`, `Streak` and `Goal`. Here a few examples:
 
@@ -285,19 +336,19 @@ The following variables are available for your custom script.
 
 Variable                    | Description
 ----------------------------|------------
-Overlay.Text.BitsLeft       | Amount of `Bits` needed to get the next `Point`
-Overlay.Text.BitPoints      | Amount of `Points` acquired via `Bits`
-Overlay.Text.DonationPoints | Amount of `Points` acquired via `Donations`
-Overlay.Text.FollowPoints   | Amount of `Points` acquired via `Follows`
-Overlay.Text.Goal           | Amount of `Points` needed to complete a Streak (min: 1)
-Overlay.Text.Streak         | Current amount Streaks (min: 1)
-Overlay.Text.SubPoints      | Amount of `Points` acquired via `Subscriptions`
-Overlay.Text.Points         | Current amount of `Points` in the Streak (min: 0)
-Overlay.Text.PointsLeft     | Amount of `Points` left to the next Streak
-Overlay.Text.TotalBits      | Amount of total Bits accumulated in the current Session
-Overlay.Text.TotalDonations | Donation amount accumulated in the current Session
-Overlay.Text.TotalFollows   | Follow amount accumulated in the current Session
-Overlay.Text.TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+Overlay.BitsLeft       | Amount of `Bits` needed to get the next `Point`
+Overlay.BitPoints      | Amount of `Points` acquired via `Bits`
+Overlay.DonationPoints | Amount of `Points` acquired via `Donations`
+Overlay.FollowPoints   | Amount of `Points` acquired via `Follows`
+Overlay.Goal           | Amount of `Points` needed to complete a Streak (min: 1)
+Overlay.Streak         | Current amount Streaks (min: 1)
+Overlay.SubPoints      | Amount of `Points` acquired via `Subscriptions`
+Overlay.Points         | Current amount of `Points` in the Streak (min: 0)
+Overlay.PointsLeft     | Amount of `Points` left to the next Streak
+Overlay.TotalBits      | Amount of total Bits accumulated in the current Session
+Overlay.TotalDonations | Donation amount accumulated in the current Session
+Overlay.TotalFollows   | Follow amount accumulated in the current Session
+Overlay.TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
 
 ## Manual Overwrites
 
@@ -349,6 +400,12 @@ Reset Tracker   | Resets everything to their initial values.
 [**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma) - Initial Concept
 
 [**TheLevelUpShow**](https://www.twitch.tv/thelevelupshow) - Progressbar Concept and Debugging
+
+## Compensation
+
+The topic of compensating me for my work came up quite a few times. While I appreciate the idea, I do this for fun and don't need any type of monetary compensation. If you still feel like compensating me for my work, then there is my [GoG.com Wishlist](https://www.gog.com/u/beStrange/wishlist) with a mix of games in most price classes.
+
+In case you decide to gift me something from said wishlist, thank you and use braininblack@gmail.com as the recipient. However, a simple "thank you!" goes a long way and is more than welcome.
 
 ## Project Info
 
