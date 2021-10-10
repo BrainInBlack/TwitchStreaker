@@ -32,6 +32,7 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Streamers using TwitchStreaker](#streamers-using-twitchstreaker)
   - [Contributing](#contributing)
   - [Contributor's](#contributors)
+  - [Compensation](#compensation)
   - [Project Info](#project-info)
 
 ## Disclaimer
@@ -354,6 +355,12 @@ Reset Tracker   | Resets everything to their initial values.
 [**AnEternalEnigma**](https://twitch.tv/AnEternalEnigma) - Initial Concept
 
 [**TheLevelUpShow**](https://www.twitch.tv/thelevelupshow) - Progressbar Concept and Debugging
+
+## Compensation
+
+The topic of compensating me for my work came up quite a few times. While I appreciate the idea, I do this for fun and don't need any type of monetary compensation. If you still feel like compensating me for my work, then there is my [GoG.com Wishlist](https://www.gog.com/u/beStrange/wishlist) with a mix of games in most price classes.
+
+In case you decide to gift me something from said wishlist, thank you and use braininblack@gmail.com as the recipient. However, a simple "thank you!" goes a long way and is more than welcome.
 
 ## Project Info
 
