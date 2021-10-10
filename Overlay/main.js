@@ -20,7 +20,7 @@ var Overlay = {
 	'BitPoints'     : 0,
 	'DonationPoints': 0,
 	'FollowPoints'  : 0,
-	'SubPoints'     : 1,
+	'SubPoints'     : 0,
 
 	// Totals Values
 	'TotalBits'     : 0,
