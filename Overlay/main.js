@@ -3,27 +3,34 @@
  *****************/
 var Overlay = {
 
+	// Base Values
+	'BitsLeft'      : 0,
+	'Goal'          : 10,
+	'Points'        : 0,
+	'PointsLeft'    : 10,
+	'Streak'        : 1,
+
+	// BarValues
+	'BarGoal': 100,
+	'BarGoalCompleted': false,
+	'BarSegmentPointsLeft': 25,
+	'BarSegmentsCompleted': 0,
+
+	// Point Values
+	'BitPoints'     : 0,
+	'DonationPoints': 0,
+	'FollowPoints'  : 0,
+	'SubPoints'     : 1,
+
+	// Totals Values
+	'TotalBits'     : 0,
+	'TotalDonations': 0,
+	'TotalFollows'  : 0,
+	'TotalSubs'     : 0,
+
 	// === Text Overlay ===
 	'Text': {
-		// Base Values
-		'BitsLeft'      : 0,
-		'Goal'          : 10,
-		'Points'        : 0,
-		'PointsLeft'    : 10,
-		'Streak'        : 1,
-		
-		// Point Values
-		'BitPoints'     : 0,
-		'DonationPoints': 0,
-		'FollowPoints'  : 0,
-		'SubPoints'     : 1,
-		
-		// Totals Values
-		'TotalBits'     : 0,
-		'TotalDonations': 0,
-		'TotalFollows'  : 0,
-		'TotalSubs'     : 0,
-	
+
 		// Base Elements
 		'eBitsLeft'      : document.getElementById('BitsLeft'),
 		'eGoal'          : document.getElementById('Goal'),
@@ -47,23 +54,23 @@ var Overlay = {
 		// Refresh, gets called for each Event coming through the EventBus
 		'refresh': function() {
 			// Base
-			if (this.eBitsLeft)       this.eBitsLeft.innerText       = this.BitsLeft;
-			if (this.eGoal)           this.eGoal.innerText           = this.Goal;
-			if (this.ePoints)         this.ePoints.innerText         = this.Points;
-			if (this.ePointsLeft)     this.ePointsLeft.innerText     = this.PointsLeft;
-			if (this.eStreak)         this.eStreak.innerText         = this.Streak;
+			if (this.eBitsLeft)       this.eBitsLeft.innerText       = Overlay.BitsLeft;
+			if (this.eGoal)           this.eGoal.innerText           = Overlay.Goal;
+			if (this.ePoints)         this.ePoints.innerText         = Overlay.Points;
+			if (this.ePointsLeft)     this.ePointsLeft.innerText     = Overlay.PointsLeft;
+			if (this.eStreak)         this.eStreak.innerText         = Overlay.Streak;
 
 			// Points
-			if (this.eBitPoints)      this.eBitPoints.innerText      = this.BitPoints;
-			if (this.eDonationPoints) this.eDonationPoints.innerText = this.DonationPoints;
-			if (this.eFollowPoints)   this.eFollowPoints.innerText   = this.FollowPoints;
-			if (this.eSubPoints)      this.eSubPoints.innerText      = this.SubPoints;
+			if (this.eBitPoints)      this.eBitPoints.innerText      = Overlay.BitPoints;
+			if (this.eDonationPoints) this.eDonationPoints.innerText = Overlay.DonationPoints;
+			if (this.eFollowPoints)   this.eFollowPoints.innerText   = Overlay.FollowPoints;
+			if (this.eSubPoints)      this.eSubPoints.innerText      = Overlay.SubPoints;
 
 			// Totals
-			if (this.eTotalBits)      this.eTotalBits.innerText      = this.TotalBits;
-			if (this.eTotalDonations) this.eTotalDonations.innerText = this.TotalDonations;
-			if (this.eTotalFollows)   this.eTotalFollows.innerText   = this.TotalFollows;
-			if (this.eTotalSubs)      this.eTotalSubs.innerText      = this.TotalSubs;
+			if (this.eTotalBits)      this.eTotalBits.innerText      = Overlay.TotalBits;
+			if (this.eTotalDonations) this.eTotalDonations.innerText = Overlay.TotalDonations;
+			if (this.eTotalFollows)   this.eTotalFollows.innerText   = Overlay.TotalFollows;
+			if (this.eTotalSubs)      this.eTotalSubs.innerText      = Overlay.TotalSubs;
 			if (this.eTracker)        this.eTracker.title            = this.eTracker.innerText;     // ! Outline Hack!
 		},
 
@@ -74,29 +81,26 @@ var Overlay = {
 	// === Progress Bar ===
 	'Bar': {
 		// Base
-		'Goal'          : 100,
-		'SegmentCount'  : 4,
-		'SegmentSize'   : 25,
+		'SegmentCount' : 4,
 
 		// Points
-		'BitPoints'       : 0,
 		'BitsEnabled'     : true,
-		'DonationPoints'  : 0,
 		'DonationsEnabled': true,
-		'FollowPoints'    : 0,
 		'FollowsEnabled'  : true,
-		'SubPoints'       : 0,
 		'SubsEnabled'     : true,
 
-		'_width': '0px',
+		// Internal
+		'_width'     : '0px',
 		'_pointWidth': '0px',
-		'_finished': false,
+		'_finished'  : false,
 
 		'updateIndicators': function() {
 			if (!(tmp = document.getElementById('Bar'))) { return; }
+			var indicators = document.getElementsByClassName('Indicator');
+			while (indicators[0]) { indicators[0].parentNode.removeChild(indicators[0]); }
 			tmp.innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
 
-			var indicators   = document.getElementsByClassName('Indicator');
+			indicators   = document.getElementsByClassName('Indicator');
 			var segmentWidth = this._width / this.SegmentCount;
 			var iter         = 1;
 
@@ -108,36 +112,36 @@ var Overlay = {
 		},
 
 		'refresh': function() {
+			if (this._finished == true) { return };
 			if (!(tmp = document.getElementById('Bar'))) { return; }
-			this._width          = getContentWidth(tmp);
-			this._pointWidth     = this._width / this.Goal;
 
-			if (this._finished === true) { return} ;
+			this._width      = getContentWidth(tmp);
+			this._pointWidth = this._width / Overlay.BarGoal;
 
 			var sum = 0;
 
 			if (this.SubsEnabled) {
-				document.getElementById('BarSubs').style.width = Math.floor(this._pointWidth * this.SubPoints) + 'px';
-				sum += this.SubPoints;
+				document.getElementById('BarSubs').style.width = Math.floor(this._pointWidth * Overlay.SubPoints) + 'px';
+				sum += Overlay.SubPoints;
 			}
 			if (this.FollowsEnabled) {
-				document.getElementById('BarFollows').style.width = Math.floor(this._pointWidth * this.FollowPoints) + 'px';
-				sum += this.FollowPoints;
+				document.getElementById('BarFollows').style.width = Math.floor(this._pointWidth * Overlay.FollowPoints) + 'px';
+				sum += Overlay.FollowPoints;
 			}
 			if (this.BitsEnabled) {
-				document.getElementById('BarBits').style.width = Math.floor(this._pointWidth * this.BitPoints) + 'px';
-				sum += this.BitPoints;
+				document.getElementById('BarBits').style.width = Math.floor(this._pointWidth * Overlay.BitPoints) + 'px';
+				sum += Overlay.BitPoints;
 			}
 			if (this.DonationsEnabled) {
-				document.getElementById('BarDonations').style.width = Math.floor(this._pointWidth * this.DonationPoints) + 'px';
-				sum += this.DonationPoints;
+				document.getElementById('BarDonations').style.width = Math.floor(this._pointWidth * Overlay.DonationPoints) + 'px';
+				sum += Overlay.DonationPoints;
 			}
 
-			this._finished = (sum >= this.Goal);
+			this._finished = (sum >= Overlay.BarGoal);
 		},
 
 		// User Refresh
-		'onrefresh':  function() {}
+		'onrefresh': function() {}
 	}
 }
 
@@ -154,8 +158,7 @@ function connectWebsocket() {
 			website: 'https://github.com/BrainInBlack/TwitchStreaker',
 			api_key:  API_Key,
 			events: [
-				'EVENT_UPDATE_OVERLAY',
-				'EVENT_UPDATE_BAR'
+				'EVENT_UPDATE_OVERLAY'
 			]
 		}));
 		console.log('TwitchStreaker: Connected (Socket)');
@@ -178,56 +181,48 @@ function connectWebsocket() {
 		switch (socketMessage.event) {
 			case 'EVENT_UPDATE_OVERLAY':
 				var data = JSON.parse(socketMessage.data);
-				// Base
-				Overlay.Text.BitsLeft       = data.BitsLeft;
-				Overlay.Text.Goal           = data.Goal;
-				Overlay.Text.Streak         = data.Streak;
-				Overlay.Text.Points         = data.Points;
-				Overlay.Text.PointsLeft     = data.PointsLeft;
+
+				// Base Values
+				Overlay.BitsLeft   = data.BitsLeft;
+				Overlay.Goal       = data.Goal;
+				Overlay.Points     = data.Points;
+				Overlay.PointsLeft = data.PointsLeft;
+				Overlay.Streak     = data.Streak;
+			
+				// BarValues
+				Overlay.BarGoal              = data.BarGoal;
+				Overlay.BarGoalCompleted     = data.BarGoalCompleted;
+				Overlay.BarSegmentPointsLeft = data.BarSegmentPointsLeft;
+				Overlay.BarSegmentsCompleted = data.BarSegmentsCompleted;
+			
+				// Point Values
+				Overlay.BitPoints      = data.BitPoints;
+				Overlay.DonationPoints = data.DonationPoints;
+				Overlay.FollowPoints   = data.FollowPoints;
+				Overlay.SubPoints      = data.SubPoints;
+			
+				// Totals Values
+				Overlay.TotalBits      = data.TotalBits;
+				Overlay.TotalDonations = data.TotalDonations;
+				Overlay.TotalFollows   = data.TotalFollows;
+				Overlay.TotalSubs      = data.TotalSubs;
+
+				// Bar Specific
+				Overlay.Bar.BitsEnabled      = data.BitsEnabled;
+				Overlay.Bar.DonationsEnabled = data.DonationsEnabled;
+				Overlay.Bar.FollowsEnabled   = data.FollowsEnabled;
+				Overlay.Bar.SubsEnabled      = data.SubsEnabled;
+				Overlay.Bar.SegmentCount     = data.SegmentCount;
 		
-				// Points
-				Overlay.Text.BitPoints      = data.BitPoints;
-				Overlay.Text.DonationPoints = data.DonationPoints;
-				Overlay.Text.FollowPoints   = data.FollowPoints;
-				Overlay.Text.SubPoints      = data.SubPoints;
-		
-				// Totals
-				Overlay.Text.TotalBits      = data.TotalBits;
-				Overlay.Text.TotalDonations = data.TotalDonations;
-				Overlay.Text.TotalFollows   = data.TotalFollows;
-				Overlay.Text.TotalSubs      = data.TotalSubs;
-		
-				// Refresh
+				// Refresh Text
 				Overlay.Text.refresh();
 				Overlay.Text.onrefresh();
-				break;
 
-			case 'EVENT_UPDATE_BAR':
-				var data = JSON.parse(socketMessage.data);
-				// Base
-				Overlay.Bar.Goal             = data.Goal;
-				if (data.SegmentCount != Overlay.Bar.SegmentCount) {
-					Overlay.Bar.SegmentCount = data.SegmentCount;
-					Overlay.Bar.updateIndicators();
-				} else {
-					Overlay.Bar.SegmentCount = data.SegmentCount;
-				}
-				Overlay.Bar.SegmentSize      = data.SegmentSize;
-				
-				// Points
-				Overlay.Bar.BitPoints        = data.BitPoints;
-				Overlay.Bar.BitsEnabled      = data.BitsEnabled;
-				Overlay.Bar.DonationPoints   = data.DonationPoints;
-				Overlay.Bar.DonationsEnabled = data.DonationsEnabled;
-				Overlay.Bar.FollowPoints     = data.FollowPoints;
-				Overlay.Bar.FollowsEnabled   = data.FollowsEnabled;
-				Overlay.Bar.SubPoints        = data.SubPoints;
-				Overlay.Bar.SubsEnabled      = data.SubsEnabled;
-				
-				// Refresh
+				// Refresh Bar
+				Overlay.Bar.updateIndicators();
 				Overlay.Bar.refresh();
 				Overlay.Bar.onrefresh();
-				break
+				break;
 
 				default:
 					if(socketMessage.event, ['EVENT_CONNECTED']) { return; }

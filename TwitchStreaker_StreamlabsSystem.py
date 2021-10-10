@@ -84,9 +84,6 @@ class ScriptSession(object):
 	TotalSubs      = 0
 	TotalDonations = 0
 
-	def __init__(self):
-		self.__dict__ = self.DefaultSession()
-
 	def Load(self):
 		try:
 			with codecs.open(SESSION_FILE, encoding="utf-8-sig", mode="r") as f:
@@ -106,101 +103,67 @@ class ScriptSession(object):
 		except:
 			raise Exception("Unable to save Session (Unknown Error)")
 
-	@staticmethod
-	def DefaultSession():
-		return {
-			# Base Values
-			"BitsLeft": 500,
-			"FollowsLeft": 0,
-			"Goal": 10,
-			"Points": 0,
-			"PointsLeft": 10,
-			"Streak": 1,
-
-			# Point Values
-			"BitPoints": 0,
-			"DonationPoints": 0,
-			"FollowPoints": 0,
-			"SubPoints": 0,
-
-			# Bar Values
-			"BarGoal": 100,
-			"BarGoalCompleted": False,
-			"BarPointsLeft": 0,
-			"BarSegmentPointsLeft": 0,
-			"BarSegmentsCompleted": 0,
-
-			# Totals Values
-			"TotalBits": 0,
-			"TotalFollows": 0,
-			"TotalSubs": 0,
-			"TotalDonations": 0
-		}
-
 
 # === Settings Class ===
 class ScriptSettings(object):
 
 	# General
-	Goal = 10
-	GoalMin = 5
-	GoalMax = 10
+	Goal          = 10
+	GoalMin       = 5
+	GoalMax       = 10
 	GoalIncrement = 1
 
 	# Bits
-	BitsMinAmount = 500
-	BitsPointValue = 1
-	CountBits = False
-	CountBitsOnce = False
+	BitsMinAmount       = 500
+	BitsPointValue      = 1
+	CountBits           = False
+	CountBitsOnce       = False
 	CountBitsCumulative = False
 
 	# Donations
-	DonationMinAmount = 5.0
-	DonationPointValue = 1
-	CountDonations = False
-	CountDonationsOnce = False
+	DonationMinAmount        = 5.0
+	DonationPointValue       = 1
+	CountDonations           = False
+	CountDonationsOnce       = False
 	CountDonationsCumulative = False
+
+	# Follows
+	CountFollows     = False
+	FollowsRequired  = 10
+	FollowPointValue = 1
 
 	# Subscriptions
 	CountReSubs = False
-	Sub1 = 1
-	Sub2 = 1
-	Sub3 = 1
-	ReSub1 = 1
-	ReSub2 = 1
-	ReSub3 = 1
-	GiftSub1 = 1
-	GiftSub2 = 1
-	GiftSub3 = 1
-	GiftReSub1 = 1
-	GiftReSub2 = 1
-	GiftReSub3 = 1
-
-	# Follows
-	CountFollows = False
-	FollowsRequired = 10
-	FollowPointValue = 1
+	Sub1        = 1
+	Sub2        = 1
+	Sub3        = 1
+	ReSub1      = 1
+	ReSub2      = 1
+	ReSub3      = 1
+	GiftSub1    = 1
+	GiftSub2    = 1
+	GiftSub3    = 1
+	GiftReSub1  = 1
+	GiftReSub2  = 1
+	GiftReSub3  = 1
 
 	# Progressbar
-	BarGoal = 100
-	BarSegmentCount = 4
-	BarBitsEnabled = True
+	BarGoal             = 100
+	BarSegmentCount     = 4
+	BarBitsEnabled      = True
 	BarDonationsEnabled = True
-	BarFollowsEnabled = True
-	BarSubsEnabled = True
+	BarFollowsEnabled   = True
+	BarSubsEnabled      = True
 
 	# Sounds
-	SoundEnabled = False
-	GoalCompletedSound = None
-	GoalCompletedSoundDelay = 0
-	SegmentCompletedSound = None
+	SoundEnabled               = False
+	GoalCompletedSound         = None
+	GoalCompletedSoundDelay    = 0
+	SegmentCompletedSound      = None
 	SegmentCompletedSoundDelay = 0
 
 	# Streamlabs
 	SocketToken = None
-
-	def __init__(self):
-		self.__dict__ = self.DefaultSettings()
 
 	def Load(self):
 		try:
@@ -220,60 +183,6 @@ class ScriptSettings(object):
 			raise Exception("Unable to save Settings ({})".format(e.message))
 		except:
 			raise Exception("Unable to save Settings (Unknown error)")
-
-	@staticmethod
-	def DefaultSettings():
-		return {
-			# General
-			"Goal": 10,
-			"GoalMin": 5,
-			"GoalMax": 10,
-			"GoalIncrement": 1,
-
-			# Bits
-			"BitsMinAmount": 500,
-			"BitsPointValue": 1,
-			"CountBits": False,
-			"CountBitsOnce": False,
-			"CountBitsCumulative": False,
-
-			# Donations
-			"DonationMinAmount": 5.0,
-			"DonationPointValue": 1,
-			"CountDonations": False,
-			"CountDonationsOnce": False,
-			"CountDonationsCumulative": False,
-
-			# Subscriptions
-			"CountReSubs": False,
-			"Sub1": 1, "Sub2": 1, "Sub3": 1,
-			"ReSub1": 1, "ReSub2": 1, "ReSub3": 1,
-			"GiftSub1": 1, "GiftSub2": 1, "GiftSub3": 1,
-			"GiftReSub1": 1, "GiftReSub2": 1, "GiftReSub3": 1,
-
-			# Follows
-			"CountFollows": False,
-			"FollowPointValue": 1,
-			"FollowsRequired": 10,
-
-			# Progressbar
-			"BarGoal": 100,
-			"BarSegmentCount": 4,
-			"BarBitsEnabled": True,
-			"BarDonationsEnabled": True,
-			"BarFollowsEnabled": True,
-			"BarSubsEnabled": True,
-
-			# Sounds
-			"SoundEnabled": False,
-			"GoalCompletedSound": None,
-			"GoalCompletedSoundDelay":0,
-			"SegmentCompletedSound": None,
-			"SegmentCompletedSoundDelay": 0,
-
-			# Streamlabs
-			"SocketToken": None
-		}
 
 
 # === Internal Class ===
@@ -356,8 +265,8 @@ def Init():
 	except Exception as e:
 		Log(e.message)
 		return
-	Session.BarGoal     = Settings.BarGoal
-	Session.Goal        = Settings.Goal
+	Session.BarGoal = Settings.BarGoal
+	Session.Goal    = Settings.Goal
 
 	# Create missing folders
 	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
@@ -777,20 +686,13 @@ def UpdateTracker():  # ! Only call if a quick response is required
 			Internal.SegmentSoundStamp    = now
 
 	# Update Overlay
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(Session.__dict__)))
-	Parent.BroadcastWsEvent("EVENT_UPDATE_BAR",     str(json.dumps({
-		"Goal":             Settings.BarGoal,
-		"SegmentCount":     Settings.BarSegmentCount,
-		"SegmentSize":      segmentSize,
-		"BitPoints":        Session.BitPoints,
-		"BitsEnabled":      Settings.BarBitsEnabled,
-		"DonationPoints":   Session.DonationPoints,
-		"DonationsEnabled": Settings.BarDonationsEnabled,
-		"FollowPoints":     Session.FollowPoints,
-		"FollowsEnabled":   Settings.BarFollowsEnabled,
-		"SubPoints":        Session.SubPoints,
-		"SubsEnabled":      Settings.BarSubsEnabled
-	})))
+	payload = Session.__dict__
+	payload["BitsEnabled"]      = Settings.BarBitsEnabled
+	payload["DonationsEnabled"] = Settings.BarDonationsEnabled
+	payload["FollowsEnabled"]   = Settings.BarFollowsEnabled
+	payload["SubsEnabled"]      = Settings.BarSubsEnabled
+	payload["SegmentCount"]     = Settings.BarSegmentCount
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(payload)))
 
 	# Update Text Files
 	SimpleWrite(BAR_GOAL,                Session.BarGoal)
@@ -910,12 +812,13 @@ def SanityCheck():
 
 # === Reset Session ===
 def ResetSession():
+	global Session
 
 	Internal.TempBits      = 0
 	Internal.TempDonations = 0
 	Internal.TempFollows   = 0
 
-	Session.__dict__    = Session.DefaultSession()
+	Session             = ScriptSession()
 	Session.BarGoal     = Settings.BarGoal
 	Session.BitsLeft    = Settings.BitsMinAmount
 	Session.FollowsLeft = Settings.FollowsRequired

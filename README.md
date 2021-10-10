@@ -180,7 +180,7 @@ $tsGoal                 | Amount of `Points` needed per Streak
 $tsPoints               | Current amount of `Points` in the current Streak
 $tsPointsLeft           | Amount of `Points` needed to complete the current Streak
 $tsStreak               | Current Streak
-%tsSubPoints            | Amount of `Points` acquired via `Subscriptions`
+$tsSubPoints            | Amount of `Points` acquired via `Subscriptions`
 $tsTotalBits            | Amount of Bits accumulated in the current Session
 $tsTotalDonations       | Donation amount accumulated in the current Session
 $tsTotalFollows         | Amount of Follows accumulated in the current Session
@@ -231,13 +231,18 @@ The following element ID's are available for use in your design:
 ID             | Description
 ---------------|------------
 BitsLeft       | Amount of `Bits` needed to get the next `Point`
+BitPoints      | Amount of `Points` acquired via `Bits`
+DonationPoints | Amount of `Points` acquired via `Donations`
+FollowPoints   | Amount of `Points` acquired via `Follows`
 Goal           | Amount of `Points` needed per Streak
 Points         | Current amount of `Points` in the current Streak
 PointsLeft     | Amount of `Points` needed to complete the current Streak
 Streak         | Current Streaks
-TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+SubPoints      | Amount of `Points` acquired via `Subscriptions`
 TotalBits      | Amount of `Bits` accumulated in the current Session
 TotalDonations | Donation amount accumulated in the current Session
+TotalFollows   | Amount of total Follows accumulated in the current Session
+TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
 
 None of those ID's are actually required and can be placed anywhere in the document, in case of the default design we're only using `Points`, `Streak` and `Goal`. Here a few examples:
 
@@ -285,19 +290,19 @@ The following variables are available for your custom script.
 
 Variable                    | Description
 ----------------------------|------------
-Overlay.Text.BitsLeft       | Amount of `Bits` needed to get the next `Point`
-Overlay.Text.BitPoints      | Amount of `Points` acquired via `Bits`
-Overlay.Text.DonationPoints | Amount of `Points` acquired via `Donations`
-Overlay.Text.FollowPoints   | Amount of `Points` acquired via `Follows`
-Overlay.Text.Goal           | Amount of `Points` needed to complete a Streak (min: 1)
-Overlay.Text.Streak         | Current amount Streaks (min: 1)
-Overlay.Text.SubPoints      | Amount of `Points` acquired via `Subscriptions`
-Overlay.Text.Points         | Current amount of `Points` in the Streak (min: 0)
-Overlay.Text.PointsLeft     | Amount of `Points` left to the next Streak
-Overlay.Text.TotalBits      | Amount of total Bits accumulated in the current Session
-Overlay.Text.TotalDonations | Donation amount accumulated in the current Session
-Overlay.Text.TotalFollows   | Follow amount accumulated in the current Session
-Overlay.Text.TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
+Overlay.BitsLeft       | Amount of `Bits` needed to get the next `Point`
+Overlay.BitPoints      | Amount of `Points` acquired via `Bits`
+Overlay.DonationPoints | Amount of `Points` acquired via `Donations`
+Overlay.FollowPoints   | Amount of `Points` acquired via `Follows`
+Overlay.Goal           | Amount of `Points` needed to complete a Streak (min: 1)
+Overlay.Streak         | Current amount Streaks (min: 1)
+Overlay.SubPoints      | Amount of `Points` acquired via `Subscriptions`
+Overlay.Points         | Current amount of `Points` in the Streak (min: 0)
+Overlay.PointsLeft     | Amount of `Points` left to the next Streak
+Overlay.TotalBits      | Amount of total Bits accumulated in the current Session
+Overlay.TotalDonations | Donation amount accumulated in the current Session
+Overlay.TotalFollows   | Follow amount accumulated in the current Session
+Overlay.TotalSubs      | Amount of total Subs (not `Points`) accumulated in the current Session
 
 ## Manual Overwrites
 

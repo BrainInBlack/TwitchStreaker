@@ -2,8 +2,14 @@
 
 ## 3.0.1 - Something
 
+* Updated README.md
+  * Still needs some additional work
+* Improved Session and Settings classes
+* Improved event data structure
+* Improved both Overlays
 * Fixed new Settings not being applied to the current Session
 * Fixed Settings not being applied to the Session when the script loads
+* Fixed typo in README.md
 
 ## 3.0.0 - Segmented Progressbar
 
