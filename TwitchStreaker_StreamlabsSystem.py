@@ -340,13 +340,14 @@ def SocketEvent(data):
 		event["message"] = json.loads("[ {} ]".format(json.dumps(event["message"])))
 
 	msg = event["message"][0]  # Messages come in as single events, a loop is not needed
-	Log(json.dumps(msg), True)
 
 	# Repeat and isTest
 	if "repeat" in msg:
 		return
 	if "isTest" in msg:
 		isTest = msg["isTest"]
+	else:
+		isTest = False
 
 	# Event Filter
 	Internal.FlushStamp = time.time()
@@ -422,9 +423,95 @@ def SocketEvent(data):
 				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, name))
 			return
 		
+		# === Subscriptions ===
 		if event["type"] == "subscription":
-			# TODO: Implementation
-			return
+
+			# Simplification
+			name = msg["name"]
+
+			# Type Hackery
+			if not "sub_type" in msg and "type" in msg:
+				type = msg["type"]
+			elif "sub_type" in msg:
+				type = msg["sub_type"]
+			elif "months" in msg and int(msg["months"]) > 0:
+				type = "resub"
+			else:
+				type = "sub"
+			
+			# Tier Hackery
+			if "plan" in msg:
+				tier = msg["plan"]
+			elif "subPlan" in msg:
+				tier = msg["subPlan"]
+			else:
+				tier = msg["sub_plan"]
+
+			# Months Hackery
+			if "months" in msg:
+				months = int(msg["months"])
+			else:
+				months = None
+
+			# === Gifted Subs ===
+			if type == "subgift" or type == "anonsubgift":
+
+				# Simplification
+				gifter = msg["gifter"]
+
+				# Ignore gifted subs by the Streamer or the Recipient
+				if gifter == ChannelName and not isTest:
+					return
+				if gifter == name and not isTest:
+					return
+
+				# Point Value
+				if months is not None and months > 0:
+					res = Settings.GiftReSub1
+					if tier == "2000": res = Settings.GiftReSub2
+					if tier == "3000": res = Settings.GiftReSub3
+				else:
+					res = Settings.GiftSub1
+					if tier == "2000": res = Settings.GiftSub2
+					if tier == "3000": res = Settings.GiftSub3
+
+				# Update Session
+				Session.Points    += res
+				Session.SubPoints += res
+				if not isTest:
+					Session.TotalSubs += 1
+				Log("Added {} Point(s) for a {} from {} to {}".format(res, type, gifter, name))
+				return
+
+			# === Resubs ===
+			elif type == "resub" and (Settings.CountReSubs or isTest):
+				# Point Value
+				res = Settings.ReSub1
+				if tier == "2000": res = Settings.ReSub2
+				if tier == "3000": res = Settings.ReSub3
+
+				# Update Session
+				Session.Points    += res
+				Session.SubPoints += res
+				if not isTest:
+					Session.TotalSubs += 1
+				Log("Added {} Point(s) for a {} from {}".format(res, type, name))
+				return
+
+			# === Subs ===
+			else:
+				# Point Value
+				res = Settings.Sub1
+				if tier == "2000": res = Settings.Sub2
+				if tier == "3000": res = Settings.Sub3
+
+				# Update Session
+				Session.Points    += res
+				Session.SubPoints += res
+				if not isTest:
+					Session.TotalSubs += 1
+				Log("Added {} Point(s) for a {} from {}".format(res, type, name))
+				return
 		return
 
 	# === Youtube ===
@@ -456,10 +543,6 @@ def SocketEvent(data):
 			# TODO: Implementation
 			return
 
-		# === Donations aka Superchats ===
-		if event["type"] == "superchat":
-			# TODO: Implementation
-			return
 		return
 
 	# === Streamlabs ===
