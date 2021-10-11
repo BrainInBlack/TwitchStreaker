@@ -39,18 +39,17 @@ TOTAL_SUBS              = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
 
 # === External References ===
 import clr
+clr.AddReference("SocketIOClientDotNet.dll")
 clr.AddReference("Newtonsoft.Json.dll")
-clr.AddReference("EngineIoClientDotNet.dll")
-clr.AddReference("SocketIoClientDotNet.dll")
-clr.AddReferenceToFileAndPath(os.path.join(SCRIPT_FOLDER, "Lib\\StreamlabsEventReceiver.dll"))
-from StreamlabsEventReceiver import StreamlabsEventClient
-
+from System import Uri, Action
+from Quobject.SocketIoClientDotNet import Client as SocketIO
+from Newtonsoft.Json.JsonConvert import SerializeObject as JSONDump
 
 # === Script Info ===
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "3.0.2"
+Version     = "3.1.0"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -310,257 +309,228 @@ def StartUp():
 def Connect():
 	global Socket
 
-	Socket = StreamlabsEventClient()
-	Socket.StreamlabsSocketConnected    += SocketConnected
-	Socket.StreamlabsSocketDisconnected += SocketDisconnected
-	Socket.StreamlabsSocketEvent        += SocketEvent
-	Socket.Connect(Settings.SocketToken)
+	Socket = SocketIO.IO.Socket(Uri("https://sockets.streamlabs.com"), SocketIO.IO.Options(AutoConnect=False, QueryString="token={}".format(Settings.SocketToken)))
+	Socket.On("event", Action[object](SocketEvent))
+	Socket.On(SocketIO.Socket.EVENT_CONNECT,          Action[object](SocketConnected))
+	Socket.On(SocketIO.Socket.EVENT_CONNECT_ERROR,    Action[object](SocketError))
+	Socket.On(SocketIO.Socket.EVENT_CONNECT_TIMEOUT,  Action[object](SocketError))
+	Socket.On(SocketIO.Socket.EVENT_DISCONNECT,       Action[object](SocketDisconnected))
+	Socket.On(SocketIO.Socket.EVENT_ERROR,            Action[object](SocketError))
+	Socket.On(SocketIO.Socket.EVENT_RECONNECT_ERROR,  Action[object](SocketError))
+	Socket.On(SocketIO.Socket.EVENT_RECONNECT_FAILED, Action[object](SocketError))
+	Socket.Connect()
 
 
 # === Event Bus ===
-def SocketEvent(sender, args):
+def SocketEvent(data):
 
-	# Get Data
-	data = args.Data
-	msg  = data.Message[0]  # Messages come in as single events, no need for a loop
+	# Decode Data
+	event = json.loads(JSONDump(data).encode(encoding="UTF-8", errors="backslashreplace"))
+	
+	# Validate Message
+	if not "message" in event:
+		Log("No message in Event: {}".format(json.dumps(event)))
+	
+	# Fix Streamlabs Donation
+	if not "for" in event and "type" in event and event["type"] == "donation":
+		event["for"] = "streamlabs"
 
-	# Event Filtering
+	# Fix Message Format
+	if isinstance(event["message"], dict):
+		event["message"] = json.loads("[ {} ]".format(json.dumps(event["message"])))
+
+	msg = event["message"][0]  # Messages come in as single events, a loop is not needed
+	Log(json.dumps(msg), True)
+
+	# Repeat and isTest
+	if "repeat" in msg:
+		return
+	if "isTest" in msg:
+		isTest = msg["isTest"]
+
+	# Event Filter
 	Internal.FlushStamp = time.time()
-	if msg.Id in Internal.EventIDs:
+	if msg["_id"] in Internal.EventIDs:
 		return
-	Internal.EventIDs.append(msg.Id)
-
-	# Skip on Repeat and NotLive
-	if msg.IsRepeat:
-		return
-	if not msg.IsLive and not msg.IsTest:
-		return
+	Internal.EventIDs.append(msg["_id"])
 
 	# === Twitch ===
-	if data.For == "twitch_account":
+	if event["for"] == "twitch_account":
 
 		# === Bits ===
-		if data.Type == "bits" and Settings.CountBits:
+		if event["type"] == "bits" and Settings.CountBits:
+
+			# Simplification
+			name   = msg["name"]
+			amount = int(msg["amount"])
 
 			# Ignore TestBits for the total amount of Bits
-			if not msg.IsTest:
-				Session.TotalBits += msg.Amount
+			if not isTest:
+				Session.TotalBits += amount
 
-			# Bits are above MinAmount
-			if msg.Amount >= Settings.BitsMinAmount:
+			# Bits are above the minimum amount required
+			if amount >= Settings.BitsMinAmount:
 
+				# Non cumulative Bits
 				if Settings.CountBitsOnce:
-					Session.Points    += Settings.BitsPointValue
+					Session.Points += Settings.BitsPointValue
 					Session.BitPoints += Settings.BitsPointValue
-					Log("Added {} Point(s) for {} Bits from {}".format(Settings.BitsPointValue, msg.Amount, msg.Name))
+					Log("Added {} Point(s) for {} Bits from {}".format(Settings.BitsPointValue, amount, name))
 					return
 
-				res = Settings.BitsPointValue * math.trunc(msg.Amount / Settings.BitsMinAmount)
+				# Calculate Points
+				res = int(Settings.BitsPointValue * math.floor(amount / Settings.BitsMinAmount))
 
-				# Add remainder to BitsTemp, if cumulative Bits are enabled
+				# Add remainder to TempBits, if cumulative Bits are enabled
 				if Settings.CountBitsCumulative:
-					Internal.TempBits += msg.Amount % Settings.BitsMinAmount
+					Internal.TempBits += amount % Settings.BitsMinAmount
 
-				Session.Points    += res
+				# Update Session
+				Session.Points += res
 				Session.BitPoints += res
-				Log("Added {} Point(s) for {} Bits from {}".format(res, msg.Amount, msg.Name))
+				Log("Added {} Point(s) for {} Bits from {}".format(res, amount, name))
 				return
 
-			# Cumulative Bits
+			# Bits are below the minimum amount required and cumulative Bits are enabled
 			elif Settings.CountBitsCumulative:
+				Internal.TempBits += amount
+				Log("Added {} Bit(s) from {} to the cumulative amount".format(amount, name))
 
-				Internal.TempBits += msg.Amount
-				Log("Added {} Bit(s) from {} to the cumulative amount".format(msg.Amount, msg.Name))
-
+			# Amount of Bits are not above the minimum amount required and cumulative Bits are disabled
 			else:
-				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(msg.Amount, msg.Name))
+				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(amount, name))
 			return
 
 		# === Follows ===
-		if data.Type == "follow" and Settings.CountFollows:
+		if event["type"] == "follow" and Settings.CountFollows:
 
-			# Ignore TestFollows for the total amount of follows
-			if not msg.IsTest:
+			# Simplification
+			name = msg["name"]
+			
+			# Ignore TestFollows for the total amount of Follows
+			if not isTest:
 				Session.TotalFollows += 1
 
+			# Update TempFollows
 			Internal.TempFollows += 1
+
+			# Update Session and TempFollows if the TempFollows are above the minimum amount required
 			if Internal.TempFollows >= Settings.FollowsRequired:
-				Session.Points       += Settings.FollowPointValue
+				Session.Points += Settings.FollowPointValue
 				Session.FollowPoints += Settings.FollowPointValue
 				Internal.TempFollows -= Settings.FollowsRequired
-				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, msg.Name))
-
-		# === Subscriptions ===
-		if data.Type == "subscription":
-
-			# === Gifted Subs ===
-			if msg.SubType == "subgift" or msg.SubType == "anonsubgift":
-
-				# Ignore gifted Subs by the Streamer or the Recipient
-				if msg.Gifter == ChannelName and not msg.IsTest:
-					return
-				if msg.Name == msg.Gifter and not msg.IsTest:
-					return
-
-				# ReSub
-				if msg.Months is not None:
-
-					res = Settings.GiftReSub1
-					if msg.SubPlan == "2000": res = Settings.GiftReSub2
-					if msg.SubPlan == "3000": res = Settings.GiftReSub3
-
-					Session.Points    += res
-					Session.SubPoints += res
-					Session.TotalSubs += 1
-					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
-					return
-
-				# New Sub
-				else:
-
-					res = Settings.GiftSub1
-					if msg.SubPlan == "2000": res = Settings.GiftSub2
-					if msg.SubPlan == "3000": res = Settings.GiftSub3
-
-					Session.Points    += res
-					Session.SubPoints += res
-					Session.TotalSubs += 1
-					Log("Added {} Point(s) for a {} Subscription from {} to {}".format(res, msg.SubType, msg.Gifter, msg.Name))
-					return
-
-			# ReSubs
-			elif msg.SubType == "resub" and (Settings.CountReSubs or msg.IsTest):
-
-				res = Settings.ReSub1
-				if msg.SubPlan == "2000": res = Settings.ReSub2
-				if msg.SubPlan == "3000": res = Settings.ReSub3
-
-				Session.Points    += res
-				Session.SubPoints += res
-				Session.TotalSubs += 1
-				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
-				return
-			# Resubs - END
-
-			# Subs
-			else:
-
-				res = Settings.Sub1
-				if msg.SubPlan == "2000": res = Settings.Sub2
-				if msg.SubPlan == "3000": res = Settings.Sub3
-
-				Session.Points    += res
-				Session.SubPoints += res
-				Session.TotalSubs += 1
-				Log("Added {} Point(s) for a {} Subscription from {}".format(res, msg.SubType, msg.Name))
-				return
-			# Subs - END
-
-		return  # /Twitch
+				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, name))
+			return
+		
+		if event["type"] == "subscription":
+			# TODO: Implementation
+			return
+		return
 
 	# === Youtube ===
-	if data.For == "youtube_account":
+	if event["for"] == "youtube_account":
 
-		# === Subscription ===
-		if data.Type == "subscription":
+		# === Follows aka Subscriptions ===
+		if event["type"] == "follow" and Settings.CountFollows:
 
-			if msg.Months > 1 and not Settings.CountResubs:
-				return
+			# Simplification
+			name = msg["name"]
+			
+			# Ignore TestFollows for the total amount of Follows
+			if not isTest:
+				Session.TotalFollows += 1
 
-			Session.Points    += Settings.Sub1
-			Session.SubPoints += Settings.Sub2
-			Session.TotalSubs += 1
-			Log("Added {} Point(s) for a Sponsorship from {} (YouTube)".format(Settings.Sub1, msg.Name))
+			# Update TempFollows
+			Internal.TempFollows += 1
+
+			# Update Session and TempFollows if the TempFollows are above the minimum amount required
+			if Internal.TempFollows >= Settings.FollowsRequired:
+				Session.Points += Settings.FollowPointValue
+				Session.FollowPoints += Settings.FollowPointValue
+				Internal.TempFollows -= Settings.FollowsRequired
+				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, name))
 			return
 
-		# === Superchat ===
-		if data.Type == 'superchat':
+		# === Subscriptions aka Memberships ===
+		if event["type"] == "subscription":
+			# TODO: Implementation
+			return
 
-			if not msg.IsTest:
-				Session.TotalDonations += msg.Amount
+		# === Donations aka Superchats ===
+		if event["type"] == "superchat":
+			# TODO: Implementation
+			return
+		return
 
-			if msg.Amount >= Settings.DonationMinAmount:
+	# === Streamlabs ===
+	if event["for"] == "streamlabs":
 
+		# === Donations ===
+		if event["type"] == "donation" and Settings.CountDonations:
+
+			# Simplification
+			name     = msg["from"]
+			amount   = float(msg["amount"])
+			currency = msg["currency"]
+
+			# Ignore test Donation for the total amount
+			if not isTest:
+				Session.TotalDonations += amount
+
+			# Donation is above the minimum amount required
+			if amount >= Settings.DonationMinAmount:
+
+				# Non cumulative Donation
 				if Settings.CountDonationsOnce:
-					Session.Points += Settings.DonationPointValue
-					Log("Added {} Point(s) for a {} {} Superchat from {}".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.Name))
+					Session.Points         += Settings.DonationPointValue
+					Session.DonationPoints += Settings.DonationPointValue
+					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, amount, currency, name))
 					return
 
-				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
+				# Calculate Points
+				res = int(Settings.DonationPointValue * amount / Settings.DonationMinAmount)
 
-				# Add remainder to DonationTemp, if cumulative Donations are enabled
+				# Add remainder to TempDonation, if cumulative Donations are enabled
 				if Settings.CountDonationsCumulative:
-					Internal.TempDonations += msg.Amount % Settings.DonationMinAmount
+					Internal.TempDonations += amount % Settings.DonationMinAmount
 
-				Session.Points         += res
-				Session.DonationPoints += res
-				Log("Added {} Point(s) for a {} {} Superchat from {}".format(res, msg.Amount, msg.Currency, msg.Name))
+				# Update Session
+				Session.Points += Settings.DonationPointValue
+				Session.DonationPoints += Settings.DonationPointValue
+				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, amount, currency, name))
 				return
 
+			# Donation is below the minimum amount required and cumulative Donations are enabled
 			elif Settings.CountDonationsCumulative:
-
-				Internal.TempDonations += msg.Amount
-				Log("Added Superchat of {} {} from {} to the cumulative Amount.".format())
+				Internal.TempDonations += amount
+				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(amount, currency, name))
 				return
 
+			# Donation is below the minimum amount required and cumulative Donations are disabled
 			else:
-				Log("Ignored Superchat of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.Name))
+				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(amount, currency, name))
 				return
 
 		return
 
-	# === Streamlabs ===
-	if data.For == "streamlabs":
-
-		# === Donation ===
-		if data.Type == "donation" and Settings.CountDonations:
-
-			# Ignore test donations for the total amount
-			if not msg.IsTest:
-				Session.TotalDonations += msg.Amount
-
-			# Donation is above MinAmount
-			if msg.Amount >= Settings.DonationMinAmount:
-
-				if Settings.CountDonationsOnce:
-					Session.Points += Settings.DonationPointValue
-					Session.DonationPoints += Settings.DonationPointValue
-					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, msg.Amount, msg.Currency, msg.FromName))
-					return
-
-				res = Settings.DonationPointValue * math.trunc(msg.Amount / Settings.DonationMinAmount)
-
-				# Add remainder to DonationTemp, if cumulative Donations are enabled
-				if Settings.CountDonationsCumulative:
-					Internal.TempDonations += msg.Amount % Settings.DonationMinAmount  # Add remainder to DonationTemp
-
-				Session.Points         += res
-				Session.DonationPoints += res
-				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, msg.Amount, msg.Currency, msg.FromName))
-				return
-
-			# Cumulative Donation
-			elif Settings.CountDonationsCumulative:
-
-				Internal.TempDonations += msg.Amount
-				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(msg.Amount, msg.Currency, msg.FromName))
-				return
-
-			else:
-				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(msg.Amount, msg.Currency, msg.FromName))
-				return
-
-		return  # /Streamlabs
-
-	Log("Unknown/Unsupported Platform {}!".format(data.For))
+	Log("Unknown/Unsupported Platform {}!".format(event["for"]))
 
 
 # === Event Connected ===
-def SocketConnected(sender, args): Log("Connected")
+def SocketConnected(data):
+	Log("Connected")
 
 
 # === Event Disconnected ===
-def SocketDisconnected(sender, args): Log("Disconnected")
+def SocketDisconnected(data):
+	Log("Disconnected: {}".format(data), no_console = True)
+	Log("Disconnected", no_write = True)
+
+
+# === Event Error ===
+def SocketError(data):
+	Log("SocketError: {}".format(data.Message), no_console = True)
+	Log("SocketError", no_write = True)
 
 
 # === Tick ===
@@ -580,7 +550,7 @@ def Tick():
 			StartUp()
 
 		# Reconnect
-		if Socket is None or not Socket.IsConnected:
+		if not Socket:
 			Connect()
 			Internal.RefreshStamp = now
 			return
@@ -840,7 +810,7 @@ def ResetSession():
 
 
 # === Reload Settings ===
-def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
+def ReloadSettings(json_data):
 	global Socket
 
 	# Backup old token for comparison
@@ -849,9 +819,9 @@ def ReloadSettings(json_data):  # Triggered by the bot on Save Settings
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
+		# TODO: Update connection
 		if Socket:
-			if Socket.IsConnected:
-				Socket.Disconnect()
+			Socket.Close()
 			Socket = None
 		Connect()
 		if not Internal.ScriptReady:
@@ -917,8 +887,8 @@ def SubtractFromGoal():
 # === Unload ===
 def Unload():
 	global Socket
-	if Socket and Socket.IsConnected:
-		Socket.Disconnect()
+	if Socket:
+		Socket.Close()
 	Socket = None
 	Internal.ScriptReady = False
 	UpdateTracker()
@@ -942,17 +912,19 @@ def Execute(data): pass
 
 
 # === Log Wrapper ===
-def Log(message):
-	try:
-		with codecs.open(os.path.join(LOG_FOLDER, Session.LogFile), encoding="utf-8", mode="a+") as f:
-			f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
-			f.close()
-	except IOError as e:
-		Parent.Log(ScriptName, "Unable to write to logfile. ({})".format(e.message))
-	except:
-		Parent.Log(ScriptName, "Unable to write to logfile.")
+def Log(message, no_console = False, no_write = False):
+	if not no_write:
+		try:
+			with codecs.open(os.path.join(LOG_FOLDER, Session.LogFile), encoding="utf-8", mode="a+") as f:
+				f.write("{} - {}\n".format(time.strftime("%m/%d/%y - %H:%M:%S"), message))
+				f.close()
+		except IOError as e:
+			Parent.Log(ScriptName, "Unable to write to logfile. ({})".format(e.message))
+		except:
+			Parent.Log(ScriptName, "Unable to write to logfile.")
 
-	Parent.Log(ScriptName, message)
+	if not no_console:
+		Parent.Log(ScriptName, message)
 
 
 # === Simple Write ===

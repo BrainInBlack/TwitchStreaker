@@ -1,6 +1,9 @@
 # Changelog
 
-## 3.0.2 - Placeholder
+## 3.1.0 - Event System Rework
+
+* Added no console and no write option to the Log function
+* Removed StreamlabsEventReceiver
 
 ## 3.0.1 - Bug Fixes and Improvements
 
