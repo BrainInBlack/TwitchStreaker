@@ -73,7 +73,7 @@ class ScriptSession(object):
 	# Bar Values
 	BarGoal              = 100
 	BarGoalCompleted     = False
-	BarPointsLeft        = 0
+	BarPointsLeft        = 100
 	BarSegmentPointsLeft = 0
 	BarSegmentsCompleted = 0
 
@@ -87,7 +87,7 @@ class ScriptSession(object):
 	LogFile = None
 
 	def __init__(self):
-		self.LogFile = "{}.log".format(time.strftime("%m-%d-%y_%H-%M-%S"))
+		self.__dict__.update(self.DefaultValues())
 
 	def Load(self):
 		try:
@@ -108,6 +108,40 @@ class ScriptSession(object):
 		except:
 			raise Exception("Unable to save Session (Unknown Error)")
 
+	@staticmethod
+	def DefaultValues():
+		return {
+			# Base Values
+			"BitsLeft": 500,
+			"FollowsLeft": 10,
+			"Goal": 10,
+			"Points": 0,
+			"PointsLeft": 10,
+			"Streak": 1,
+
+			# Point Values
+			"BitPoints" : 0,
+			"DonationPoints": 0,
+			"FollowPoints": 0,
+			"SubPoints": 0,
+
+			# Bar Values
+			"BarGoal": 100,
+			"BarGoalCompleted": False,
+			"BarPointsLeft": 100,
+			"BarSegmentPointsLeft": 0,
+			"BarSegmentsCompleted": 0,
+
+			# Totals Values
+			"TotalBits": 0,
+			"TotalFollows": 0,
+			"TotalSubs": 0,
+			"TotalDonations": 0,
+
+			# Internal
+			"LogFile": "{}.log".format(time.strftime("%m-%d-%y_%H-%M-%S"))
+		}
+
 
 # === Settings Class ===
 class ScriptSettings(object):
@@ -126,7 +160,7 @@ class ScriptSettings(object):
 	CountBitsCumulative = False
 
 	# Donations
-	DonationMinAmount        = 5.0
+	DonationMinAmount        = 5.00
 	DonationPointValue       = 1
 	CountDonations           = False
 	CountDonationsOnce       = False
@@ -140,17 +174,17 @@ class ScriptSettings(object):
 	# Subscriptions
 	CountReSubs = False
 	Sub1        = 1
-	Sub2        = 1
-	Sub3        = 1
+	Sub2        = 2
+	Sub3        = 3
 	ReSub1      = 1
-	ReSub2      = 1
-	ReSub3      = 1
+	ReSub2      = 2
+	ReSub3      = 3
 	GiftSub1    = 1
-	GiftSub2    = 1
-	GiftSub3    = 1
+	GiftSub2    = 2
+	GiftSub3    = 3
 	GiftReSub1  = 1
-	GiftReSub2  = 1
-	GiftReSub3  = 1
+	GiftReSub2  = 2
+	GiftReSub3  = 3
 
 	# Progressbar
 	BarGoal             = 100
@@ -170,6 +204,9 @@ class ScriptSettings(object):
 	# Streamlabs
 	SocketToken = None
 
+	def __init__(self):
+		self.__dict__.update(self.DefaultValues())
+
 	def Load(self):
 		try:
 			with codecs.open(SETTINGS_FILE, encoding="utf-8-sig", mode="r") as f:
@@ -188,6 +225,58 @@ class ScriptSettings(object):
 			raise Exception("Unable to save Settings ({})".format(e.message))
 		except:
 			raise Exception("Unable to save Settings (Unknown error)")
+
+	@staticmethod
+	def DefaultValues():
+		return {
+
+			# General
+			"Goal": 10,
+			"GoalMin": 5,
+			"GoalMax": 10,
+			"GoalIncrement": 1,
+
+			# Bits
+			"BitsMinAmount": 500,
+			"BitsPointValue": 1,
+			"CountBits": False,
+			"CountBitsOnce": False,
+			"CountBitsCumulative": False,
+
+			# Donations
+			"DonationMinAmount": 5.00,
+			"DonationPointValue": 1,
+			"CountDonations": False,
+			"CountDonationsOnce": False,
+			"CountDonationsCumulative": False,
+
+			# Follows
+			"CountFollows": False,
+			"FollowsRequired": 10,
+			"FollowPointValue": 1,
+
+			# Subscriptions
+			"CountReSubs": False,
+			"Sub1": 1, "Sub2": 2, "Sub3": 3,
+			"ReSub1": 1, "ReSub2": 2, "ReSub3": 3,
+			"GiftSub1": 1, "GiftSub2": 2, "GiftSub3": 3,
+			"GiftReSub1": 1, "GiftReSub2": 2, "GiftReSub3": 3,
+
+			# Progressbar
+			"BarGoal": 100,
+			"BarSegmentCount": 4,
+			"BarBitsEnabled": True,
+			"BarDonationsEnabled": True,
+			"BarFollowsEnabled": True,
+			"BarSubsEnabled": True,
+
+			# Sounds
+			"SoundEnabled": False,
+			"GoalCompletedSound": None,
+			"GoalCompletedSoundDelay": 0,
+			"SegmentCompletedSound": None,
+			"SegmentCompletedSoundDelay": 0
+		}
 
 
 # === Internal Class ===
@@ -212,6 +301,41 @@ class ScriptInternals(object):
 	TempBits      = 0
 	TempDonations = 0.0
 	TempFollows   = 0
+
+
+# === Event Data ===
+class EventData(object):
+	For      = None
+	IsRepeat = False
+	IsTest   = False
+	Type     = None
+
+
+# === Bits Data ===
+class BitsData(EventData):
+	Name   = None
+	Amount = 0
+
+
+# === Donation Data ===
+class DonationData(EventData):
+	Name     = None
+	Amount   = 0
+	Currency = None
+
+
+# === Follow Data ===
+class FollowData(EventData):
+	Name = None
+
+
+# === Subscription Data ===
+class SubscriptionData(EventData):
+	Name    = None
+	Gifter  = None
+	Months  = None
+	SubPlan = None
+	SubType = None
 
 
 # === Global Variables ===
@@ -328,26 +452,17 @@ def SocketEvent(data):
 	event = json.loads(JSONDump(data).encode(encoding="UTF-8", errors="backslashreplace"))
 	
 	# Validate Message
-	if not "message" in event:
-		Log("No message in Event: {}".format(json.dumps(event)))
+	if "message" not in event:
+		Log("No message in Event: {}".format(json.dumps(event)), no_console = True)
 	
 	# Fix Streamlabs Donation
-	if not "for" in event and "type" in event and event["type"] == "donation":
+	if "for" not in event and "type" in event and event["type"] == "donation":
 		event["for"] = "streamlabs"
 
 	# Fix Message Format
 	if isinstance(event["message"], dict):
 		event["message"] = json.loads("[ {} ]".format(json.dumps(event["message"])))
-
 	msg = event["message"][0]  # Messages come in as single events, a loop is not needed
-
-	# Repeat and isTest
-	if "repeat" in msg:
-		return
-	if "isTest" in msg:
-		isTest = msg["isTest"]
-	else:
-		isTest = False
 
 	# Event Filter
 	Internal.FlushStamp = time.time()
@@ -355,249 +470,228 @@ def SocketEvent(data):
 		return
 	Internal.EventIDs.append(msg["_id"])
 
+	event_for    = event["for"]
+	event_type   = event["type"]
+	event_repeat = msg["repeat"] if "repeat" in msg else False
+	event_test   = msg["isTest"] if "isTest" in msg else False
+
 	# === Twitch ===
-	if event["for"] == "twitch_account":
+	if event_for == "twitch_account":
 
 		# === Bits ===
-		if event["type"] == "bits" and Settings.CountBits:
+		if event_type == "bits":
 
-			# Simplification
-			name   = msg["name"]
-			amount = int(msg["amount"])
-
-			# Ignore TestBits for the total amount of Bits
-			if not isTest:
-				Session.TotalBits += amount
-
-			# Bits are above the minimum amount required
-			if amount >= Settings.BitsMinAmount:
-
-				# Non cumulative Bits
-				if Settings.CountBitsOnce:
-					Session.Points += Settings.BitsPointValue
-					Session.BitPoints += Settings.BitsPointValue
-					Log("Added {} Point(s) for {} Bits from {}".format(Settings.BitsPointValue, amount, name))
-					return
-
-				# Calculate Points
-				res = int(Settings.BitsPointValue * math.floor(amount / Settings.BitsMinAmount))
-
-				# Add remainder to TempBits, if cumulative Bits are enabled
-				if Settings.CountBitsCumulative:
-					Internal.TempBits += amount % Settings.BitsMinAmount
-
-				# Update Session
-				Session.Points += res
-				Session.BitPoints += res
-				Log("Added {} Point(s) for {} Bits from {}".format(res, amount, name))
-				return
-
-			# Bits are below the minimum amount required and cumulative Bits are enabled
-			elif Settings.CountBitsCumulative:
-				Internal.TempBits += amount
-				Log("Added {} Bit(s) from {} to the cumulative amount".format(amount, name))
-
-			# Amount of Bits are not above the minimum amount required and cumulative Bits are disabled
-			else:
-				Log("Ignored {} Bits from {}, not above the Bits minimum.".format(amount, name))
-			return
+			payload = BitsData()
+			payload.Name     = msg["name"]
+			payload.Amount   = int(msg["amount"])
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleBits(payload)
 
 		# === Follows ===
-		if event["type"] == "follow" and Settings.CountFollows:
+		if event_type == "follow":
 
-			# Simplification
-			name = msg["name"]
-			
-			# Ignore TestFollows for the total amount of Follows
-			if not isTest:
-				Session.TotalFollows += 1
-
-			# Update TempFollows
-			Internal.TempFollows += 1
-
-			# Update Session and TempFollows if the TempFollows are above the minimum amount required
-			if Internal.TempFollows >= Settings.FollowsRequired:
-				Session.Points += Settings.FollowPointValue
-				Session.FollowPoints += Settings.FollowPointValue
-				Internal.TempFollows -= Settings.FollowsRequired
-				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, name))
-			return
+			payload = FollowData()
+			payload.Name     = msg["name"]
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleFollow(payload)
 		
 		# === Subscriptions ===
-		if event["type"] == "subscription":
+		if event_type == "subscription":
 
-			# Simplification
-			name = msg["name"]
-
-			# Type Hackery
-			if not "sub_type" in msg and "type" in msg:
-				type = msg["type"]
+			# Fix SubType
+			if "sub_type" not in msg and "type" in msg:
+				sub_type = msg["type"]
 			elif "sub_type" in msg:
-				type = msg["sub_type"]
+				sub_type = msg["sub_type"]
 			elif "months" in msg and int(msg["months"]) > 0:
-				type = "resub"
+				sub_type = "resub"
 			else:
-				type = "sub"
+				sub_type = "sub"
 			
-			# Tier Hackery
+			# Fix SubPlan
 			if "plan" in msg:
-				tier = msg["plan"]
+				sub_plan = msg["plan"]
 			elif "subPlan" in msg:
-				tier = msg["subPlan"]
+				sub_plan = msg["subPlan"]
 			else:
-				tier = msg["sub_plan"]
+				sub_plan = msg["sub_plan"]
 
-			# Months Hackery
-			if "months" in msg:
-				months = int(msg["months"])
-			else:
-				months = None
-
-			# === Gifted Subs ===
-			if type == "subgift" or type == "anonsubgift":
-
-				# Simplification
-				gifter = msg["gifter"]
-
-				# Ignore gifted subs by the Streamer or the Recipient
-				if gifter == ChannelName and not isTest:
-					return
-				if gifter == name and not isTest:
-					return
-
-				# Point Value
-				if months is not None and months > 0:
-					res = Settings.GiftReSub1
-					if tier == "2000": res = Settings.GiftReSub2
-					if tier == "3000": res = Settings.GiftReSub3
-				else:
-					res = Settings.GiftSub1
-					if tier == "2000": res = Settings.GiftSub2
-					if tier == "3000": res = Settings.GiftSub3
-
-				# Update Session
-				Session.Points    += res
-				Session.SubPoints += res
-				if not isTest:
-					Session.TotalSubs += 1
-				Log("Added {} Point(s) for a {} from {} to {}".format(res, type, gifter, name))
-				return
-
-			# === Resubs ===
-			elif type == "resub" and (Settings.CountReSubs or isTest):
-				# Point Value
-				res = Settings.ReSub1
-				if tier == "2000": res = Settings.ReSub2
-				if tier == "3000": res = Settings.ReSub3
-
-				# Update Session
-				Session.Points    += res
-				Session.SubPoints += res
-				if not isTest:
-					Session.TotalSubs += 1
-				Log("Added {} Point(s) for a {} from {}".format(res, type, name))
-				return
-
-			# === Subs ===
-			else:
-				# Point Value
-				res = Settings.Sub1
-				if tier == "2000": res = Settings.Sub2
-				if tier == "3000": res = Settings.Sub3
-
-				# Update Session
-				Session.Points    += res
-				Session.SubPoints += res
-				if not isTest:
-					Session.TotalSubs += 1
-				Log("Added {} Point(s) for a {} from {}".format(res, type, name))
-				return
-		return
+			payload = SubscriptionData()
+			payload.Name     = msg["name"]
+			payload.Gifter   = msg["gifter"] if sub_type in ["subgift", "anonsubgift"] else None
+			payload.Months   = int(msg["months"]) if "months" in msg else None
+			payload.SubPlan  = sub_plan
+			payload.SubType  = sub_type
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleSubscription(payload)
 
 	# === Youtube ===
-	if event["for"] == "youtube_account":
+	elif event_for == "youtube_account":
 
 		# === Follows aka Subscriptions ===
-		if event["type"] == "follow" and Settings.CountFollows:
+		if event_type == "follow":
 
-			# Simplification
-			name = msg["name"]
-			
-			# Ignore TestFollows for the total amount of Follows
-			if not isTest:
-				Session.TotalFollows += 1
-
-			# Update TempFollows
-			Internal.TempFollows += 1
-
-			# Update Session and TempFollows if the TempFollows are above the minimum amount required
-			if Internal.TempFollows >= Settings.FollowsRequired:
-				Session.Points += Settings.FollowPointValue
-				Session.FollowPoints += Settings.FollowPointValue
-				Internal.TempFollows -= Settings.FollowsRequired
-				Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, name))
-			return
+			payload = FollowData()
+			payload.Name     = msg["name"]
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleFollow(payload)
 
 		# === Subscriptions aka Memberships ===
-		if event["type"] == "subscription":
-			# TODO: Implementation
-			return
+		if event_type == "subscription":
 
-		return
+			payload = SubscriptionData()
+			payload.Name     = msg["name"]
+			payload.Gifter   = None
+			payload.Months   = None
+			payload.SubPlan  = "1000"
+			payload.SubType  = "sub"
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleSubscription(payload)
 
 	# === Streamlabs ===
-	if event["for"] == "streamlabs":
+	elif event_for == "streamlabs":
 
 		# === Donations ===
-		if event["type"] == "donation" and Settings.CountDonations:
+		if event_type == "donation":
 
-			# Simplification
-			name     = msg["from"]
-			amount   = float(msg["amount"])
-			currency = msg["currency"]
+			payload = DonationData()
+			payload.Name     = msg["from"]
+			payload.Amount   = float(msg["amount"])
+			payload.Currency = msg["currency"]
+			payload.For      = event_for
+			payload.Type     = event_type
+			payload.IsTest   = event_test
+			payload.IsRepeat = event_repeat
+			HandleDonation(payload)
 
-			# Ignore test Donation for the total amount
-			if not isTest:
-				Session.TotalDonations += amount
+	else:
+		Log("Unknown/Unsupported Platform {}!".format(event_for))
 
-			# Donation is above the minimum amount required
-			if amount >= Settings.DonationMinAmount:
 
-				# Non cumulative Donation
-				if Settings.CountDonationsOnce:
-					Session.Points         += Settings.DonationPointValue
-					Session.DonationPoints += Settings.DonationPointValue
-					Log("Added {} Point(s) for a {} {} Donation from {}.".format(Settings.DonationPointValue, amount, currency, name))
-					return
-
-				# Calculate Points
-				res = int(Settings.DonationPointValue * amount / Settings.DonationMinAmount)
-
-				# Add remainder to TempDonation, if cumulative Donations are enabled
-				if Settings.CountDonationsCumulative:
-					Internal.TempDonations += amount % Settings.DonationMinAmount
-
-				# Update Session
-				Session.Points += Settings.DonationPointValue
-				Session.DonationPoints += Settings.DonationPointValue
-				Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, amount, currency, name))
-				return
-
-			# Donation is below the minimum amount required and cumulative Donations are enabled
-			elif Settings.CountDonationsCumulative:
-				Internal.TempDonations += amount
-				Log("Added Donation of {} {} from {} to the cumulative Amount.".format(amount, currency, name))
-				return
-
-			# Donation is below the minimum amount required and cumulative Donations are disabled
-			else:
-				Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(amount, currency, name))
-				return
-
+# === Handle Bits ===
+def HandleBits(data):
+	if not Settings.CountBits:
 		return
 
-	Log("Unknown/Unsupported Platform {}!".format(event["for"]))
+	if not data.IsTest:
+		Session.TotalBits += data.Amount
 
+	if data.Amount >= Settings.BitsMinAmount:
+		if Settings.CountBitsOnce:
+			res = Settings.BitsPointValue
+		else:
+			res = int(Settings.BitsPointValue * math.floor(data.Amount / Settings.BitsMinAmount))
+			if Settings.CountBitsCumulative:
+				Internal.TempBits += data.Amount % Settings.BitsMinAmount
+		Session.Points    += res
+		Session.BitPoints += res
+		Log("Added {} Point(s) for {} Bits from {}".format(res, data.Amount, data.Name))
+		return
+	elif Settings.CountBitsCumulative:
+		Internal.TempBits += data.Amount
+		Log("Added {} Bit(s) from {} to the cumulative amount".format(data.Amount, data.Name))
+	else:
+		Log("Ignored {} Bits from {}, not above the Bits minimum.".format(data.Amount, data.Name))
+
+
+# === Handle Donation ===
+def HandleDonation(data):
+	if not Settings.CountDonations:
+		return
+	if not data.IsTest:
+		Session.TotalDonations += data.Amount
+
+	if data.Amount >= Settings.DonationMinAmount:
+		if Settings.CountDonationsOnce:
+			res = Settings.DonationPointValue
+		else:
+			res = int(Settings.DonationPointValue * data.Amount / Settings.DonationMinAmount)
+			if Settings.CountDonationsCumulative:
+				Internal.TempDonations += data.Amount % Settings.DonationMinAmount
+		Session.Points         += res
+		Session.DonationPoints += res
+		Log("Added {} Point(s) for a {} {} Donation from {}.".format(res, data.Amount, data.Currency, data.Name))
+	elif Settings.CountDonationsCumulative:
+		Internal.TempDonations += data.Amount
+		Log("Added Donation of {} {} from {} to the cumulative Amount.".format(data.Amount, data.Currency, data.Name))
+	else:
+		Log("Ignored Donation of {} {} from {}, Donation is not above the Donation minimum.".format(data.Amount, data.Currency, data.Name))
+
+
+# === Handle Follow ===
+def HandleFollow(data):
+	if not Settings.CountFollows:
+		return
+
+	if not data.IsTest:
+		Session.TotalFollows += 1
+
+	Internal.TempFollows += 1
+
+	if Internal.TempFollows >= Settings.FollowsRequired:
+		Session.Points       += Settings.FollowPointValue
+		Session.FollowPoints += Settings.FollowPointValue
+		Internal.TempFollows -= Settings.FollowsRequired
+		Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, data.Name))
+
+
+# === Handle Subscription ===
+def HandleSubscription(data):
+	if data.SubType in ["subgift", "anonsubgift"]:
+		if data.Gifter == ChannelName and not data.IsTest:
+			return
+		if data.Gifter == data.Name and not data.IsTest:
+			return
+
+		if data.Months > 0:
+			res = Settings.GiftReSub1
+			if data.SubPlan == "2000":
+				res = Settings.GiftReSub2
+			elif data.SubPlan == "3000":
+				res = Settings.GiftReSub3
+		else:
+			res = Settings.GiftSub1
+			if data.SubPlan == "2000":
+				res = Settings.GiftSub2
+			elif data.SubPlan == "3000":
+				res = Settings.GiftSub3
+		msg = "Added {} Point(s) for a gifted Sub from {} to {}".format(res, data.Gifter, data.Name)
+
+	elif data.Months > 0:
+		if not Settings.CountReSubs and not data.IsTest:
+			return
+		res = Settings.ReSub1
+		if data.SubPlan == "2000":
+			res = Settings.ReSub2
+		elif data.SubPlan == "3000":
+			res = Settings.ReSub3
+		msg = "Added {} Point(s) for a ReSub from {}".format(res, data.Name)
+
+	else:
+		res = Settings.Sub1
+		if data.SubPlan == "2000":
+			res = Settings.Sub2
+		elif data.SubPlan == "3000":
+			res = Settings.Sub3
+		msg = "Added {} Point(s) for a Sub from {}".format(res, data.Name)
+	Session.Points += res
+	Session.SubPoints += res
+	Log(msg)
 
 # === Event Connected ===
 def SocketConnected(data):
@@ -621,7 +715,7 @@ def Tick():
 	now = time.time()
 
 	# Flush EventIDs
-	if (now - Internal.FlushStamp) >= FLUSH_DELAY and len(Internal.EventIDs) > 0:
+	if (now - Internal.FlushStamp) >= FLUSH_DELAY and Internal.EventIDs:
 		Internal.EventIDs = []
 		Internal.FlushStamp = now
 
@@ -631,6 +725,8 @@ def Tick():
 		# Attempt Startup
 		if not Internal.ScriptReady:
 			StartUp()
+			Internal.RefreshStamp = now
+			return
 
 		# Reconnect
 		if not Socket:
@@ -643,7 +739,8 @@ def Tick():
 
 	# Save Timer
 	if (now - Internal.SaveStamp) >= SAVE_DELAY:
-		if not Internal.ScriptReady: return
+		if not Internal.ScriptReady:
+			return
 		try:
 			Session.Save()
 		except Exception as e:
@@ -652,40 +749,44 @@ def Tick():
 
 	# Sound System
 	if Settings.SoundEnabled and (Internal.GoalSoundCued or Internal.SegmentSoundCued):
-		if not Internal.ScriptReady: return
+		PlaySound()
 
-		if Internal.GoalSoundCued and Internal.SegmentSoundCued:  # ! Only play goal sound
-			Internal.SegmentSoundCued = False
 
-		# Goal Sound
-		if (now - Internal.GoalSoundStamp) >= Settings.GoalCompletedSoundDelay and Internal.GoalSoundCued:
-			snd = os.path.join(SOUNDS_FOLDER, Settings.GoalCompletedSound)
-			if not os.path.exists(snd):
-				Log("Goal Completion Sound file \"{}\" is missing!".format(Settings.GoalCompletedSound))
-			if not PlaySound(snd):
-				Log("Unable to play sound {}".format(Settings.GoalCompletedSound))
-			Internal.GoalSoundStamp = now
-			Internal.GoalSoundCued = False
+# === SoundSystem ===
+def PlaySound():
+	now = time.time()
+	if not Internal.ScriptReady: return
 
-		# Segment Sound
-		if (now - Internal.SegmentSoundStamp) >= Settings.SegmentCompletedSoundDelay and Internal.SegmentSoundCued:
-			snd = os.path.join(SOUNDS_FOLDER, Settings.SegmentCompletedSound)
-			if not os.path.exists(snd):
-				Log("Segment Completion Sound file \"{}\" is missing!".format(Settings.SegmentCompletedSound))
-			if not PlaySound(snd):
-				Log("Unable to play sound {}".format(Settings.SegmentCompletedSound))
-			Internal.SegmentSoundStamp = now
-			Internal.SegmentSoundCued = False
+	if Internal.GoalSoundCued and Internal.SegmentSoundCued:  # ! Only play goal sound
+		Internal.SegmentSoundCued = False
+
+	# Goal Sound
+	if Internal.GoalSoundCued and (now - Internal.GoalSoundStamp) >= Settings.GoalCompletedSoundDelay:
+		try:
+			Play(Settings.GoalCompletedSound)
+		except Exception as e:
+			Log('Unable to play Goal Completion Sound.', no_write = True)
+			Log('Unable to play Goal Completion Sound: {}.'.format(e.message), no_console = True)
+		Internal.GoalSoundStamp = now
+		Internal.GoalSoundCued = False
+
+	# Segment Sound
+	if Internal.SegmentSoundCued and (now - Internal.SegmentSoundStamp) >= Settings.SegmentCompletedSoundDelay:
+		try:
+			Play(Settings.SegmentCompletedSound)
+		except Exception as e:
+			Log('Unable to play Segment Completion Sound.', no_write = True)
+			Log('Unable to play Segment Completion Sound: {}.'.format(e.message), no_console = True)
+		Internal.SegmentSoundStamp = now
+		Internal.SegmentSoundCued = False
 
 
 # === Update Tracker ===
 def UpdateTracker():  # ! Only call if a quick response is required
 
-	now = time.time()
-
 	# Calculate Bits
 	if Settings.CountBitsCumulative and Internal.TempBits >= Settings.BitsMinAmount:
-		res = math.trunc(Internal.TempBits / Settings.BitsMinAmount)
+		res = math.floor(Internal.TempBits / Settings.BitsMinAmount)
 		Session.Points    += Settings.BitsPointValue * res
 		Session.BitPoints += Settings.BitsPointValue
 		Internal.TempBits -= Settings.BitsMinAmount * res
@@ -695,7 +796,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 
 	# Calculate Donations
 	if Settings.CountDonationsCumulative and Internal.TempDonations >= Settings.DonationMinAmount:
-		res = math.trunc(Internal.TempDonations / Settings.DonationMinAmount)
+		res = math.floor(Internal.TempDonations / Settings.DonationMinAmount)
 		Session.Points         += Settings.DonationPointValue
 		Session.DonationPoints += Settings.DonationPointValue
 		Internal.TempDonations -= Settings.DonationMinAmount * res
@@ -714,14 +815,29 @@ def UpdateTracker():  # ! Only call if a quick response is required
 			Session.Goal += Settings.GoalIncrement
 
 			# Correct Goal if GoalIncrement is bigger than the gap from CurrentGoal to GoalMax
-			if Session.Goal  > Settings.GoalMax:
-				Session.Goal = Settings.GoalMax
+			Session.Goal = min(Session.Goal, Settings.GoalMax)
 
 	Session.PointsLeft  = Session.Goal - Session.Points
 	Session.FollowsLeft = Settings.FollowsRequired - Internal.TempFollows
 
-	# Update Progress Bar
+	# Updates
+	UpdateProgressbar()
+	UpdateText()
+
+	# Update Overlay
+	payload = Session.__dict__
+	payload["BitsEnabled"]      = Settings.BarBitsEnabled
+	payload["DonationsEnabled"] = Settings.BarDonationsEnabled
+	payload["FollowsEnabled"]   = Settings.BarFollowsEnabled
+	payload["SubsEnabled"]      = Settings.BarSubsEnabled
+	payload["SegmentCount"]     = Settings.BarSegmentCount
+	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(payload)))
+
+
+# === Update Progressbar ===
+def UpdateProgressbar():
 	pointsSum = 0
+	now = time.time()
 	if Settings.BarBitsEnabled:      pointsSum += Session.BitPoints
 	if Settings.BarDonationsEnabled: pointsSum += Session.DonationPoints
 	if Settings.BarFollowsEnabled:   pointsSum += Session.FollowPoints
@@ -729,7 +845,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 	segmentSize = math.trunc(Settings.BarGoal / Settings.BarSegmentCount)
 
 	Session.BarPointsLeft = Settings.BarGoal - pointsSum
-	if Session.BarPointsLeft < 0: Session.BarPointsLeft = 0
+	Session.BarPointsLeft = max(Session.BarPointsLeft, 0)
 
 	Session.BarSegmentPointsLeft = (segmentSize * (Session.BarSegmentsCompleted + 1)) - pointsSum
 	if Session.BarSegmentPointsLeft < 0: Session.SegmentPointsLeft = 0
@@ -745,16 +861,9 @@ def UpdateTracker():  # ! Only call if a quick response is required
 			Internal.SegmentSoundCued     = True
 			Internal.SegmentSoundStamp    = now
 
-	# Update Overlay
-	payload = Session.__dict__
-	payload["BitsEnabled"]      = Settings.BarBitsEnabled
-	payload["DonationsEnabled"] = Settings.BarDonationsEnabled
-	payload["FollowsEnabled"]   = Settings.BarFollowsEnabled
-	payload["SubsEnabled"]      = Settings.BarSubsEnabled
-	payload["SegmentCount"]     = Settings.BarSegmentCount
-	Parent.BroadcastWsEvent("EVENT_UPDATE_OVERLAY", str(json.dumps(payload)))
 
-	# Update Text Files
+# === Update Text ===
+def UpdateText():
 	SimpleWrite(BAR_GOAL,                Session.BarGoal)
 	SimpleWrite(BAR_POINTS_LEFT,         Session.BarPointsLeft)
 	SimpleWrite(BAR_SEGMENT_POINTS_LEFT, Session.BarSegmentPointsLeft)
@@ -874,22 +983,24 @@ def SanityCheck():
 def ResetSession():
 	global Session
 
+	Log("Session End", no_console = True)
 	Internal.TempBits      = 0
 	Internal.TempDonations = 0
 	Internal.TempFollows   = 0
 
-	Session             = ScriptSession()
-	Session.BarGoal     = Settings.BarGoal
-	Session.BitsLeft    = Settings.BitsMinAmount
-	Session.FollowsLeft = Settings.FollowsRequired
-	Session.Goal        = Settings.Goal
-	Session.PointsLeft  = Settings.Goal
-
-	Session.Save()
+	Session.__dict__.update(ScriptSession.DefaultValues())
+	Session.BarGoal       = Settings.BarGoal
+	Session.BarPointsLeft = Settings.BarGoal
+	Session.BitsLeft      = Settings.BitsMinAmount
+	Session.FollowsLeft   = Settings.FollowsRequired
+	Session.Goal          = Settings.Goal
+	Session.PointsLeft    = Settings.Goal
 
 	SanityCheck()
 	UpdateTracker()
-	Log("Session Reset!")
+	Session.Save()
+	Log("New Session", no_console = True)
+	Log("Session Reset", no_write = True)
 
 
 # === Reload Settings ===
@@ -902,18 +1013,17 @@ def ReloadSettings(json_data):
 
 	# Reconnect if Token changed
 	if old_token is None or Settings.SocketToken != old_token:
-		# TODO: Update connection
 		if Socket:
 			Socket.Close()
 			Socket = None
 		Connect()
-		if not Internal.ScriptReady:
-			Internal.ScriptReady = True
+		Internal.ScriptReady = True
 
-	Session.BarGoal     = Settings.BarGoal
-	Session.Goal        = Settings.Goal
+	Session.BarGoal = Settings.BarGoal
+	Session.Goal    = Settings.Goal
 
 	SanityCheck()
+	UpdateTracker()
 	Session.Save()
 	Log("Settings saved!")
 
@@ -1013,14 +1123,21 @@ def Log(message, no_console = False, no_write = False):
 # === Simple Write ===
 def SimpleWrite(path, content):
 	try:
-		f = open(path, "w")
-		f.write(str(content))
-		f.close()
+		with open(path, "w") as f:
+			f.write(str(content))
+			f.close()
 	except IOError as e:
-		Log("Unable to write file \"{}\" ({})".format(path, e.message))
+		Log('Unable to write file "{}" ({})'.format(path, e.message))
 	except:
-		Log("Unable to write file \"{}\"".format(path))
+		Log('Unable to write file "{}"'.format(path))
+
 
 # === PlaySound Wrapper ===
-def PlaySound(path, level = 1.0):
-	return Parent.PlaySound(path, level)
+def Play(filename, level = 1.0):
+	path = os.path.join(SOUNDS_FOLDER, filename)
+	if not os.path.exists(path):
+		raise Exception('File "{}" not found!'.format(filename))
+	if not Parent.PlaySound(path, level):
+		raise Exception('Unable to play "{}"'.format(filename))
+	return True
+

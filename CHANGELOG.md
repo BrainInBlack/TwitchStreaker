@@ -2,8 +2,14 @@
 
 ## 3.1.0 - Event System Rework
 
+**Important!** With this release, you can delete the Lib folder within the script folder.
+
 * Added no console and no write option to the Log function
+* Added data classes for all event types
+* Added separate functions to handle subs, follows, etc.
+* Improved the event bus
 * Removed StreamlabsEventReceiver
+* Fixed Session and Settings Reset
 
 ## 3.0.1 - Bug Fixes and Improvements
 
