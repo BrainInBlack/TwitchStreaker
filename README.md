@@ -409,8 +409,6 @@ In case you decide to gift me something from said wishlist, thank you and use br
 
 ## Project Info
 
-TwitchStreaker is using [StreamLabs Event Receiver](https://github.com/ocgineer/Streamlabs-Events-Receiver) by [Ocgineer](https://github.com/ocgineer)
-
 [GNU GPL-3.0 License](LICENSE.md)
 
 [Changelog](CHANGELOG.md)

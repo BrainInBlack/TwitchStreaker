@@ -454,6 +454,7 @@ def SocketEvent(data):
 	# Validate Message
 	if "message" not in event:
 		Log("No message in Event: {}".format(json.dumps(event)), no_console = True)
+		return
 	
 	# Fix Streamlabs Donation
 	if "for" not in event and "type" in event and event["type"] == "donation":

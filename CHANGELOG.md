@@ -2,13 +2,15 @@
 
 ## 3.1.0 - Event System Rework
 
-**Important!** With this release, you can delete the Lib folder within the script folder.
+**Important!** With this release you can delete the Lib folder within the script folder, it is no longer needed.
 
+YouTube is not fully integrated yer, only Subscriptions (Follows) are integrated for now. Superchats cannot be tested at the moment, since Streamlabs test system behaving weirdly. Full support for YouTube Memberships (Subscriptions) is coming with the next release.
+
+* Reworked the complete event system
+  * No longer uses a custom external library
+  * Each event now has its own sub function
+  * Separate classes for each event type
 * Added no console and no write option to the Log function
-* Added data classes for all event types
-* Added separate functions to handle subs, follows, etc.
-* Improved the event bus
-* Removed StreamlabsEventReceiver
 * Fixed Session and Settings Reset
 
 ## 3.0.1 - Bug Fixes and Improvements
