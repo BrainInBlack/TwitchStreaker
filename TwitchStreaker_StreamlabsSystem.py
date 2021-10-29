@@ -11,32 +11,6 @@ TEXT_FOLDER             = os.path.join(SCRIPT_FOLDER, "Text\\")
 SESSION_FILE            = os.path.join(SCRIPT_FOLDER, "Session.json")
 SETTINGS_FILE           = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
-# === Base Files ===
-BITS_LEFT               = os.path.join(TEXT_FOLDER, "BitsLeft.txt")
-FOLLOWS_LEFT            = os.path.join(TEXT_FOLDER, "FollowsLeft.txt")
-GOAL                    = os.path.join(TEXT_FOLDER, "Goal.txt")
-POINTS                  = os.path.join(TEXT_FOLDER, "Points.txt")
-POINTS_LEFT             = os.path.join(TEXT_FOLDER, "PointsLeft.txt")
-STREAK                  = os.path.join(TEXT_FOLDER, "Streak.txt")
-
-# === Point Files ===
-BIT_POINTS              = os.path.join(TEXT_FOLDER, "BitPoints.txt")
-DONATION_POINTS         = os.path.join(TEXT_FOLDER, "DonationPoints.txt")
-FOLLOW_POINTS           = os.path.join(TEXT_FOLDER, "FollowPoints.txt")
-SUB_POINTS              = os.path.join(TEXT_FOLDER, "SubPoints.txt")
-
-# === Bar Files ===
-BAR_GOAL                = os.path.join(TEXT_FOLDER, "BarGoal.txt")
-BAR_POINTS_LEFT         = os.path.join(TEXT_FOLDER, "BarPointsLeft.txt")
-BAR_SEGMENT_POINTS_LEFT = os.path.join(TEXT_FOLDER, "BarSegmentPointsLeft.txt")
-BAR_SEGMENTS_COMPLETED  = os.path.join(TEXT_FOLDER, "BarSegmentsCompleted.txt")
-
-# === Totals Files ===
-TOTAL_BITS              = os.path.join(TEXT_FOLDER, "TotalBits.txt")
-TOTAL_DONATIONS         = os.path.join(TEXT_FOLDER, "TotalDonations.txt")
-TOTAL_FOLLOWS           = os.path.join(TEXT_FOLDER, "TotalFollows.txt")
-TOTAL_SUBS              = os.path.join(TEXT_FOLDER, "TotalSubs.txt")
-
 # === External References ===
 import clr
 clr.AddReference("SocketIOClientDotNet.dll")
@@ -95,6 +69,7 @@ class ScriptSession(object):
 				self.__dict__.update(json.load(f, encoding="utf-8-sig"))
 				f.close()
 		except:
+			Log("Unable to load settings, using default values instead.", no_console = True)
 			self.Save()
 			return
 
@@ -357,6 +332,12 @@ POINT_VARS    = [
 	"GiftReSub1", "GiftReSub2", "GiftReSub3",
 	"BitsPointValue", "DonationsPointValue", "FollowPointValue"
 ]
+TEXT_PARAMETERS = [
+	"BitsLeft", "FollowsLeft", "Goal", "Points", "PointsLeft", "Streak",
+	"BitPoints", "DonationPoints", "FollowPoints", "SubPoints",
+	"BarGoal", "BarPointsLeft", "BarSegmentPointsLeft", "BarSegmentsCompleted",
+	"TotalBits", "TotalDonations", "TotalFollows", "TotalSubs"
+]
 PARSE_PARAMETERS = {
 	# Base Values
 	"$tsBitsLeft":       "BitsLeft",
@@ -388,6 +369,13 @@ PARSE_PARAMETERS = {
 
 # === Initiation ===
 def Init():
+
+	# Create missing folders
+	if not os.path.exists(LOG_FOLDER):    os.mkdir(LOG_FOLDER)
+	if not os.path.exists(SOUNDS_FOLDER): os.mkdir(SOUNDS_FOLDER)
+	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
+
+	# Load Session and Settings
 	try:
 		Session.Load()
 		Settings.Load()
@@ -396,11 +384,6 @@ def Init():
 		return
 	Session.BarGoal = Settings.BarGoal
 	Session.Goal    = Settings.Goal
-
-	# Create missing folders
-	if not os.path.exists(LOG_FOLDER):    os.mkdir(LOG_FOLDER)
-	if not os.path.exists(SOUNDS_FOLDER): os.mkdir(SOUNDS_FOLDER)
-	if not os.path.exists(TEXT_FOLDER):   os.mkdir(TEXT_FOLDER)
 
 	SanityCheck()
 	StartUp()
@@ -533,7 +516,7 @@ def SocketEvent(data):
 			payload.Type     = event_type
 			payload.IsTest   = event_test
 			payload.IsRepeat = event_repeat
-			HandleSubscription(payload)
+			HandleTwitchSub(payload)
 
 	# === Youtube ===
 	elif event_for == "youtube_account":
@@ -562,7 +545,7 @@ def SocketEvent(data):
 			payload.Type     = event_type
 			payload.IsTest   = event_test
 			payload.IsRepeat = event_repeat
-			HandleSubscription(payload)
+			HandleTwitchSub(payload)
 
 	# === Streamlabs ===
 	elif event_for == "streamlabs":
@@ -614,6 +597,7 @@ def HandleBits(data):
 def HandleDonation(data):
 	if not Settings.CountDonations:
 		return
+
 	if not data.IsTest:
 		Session.TotalDonations += data.Amount
 
@@ -651,8 +635,10 @@ def HandleFollow(data):
 		Log("Added {} Point(s) for the follow from {}".format(Settings.FollowPointValue, data.Name))
 
 
-# === Handle Subscription ===
-def HandleSubscription(data):
+# === Handle Twitch Subscription ===
+def HandleTwitchSub(data):
+
+	# GiftedSub
 	if data.SubType in ["subgift", "anonsubgift"]:
 		if data.Gifter == ChannelName and not data.IsTest:
 			return
@@ -673,6 +659,7 @@ def HandleSubscription(data):
 				res = Settings.GiftSub3
 		msg = "Added {} Point(s) for a gifted Sub from {} to {}".format(res, data.Gifter, data.Name)
 
+	# ReSub
 	elif data.Months > 0:
 		if not Settings.CountReSubs and not data.IsTest:
 			return
@@ -683,6 +670,7 @@ def HandleSubscription(data):
 			res = Settings.ReSub3
 		msg = "Added {} Point(s) for a ReSub from {}".format(res, data.Name)
 
+	# Sub
 	else:
 		res = Settings.Sub1
 		if data.SubPlan == "2000":
@@ -693,6 +681,16 @@ def HandleSubscription(data):
 	Session.Points += res
 	Session.SubPoints += res
 	Log(msg)
+
+
+# === Handle YouTube Subscription ===
+def HandleYouTubeSubscription(data):
+	# TODO: Implementation
+	# * Uses the same object as the Twitch variant,
+	# * only that the SubPlan member is adjusted to
+	# * the Youtube system
+	pass
+
 
 # === Event Connected ===
 def SocketConnected(data):
@@ -745,7 +743,8 @@ def Tick():
 		try:
 			Session.Save()
 		except Exception as e:
-			Log(e.message)
+			Log("Unable to save current session!", no_write = True)
+			Log(e.message, no_console = True)
 		Internal.SaveStamp = now
 
 	# Sound System
@@ -836,7 +835,7 @@ def UpdateTracker():  # ! Only call if a quick response is required
 
 
 # === Update Progressbar ===
-def UpdateProgressbar():
+def UpdateProgressbar():  # ! Do not call this directly, instead use UpdateTracker()
 	pointsSum = 0
 	now = time.time()
 	if Settings.BarBitsEnabled:      pointsSum += Session.BitPoints
@@ -864,25 +863,14 @@ def UpdateProgressbar():
 
 
 # === Update Text ===
-def UpdateText():
-	SimpleWrite(BAR_GOAL,                Session.BarGoal)
-	SimpleWrite(BAR_POINTS_LEFT,         Session.BarPointsLeft)
-	SimpleWrite(BAR_SEGMENT_POINTS_LEFT, Session.BarSegmentPointsLeft)
-	SimpleWrite(BAR_SEGMENTS_COMPLETED,  Session.BarSegmentsCompleted)
-	SimpleWrite(BITS_LEFT,               Session.BitsLeft)
-	SimpleWrite(BIT_POINTS,              Session.BitPoints)
-	SimpleWrite(DONATION_POINTS,         Session.DonationPoints)
-	SimpleWrite(FOLLOW_POINTS,           Session.FollowPoints)
-	SimpleWrite(FOLLOWS_LEFT,            Session.FollowsLeft)
-	SimpleWrite(GOAL,                    Session.Goal)
-	SimpleWrite(POINTS,                  Session.Points)
-	SimpleWrite(POINTS_LEFT,             Session.PointsLeft)
-	SimpleWrite(STREAK,                  Session.Streak)
-	SimpleWrite(SUB_POINTS,              Session.SubPoints)
-	SimpleWrite(TOTAL_BITS,              Session.TotalBits)
-	SimpleWrite(TOTAL_FOLLOWS,           Session.TotalFollows)
-	SimpleWrite(TOTAL_SUBS,              Session.TotalSubs)
-	SimpleWrite(TOTAL_DONATIONS,         Session.TotalDonations)
+def UpdateText():  # ! Do not call this directly, instead use UpdateTracker()
+	for var in TEXT_PARAMETERS:
+		try:
+			with open(os.path.join(TEXT_FOLDER, "{}.txt".format(var)), "w") as f:
+				f.write(str(Session.__getattribute__(var)))
+				f.close()
+		except:
+			Log("Unable to write textfile for: {}".format(var), no_write = True)
 
 
 # === Sanity Check ===
@@ -1119,18 +1107,6 @@ def Log(message, no_console = False, no_write = False):
 
 	if not no_console:
 		Parent.Log(ScriptName, message)
-
-
-# === Simple Write ===
-def SimpleWrite(path, content):
-	try:
-		with open(path, "w") as f:
-			f.write(str(content))
-			f.close()
-	except IOError as e:
-		Log('Unable to write file "{}" ({})'.format(path, e.message))
-	except:
-		Log('Unable to write file "{}"'.format(path))
 
 
 # === PlaySound Wrapper ===
