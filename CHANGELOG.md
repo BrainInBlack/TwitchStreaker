@@ -10,11 +10,14 @@ YouTube is not fully integrated yer, only Subscriptions (Follows) are integrated
   * No longer uses a custom external library
   * Each event now has its own sub function
   * Separate classes for each event type
+  * Closes #34
 * Simplified how text files are generated
   * Removes a bunch of unnecessary constants
   * Shortens the UpdateText function
 * Removed SimpleWrite function
   * No longer needed, since it was only used by the UpdateText function
+* Removed Known Issues from README.md
+  * No longer needed, since issue #34 is fixed
 * Added no console and no write option to the Log function
 * Fixed Session and Settings Reset
 

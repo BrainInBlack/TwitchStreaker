@@ -12,7 +12,6 @@ TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regu
   - [Updates](#updates)
   - [Updating from 2.x to 3.x](#updating-from-2x-to-3x)
   - [Streamlabs SocketToken](#streamlabs-sockettoken)
-  - [Known Issues](#known-issues)
   - [Troubleshooting](#troubleshooting)
   - [Settings](#settings)
     - [General](#general)
@@ -88,17 +87,6 @@ With version 3.0.0 we added a progressbar that runs separate to the classic over
 2. Click on `API Tokens`
 3. Click the `Copy` Button next to the `Your Socket API Token` field
 4. Insert the Token under `Streamlabs > Socket Token` in the Script Settings
-
-## Known Issues
-
-### Script not showing up after Installation/Update
-
-1. Open `Streamlabs Chatbot.exe.config` in Chatbot main folder, with a Text Editor
-   - `Right click` > `Open file location` on the Chatbot shortcut brings you right to the Chatbot main folder
-2. Add `<loadFromRemoteSources enabled="true"/>` in a new line after `<runtime>`
-3. Save and Start/Restart the Chatbot
-
-Additional information available [here](https://github.com/BrainInBlack/TwitchStreaker/issues/38)
 
 ## Troubleshooting
 
