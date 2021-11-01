@@ -1,5 +1,26 @@
 # Changelog
 
+## 3.1.0 - Event System Rework
+
+**Important!** With this release you can delete the Lib folder within the script folder, it is no longer needed.
+
+YouTube is not fully integrated yer, only Subscriptions (Follows) are integrated for now. Superchats cannot be tested at the moment, since Streamlabs test system behaving weirdly. Full support for YouTube Memberships (Subscriptions) is coming with the next release.
+
+* Reworked the complete event system
+  * No longer uses a custom external library
+  * Each event now has its own sub function
+  * Separate classes for each event type
+  * Closes #34
+* Simplified how text files are generated
+  * Removes a bunch of unnecessary constants
+  * Shortens the UpdateText function
+* Removed SimpleWrite function
+  * No longer needed, since it was only used by the UpdateText function
+* Removed Known Issues from README.md
+  * No longer needed, since issue #34 is fixed
+* Added no console and no write option to the Log function
+* Fixed Session and Settings Reset
+
 ## 3.0.1 - Bug Fixes and Improvements
 
 * Added Session based logs
