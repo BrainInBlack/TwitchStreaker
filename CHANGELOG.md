@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.1 - Rework Fixes
+
+* Expanded check for valid event data structure
+* Fixed Progressbar not resetting after the BarGoal was already completed
+
 ## 3.1.0 - Event System Rework
 
 **Important!** With this release you can delete the Lib folder within the script folder, it is no longer needed.

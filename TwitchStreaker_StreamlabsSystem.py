@@ -23,7 +23,7 @@ from Newtonsoft.Json.JsonConvert import SerializeObject as JSONDump
 ScriptName  = "Twitch Streaker"
 Website     = "https://github.com/BrainInBlack/TwitchStreaker"
 Creator     = "BrainInBlack"
-Version     = "3.1.0"
+Version     = "3.1.1"
 Description = "Tracker for new and gifted subscriptions with a streak mechanic."
 
 
@@ -433,15 +433,15 @@ def SocketEvent(data):
 
 	# Decode Data
 	event = json.loads(JSONDump(data).encode(encoding="UTF-8", errors="backslashreplace"))
-	
-	# Validate Message
-	if "message" not in event:
-		Log("No message in Event: {}".format(json.dumps(event)), no_console = True)
-		return
-	
+
 	# Fix Streamlabs Donation
 	if "for" not in event and "type" in event and event["type"] == "donation":
 		event["for"] = "streamlabs"
+	
+	# Secondary Validation
+	if "message" not in event or "for" not in event or "type" not in event:
+		Log("No message in Event: {}".format(json.dumps(event)), no_console = True)
+		return
 
 	# Fix Message Format
 	if isinstance(event["message"], dict):
@@ -977,7 +977,7 @@ def ResetSession():
 	Internal.TempDonations = 0
 	Internal.TempFollows   = 0
 
-	Session.__dict__.update(ScriptSession.DefaultValues())
+	Session.__dict__      = ScriptSession.DefaultValues()
 	Session.BarGoal       = Settings.BarGoal
 	Session.BarPointsLeft = Settings.BarGoal
 	Session.BitsLeft      = Settings.BitsMinAmount
