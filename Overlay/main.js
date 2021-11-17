@@ -92,7 +92,6 @@ var Overlay = {
 		// Internal
 		'_width'     : '0px',
 		'_pointWidth': '0px',
-		'_finished'  : false,
 
 		'updateIndicators': function() {
 			if (!(tmp = document.getElementById('Bar'))) { return; }
@@ -100,7 +99,7 @@ var Overlay = {
 			while (indicators[0]) { indicators[0].parentNode.removeChild(indicators[0]); }
 			tmp.innerHTML += '<div class="Indicator"></div>'.repeat(this.SegmentCount - 1);
 
-			indicators   = document.getElementsByClassName('Indicator');
+			indicators       = document.getElementsByClassName('Indicator');
 			var segmentWidth = this._width / this.SegmentCount;
 			var iter         = 1;
 
@@ -112,32 +111,23 @@ var Overlay = {
 		},
 
 		'refresh': function() {
-			if (this._finished == true) { return };
 			if (!(tmp = document.getElementById('Bar'))) { return; }
 
 			this._width      = getContentWidth(tmp);
 			this._pointWidth = this._width / Overlay.BarGoal;
 
-			var sum = 0;
-
 			if (this.SubsEnabled) {
-				document.getElementById('BarSubs').style.width = Math.floor(this._pointWidth * Overlay.SubPoints) + 'px';
-				sum += Overlay.SubPoints;
+				document.getElementById('BarSubs').style.width      = Math.floor(this._pointWidth * Overlay.SubPoints) + 'px';
 			}
 			if (this.FollowsEnabled) {
-				document.getElementById('BarFollows').style.width = Math.floor(this._pointWidth * Overlay.FollowPoints) + 'px';
-				sum += Overlay.FollowPoints;
+				document.getElementById('BarFollows').style.width   = Math.floor(this._pointWidth * Overlay.FollowPoints) + 'px';
 			}
 			if (this.BitsEnabled) {
-				document.getElementById('BarBits').style.width = Math.floor(this._pointWidth * Overlay.BitPoints) + 'px';
-				sum += Overlay.BitPoints;
+				document.getElementById('BarBits').style.width      = Math.floor(this._pointWidth * Overlay.BitPoints) + 'px';
 			}
 			if (this.DonationsEnabled) {
 				document.getElementById('BarDonations').style.width = Math.floor(this._pointWidth * Overlay.DonationPoints) + 'px';
-				sum += Overlay.DonationPoints;
 			}
-
-			this._finished = (sum >= Overlay.BarGoal);
 		},
 
 		// User Refresh
