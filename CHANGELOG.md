@@ -1,6 +1,8 @@
 # Changelog
 
-## 3.1.1 - Rework Fixes
+## 3.1.1 - Final Fixes and Support Suspension
+
+In light of recent events, regarding Streamlabs, we will suspend further development of the script until a satisfying solution has been found. Technical support will still be provided via our [Discord](https://discord.gg/HWTaady) or [GitHub](https://github.com/BrainInBlack/TwitchStreaker/Issues).
 
 * Expanded check for valid event data structure
 * Fixed Progressbar not resetting after the BarGoal was already completed

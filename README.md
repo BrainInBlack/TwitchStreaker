@@ -1,5 +1,7 @@
 # TwitchStreaker for Streamlabs Chatbot
 
+In light of recent events, regarding Streamlabs, we will suspend further development of the script until a satisfying solution has been found. Technical support will still be provided via our [Discord](https://discord.gg/HWTaady) or [GitHub](https://github.com/BrainInBlack/TwitchStreaker/Issues).
+
 Initially created for the Twitch-Streamer [AnEternalEnigma](https://twitch.tv/AnEternalEnigma) to keep track of new and gifted subscriptions to his channel. This is the public version of the same exact script, with some minor changes to make it a little more generic.
 
 TwitchStreaker is compatible with Twitch and YouTube. For YouTube, only the regular Subscription options apply.
