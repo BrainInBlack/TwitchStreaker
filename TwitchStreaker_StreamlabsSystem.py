@@ -2,22 +2,22 @@
 import codecs, json, math, os, time
 
 # === Paths ===
-SCRIPT_FOLDER           = os.path.realpath(os.path.dirname(__file__))
-LOG_FOLDER              = os.path.join(SCRIPT_FOLDER, "Logs\\")
-SOUNDS_FOLDER           = os.path.join(SCRIPT_FOLDER, "Sounds\\")
-TEXT_FOLDER             = os.path.join(SCRIPT_FOLDER, "Text\\")
+SCRIPT_FOLDER = os.path.realpath(os.path.dirname(__file__))
+LOG_FOLDER    = os.path.join(SCRIPT_FOLDER, "Logs\\")
+SOUNDS_FOLDER = os.path.join(SCRIPT_FOLDER, "Sounds\\")
+TEXT_FOLDER   = os.path.join(SCRIPT_FOLDER, "Text\\")
 
 # === System Files ===
-SESSION_FILE            = os.path.join(SCRIPT_FOLDER, "Session.json")
-SETTINGS_FILE           = os.path.join(SCRIPT_FOLDER, "Settings.json")
+SESSION_FILE  = os.path.join(SCRIPT_FOLDER, "Session.json")
+SETTINGS_FILE = os.path.join(SCRIPT_FOLDER, "Settings.json")
 
 # === External References ===
 import clr
 clr.AddReference("SocketIOClientDotNet.dll")
 clr.AddReference("Newtonsoft.Json.dll")
-from System import Uri, Action
-from Quobject.SocketIoClientDotNet import Client as SocketIO
-from Newtonsoft.Json.JsonConvert import SerializeObject as JSONDump
+from System                        import Uri, Action
+from Quobject.SocketIoClientDotNet import Client          as SocketIO
+from Newtonsoft.Json.JsonConvert   import SerializeObject as JSONDump
 
 # === Script Info ===
 ScriptName  = "Twitch Streaker"
@@ -314,11 +314,11 @@ class SubscriptionData(EventData):
 
 
 # === Global Variables ===
-ChannelName   = None
-Internal      = ScriptInternals()
-Socket        = None
-Session       = ScriptSession()
-Settings      = ScriptSettings()
+ChannelName = None
+Internal    = ScriptInternals()
+Socket      = None
+Session     = ScriptSession()
+Settings    = ScriptSettings()
 
 
 # === Constants ===
