@@ -1,4 +1,5 @@
 # Exclude Common Files and Folders
+.DS_Store
 .vscode/
 .builds/
 .notes/
